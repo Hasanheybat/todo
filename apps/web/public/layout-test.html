@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Birləşmiş Tapşırıq Sistemi — Yeni Dizayn</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #F5F3F0; color: #1F1F1F; }
+
+  .page-header { position: sticky; top: 0; z-index: 100; background: #F5F3F0; padding: 32px 40px 16px; }
+  .page-header h1 { font-size: 26px; font-weight: 800; color: #1F1F1F; margin-bottom: 4px; }
+  .page-header p { font-size: 13px; color: #808080; }
+
+  .tab-bar { display: flex; gap: 6px; padding: 0 40px 20px; position: sticky; top: 78px; z-index: 99; background: #F5F3F0; flex-wrap: wrap; }
+  .tab-bar button { padding: 10px 18px; border: 2px solid #EBEBEB; border-radius: 12px; background: #fff; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; color: #808080; }
+  .tab-bar button.active { border-color: #DC4C3E; background: #FFF5F3; color: #DC4C3E; }
+  .tab-bar button:hover:not(.active) { border-color: #B3B3B3; color: #1F1F1F; }
+
+  .proposals { padding: 0 40px 60px; }
+  .proposal { display: none; }
+  .proposal.active { display: block; }
+
+  .mockup-frame { background: #fff; border-radius: 16px; border: 1px solid #EBEBEB; overflow: hidden; max-width: 1100px; margin: 0 auto; box-shadow: 0 4px 24px rgba(0,0,0,0.06); }
+  .mockup-title-bar { display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: #FAFAFA; border-bottom: 1px solid #EBEBEB; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-r { background: #FF5F57; } .dot-y { background: #FFBD2E; } .dot-g { background: #28C840; }
+  .mockup-body { display: flex; height: 620px; }
+
+  /* Sidebar */
+  .sidebar { width: 240px; background: #FCFAF8; border-right: 1px solid #EBEBEB; padding: 14px 10px; display: flex; flex-direction: column; gap: 1px; flex-shrink: 0; overflow-y: auto; }
+  .s-profile { display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 8px; margin-bottom: 8px; }
+  .s-avatar { width: 28px; height: 28px; border-radius: 50%; background: #DC4C3E; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+  .s-name { font-size: 13px; font-weight: 600; }
+  .s-add { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; font-size: 13px; font-weight: 600; color: #DC4C3E; cursor: pointer; border: none; background: none; width: 100%; margin-bottom: 4px; }
+  .s-add:hover { background: #FDECEA; }
+  .s-btn { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 8px; font-size: 13px; font-weight: 500; color: #1F1F1F; cursor: pointer; border: none; background: none; width: 100%; text-align: left; transition: background 0.1s; }
+  .s-btn:hover { background: #F5F3F0; }
+  .s-btn.active { background: #FFEFE5; color: #DC4C3E; font-weight: 600; }
+  .s-btn .badge { margin-left: auto; font-size: 11px; font-weight: 700; color: #DC4C3E; }
+  .s-btn .badge-gray { margin-left: auto; font-size: 10px; font-weight: 600; color: #B3B3B3; }
+  .s-divider { height: 1px; background: #EBEBEB; margin: 8px 0; }
+  .s-label { font-size: 10px; font-weight: 700; color: #B3B3B3; text-transform: uppercase; letter-spacing: 0.5px; padding: 6px 10px 4px; display: flex; align-items: center; justify-content: space-between; }
+  .s-label button { background: none; border: none; cursor: pointer; color: #B3B3B3; font-size: 14px; line-height: 1; }
+  .s-label button:hover { color: #808080; }
+  .s-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; display: inline-block; }
+  .s-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+  /* Content */
+  .content { flex: 1; overflow-y: auto; padding: 24px 32px; background: #fff; }
+  .content h2 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+  .content .subtitle { font-size: 12px; color: #B3B3B3; margin-bottom: 20px; }
+
+  /* View tabs */
+  .view-tabs { display: flex; gap: 0; margin-bottom: 20px; border-bottom: 2px solid #EBEBEB; }
+  .view-tab { padding: 10px 20px; font-size: 13px; font-weight: 600; color: #808080; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.15s; display: flex; align-items: center; gap: 6px; }
+  .view-tab.active { color: #DC4C3E; border-bottom-color: #DC4C3E; }
+  .view-tab:hover:not(.active) { color: #1F1F1F; }
+  .view-tab .count { background: #FEE2E0; color: #DC4C3E; font-size: 10px; padding: 1px 6px; border-radius: 10px; font-weight: 700; margin-left: 2px; }
+
+  /* Task items */
+  .task-section { margin-bottom: 16px; }
+  .section-header { display: flex; align-items: center; gap: 8px; padding: 8px 4px; }
+  .section-title { font-size: 13px; font-weight: 700; }
+  .section-line { flex: 1; height: 1px; background: #EBEBEB; }
+  .section-count { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 12px; background: #F5F3F0; color: #B3B3B3; }
+  .section-header.red .section-title { color: #DC4C3E; }
+  .section-header.red .section-line { background: #FEE2E0; }
+  .section-header.red .section-count { background: #FEE2E0; color: #DC4C3E; }
+
+  .task-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 8px; cursor: pointer; transition: background 0.15s; }
+  .task-item:hover { background: #FAFAFA; }
+  .task-check { width: 18px; height: 18px; border-radius: 50%; border: 2px solid; flex-shrink: 0; }
+  .task-content { flex: 1; }
+  .task-title { font-size: 13px; font-weight: 500; color: #1F1F1F; }
+  .task-meta { font-size: 11px; color: #B3B3B3; margin-top: 1px; display: flex; align-items: center; gap: 6px; }
+  .task-proj-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: #F5F3F0; color: #808080; font-weight: 500; }
+  .task-type-badge { font-size: 9px; padding: 1px 5px; border-radius: 3px; font-weight: 600; }
+  .type-gorev { background: #E8F0FE; color: #246FE0; }
+  .type-todo { background: #FFF3E0; color: #EB8909; }
+
+  .quick-add-bar { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border: 1.5px dashed #EBEBEB; border-radius: 10px; color: #B3B3B3; font-size: 12px; margin-top: 8px; cursor: pointer; transition: all 0.15s; }
+  .quick-add-bar:hover { border-color: #DC4C3E; color: #DC4C3E; }
+
+  /* Day groups */
+  .day-header { display: flex; align-items: center; gap: 10px; padding: 10px 4px; }
+  .day-circle { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+  .day-info { display: flex; flex-direction: column; }
+  .day-name { font-size: 13px; font-weight: 700; }
+  .day-date { font-size: 10px; color: #B3B3B3; }
+
+  /* Description */
+  .desc-card { background: #FAFAFA; border-radius: 12px; padding: 20px 24px; margin-bottom: 24px; border: 1px solid #EBEBEB; }
+  .desc-card h3 { font-size: 16px; font-weight: 700; color: #DC4C3E; margin-bottom: 6px; }
+  .desc-card p { font-size: 13px; color: #808080; line-height: 1.6; }
+  .desc-card ul { margin-top: 10px; list-style: none; }
+  .desc-card li { font-size: 12px; margin-bottom: 4px; padding-left: 18px; position: relative; }
+  .desc-card li::before { content: '✓'; position: absolute; left: 0; color: #058527; font-weight: 700; }
+  .desc-card li.x::before { content: '→'; color: #246FE0; }
+
+  /* Comparison table */
+  .compare { margin-bottom: 24px; border-radius: 12px; overflow: hidden; border: 1px solid #EBEBEB; }
+  .compare table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .compare th { background: #FAFAFA; padding: 10px 16px; text-align: left; font-weight: 700; color: #808080; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .compare td { padding: 10px 16px; border-top: 1px solid #EBEBEB; }
+  .compare .old { color: #DC4C3E; text-decoration: line-through; opacity: 0.6; }
+  .compare .new { color: #058527; font-weight: 600; }
+  .compare .arrow { color: #B3B3B3; padding: 0 4px; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Birləşmiş Tapşırıq Sistemi — Yeni Dizayn</h1>
+  <p>Köhnə "Todo" silinir, "Tapşırıqlarım" birləşir. 4 görünüş — hər yerdə hər iki tip tapşırıq.</p>
+</div>
+
+<div class="tab-bar">
+  <button class="active" onclick="show(0)">Ümumi Baxış</button>
+  <button onclick="show(1)">Bugün</button>
+  <button onclick="show(2)">Gələnlər</button>
+  <button onclick="show(3)">Gələcək</button>
+  <button onclick="show(4)">Layihələr</button>
+  <button onclick="show(5)" style="border-color:#246FE0;color:#246FE0">🆕 Görev Qruplaması</button>
+  <button onclick="show(6)" style="border-color:#9333EA;color:#9333EA">🎨 Tapşırıqlar Filtr</button>
+  <button onclick="show(7)" style="border-color:#058527;color:#058527">➕ Tapşırıq Əlavə Et</button>
+</div>
+
+<div class="proposals">
+
+<!-- ═══════════════════════════════════════ -->
+<!-- ÜMUMİ BAXIŞ — Köhnə vs Yeni -->
+<!-- ═══════════════════════════════════════ -->
+<div class="proposal active" id="p0">
+  <div class="desc-card">
+    <h3>Nə dəyişir?</h3>
+    <p>Sidebar sadələşir. Bütün tapşırıqlar (şirkət GÖREV + şəxsi Todo) eyni görünüşlərdə birləşir. İstifadəçi bir yerdən hər şeyi görür.</p>
+    <ul>
+      <li>Köhnə "Todo" yenidən yazılır — şəxsi tapşırıq sistemi olur</li>
+      <li>Köhnə "Tapşırıqlarım" (Todoist) silinir, Todo-ya birləşir</li>
+      <li>"Bugün" səhifəsi HƏR İKİ tipi göstərir</li>
+      <li>"Gələnlər" — tarixsiz tapşırıqlar (inbox)</li>
+      <li>"Gələcək" — gün-gün təqvim görünüşü</li>
+      <li>"Layihələr" — şəxsi layihələr</li>
+      <li class="x">Şirkət GÖREV-lər "Tapşırıqlar" səhifəsində qalır (assignee/approver sistemi fərqlidir)</li>
+    </ul>
+  </div>
+
+  <div class="compare">
+    <table>
+      <tr><th>Köhnə Sidebar</th><th></th><th>Yeni Sidebar</th></tr>
+      <tr><td class="old">📅 Bugün (yalnız GÖREV)</td><td class="arrow">→</td><td class="new">📅 Bugün (GÖREV + Todo)</td></tr>
+      <tr><td>📋 Tapşırıqlar</td><td class="arrow">→</td><td>📋 Tapşırıqlar (eyni qalır)</td></tr>
+      <tr><td class="old">📑 Şablonlar</td><td class="arrow">→</td><td>📑 Şablonlar (eyni qalır)</td></tr>
+      <tr><td class="old">✅ Todo (sadə checklist)</td><td class="arrow">→</td><td class="new">✅ Todo (şəxsi tapşırıqlar — yeni)</td></tr>
+      <tr><td class="old">📝 Tapşırıqlarım (ayrı modul)</td><td class="arrow">→</td><td class="new" style="color:#DC4C3E">❌ SİLİNİR (Todo-ya birləşir)</td></tr>
+      <tr><td></td><td></td><td class="new">📥 Gələnlər (YENİ — inbox)</td></tr>
+      <tr><td></td><td></td><td class="new">📆 Gələcək (YENİ — 14 gün)</td></tr>
+      <tr><td></td><td></td><td class="new">📂 Layihələr (YENİ — qruplaşdırma)</td></tr>
+    </table>
+  </div>
+
+  <!-- Yeni sidebar mockup -->
+  <div class="mockup-frame">
+    <div class="mockup-title-bar"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><span style="margin-left:8px;font-size:12px;color:#808080">WorkFlow Pro — Yeni Sidebar</span></div>
+    <div class="mockup-body">
+      <div class="sidebar">
+        <div class="s-profile"><div class="s-avatar">HƏ</div><div class="s-name">Həsən Əliyev</div></div>
+        <button class="s-add">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC4C3E" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          Tapşırıq əlavə et
+          <span style="margin-left:auto"><kbd style="padding:1px 5px;border-radius:3px;font-size:8px;font-family:monospace;background:#F0F0F0;color:#B3B3B3;border:1px solid #EBEBEB">Q</kbd></span>
+        </button>
+
+        <button class="s-btn active">
+          <span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><text x="12" y="19" text-anchor="middle" fill="currentColor" font-size="9" font-weight="bold" stroke="none">21</text></svg></span>
+          Bugün
+          <span class="badge">8</span>
+        </button>
+        <button class="s-btn">
+          <span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z"/></svg></span>
+          Gələnlər
+          <span class="badge-gray">3</span>
+        </button>
+        <button class="s-btn">
+          <span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg></span>
+          Gələcək
+        </button>
+
+        <div class="s-divider"></div>
+
+        <button class="s-btn">
+          <span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg></span>
+          Tapşırıqlar
+        </button>
+        <button class="s-btn">
+          <span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></span>
+          Todo
+        </button>
+        <button class="s-btn">
+          <span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="6" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="15" y="13" width="6" height="8" rx="1"/></svg></span>
+          Şablonlar
+        </button>
+
+        <div class="s-divider"></div>
+
+        <div class="s-label">
+          Layihələr
+          <button title="Layihə yarat">＋</button>
+        </div>
+        <button class="s-btn"><span class="s-dot" style="background:#DC4C3E"></span> İş Layihəsi <span class="badge-gray">4</span></button>
+        <button class="s-btn"><span class="s-dot" style="background:#058527"></span> Şəxsi <span class="badge-gray">2</span></button>
+        <button class="s-btn"><span class="s-dot" style="background:#246FE0"></span> Alış-veriş <span class="badge-gray">1</span></button>
+
+        <div class="s-divider"></div>
+
+        <div class="s-label">İdarəetmə</div>
+        <button class="s-btn">
+          <span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 7a4 4 0 100 8 4 4 0 000-8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></span>
+          İşçilər
+        </button>
+        <button class="s-btn">
+          <span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
+          Rollar
+        </button>
+        <button class="s-btn">
+          <span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 100 7h5a3.5 3.5 0 110 7H6"/></svg></span>
+          Maliyyə
+        </button>
+      </div>
+
+      <div class="content" style="display:flex;align-items:center;justify-content:center;flex-direction:column;color:#B3B3B3">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#EBEBEB" stroke-width="1.5"><path d="M4 6h16M4 12h10M4 18h7"/><path d="M20 15l-4 4-2-2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <p style="margin-top:12px;font-size:14px;font-weight:600">← Soldakı yeni sidebar strukturu</p>
+        <p style="font-size:12px;margin-top:4px">Digər tab-lara klikləyib hər görünüşü görün</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- BUGÜN — Birləşmiş -->
+<!-- ═══════════════════════════════════════ -->
+<div class="proposal" id="p1">
+  <div class="desc-card">
+    <h3>Bugün — Hər Şey Bir Yerdə</h3>
+    <p>Şirkət GÖREV-ləri + şəxsi Todo tapşırıqları eyni səhifədə. Hər tapşırığın yanında tip badge-i var: <span style="background:#E8F0FE;color:#246FE0;padding:1px 5px;border-radius:3px;font-size:11px;font-weight:600">GÖREV</span> və ya <span style="background:#FFF3E0;color:#EB8909;padding:1px 5px;border-radius:3px;font-size:11px;font-weight:600">TODO</span>. Üstdə tab ilə filtrləmək olur: Hamısı / GÖREV / TODO</p>
+  </div>
+
+  <div class="mockup-frame">
+    <div class="mockup-title-bar"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><span style="margin-left:8px;font-size:12px;color:#808080">WorkFlow Pro</span></div>
+    <div class="mockup-body">
+      <div class="sidebar">
+        <div class="s-profile"><div class="s-avatar">HƏ</div><div class="s-name">Həsən Əliyev</div></div>
+        <button class="s-add"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC4C3E" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg> Tapşırıq əlavə et</button>
+        <button class="s-btn active"><span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><text x="12" y="19" text-anchor="middle" fill="currentColor" font-size="9" font-weight="bold" stroke="none">21</text></svg></span> Bugün <span class="badge">8</span></button>
+        <button class="s-btn"><span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z"/></svg></span> Gələnlər <span class="badge-gray">3</span></button>
+        <button class="s-btn"><span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg></span> Gələcək</button>
+        <div class="s-divider"></div>
+        <button class="s-btn"><span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg></span> Tapşırıqlar</button>
+        <button class="s-btn"><span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></span> Todo</button>
+        <button class="s-btn"><span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="6" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="15" y="13" width="6" height="8" rx="1"/></svg></span> Şablonlar</button>
+        <div class="s-divider"></div>
+        <div class="s-label">Layihələr <button>＋</button></div>
+        <button class="s-btn"><span class="s-dot" style="background:#DC4C3E"></span> İş Layihəsi <span class="badge-gray">4</span></button>
+        <button class="s-btn"><span class="s-dot" style="background:#058527"></span> Şəxsi <span class="badge-gray">2</span></button>
+        <button class="s-btn"><span class="s-dot" style="background:#246FE0"></span> Alış-veriş <span class="badge-gray">1</span></button>
+      </div>
+
+      <div class="content">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+          <h2>Bugün</h2>
+          <span class="subtitle" style="margin-bottom:0">Cümə, 21 Mart 2026</span>
+        </div>
+
+        <div class="view-tabs">
+          <div class="view-tab active">Hamısı <span class="count">8</span></div>
+          <div class="view-tab"><span class="task-type-badge type-gorev" style="margin-right:2px">GÖREV</span> Tapşırıqlar <span style="font-size:10px;color:#B3B3B3;margin-left:2px">5</span></div>
+          <div class="view-tab"><span class="task-type-badge type-todo" style="margin-right:2px">TODO</span> Şəxsi <span style="font-size:10px;color:#B3B3B3;margin-left:2px">3</span></div>
+        </div>
+
+        <div class="task-section">
+          <div class="section-header red"><span class="section-title">Gecikmiş</span><div class="section-line"></div><span class="section-count">2</span></div>
+          <div class="task-item">
+            <div class="task-check" style="border-color:#DC4C3E"></div>
+            <div class="task-content">
+              <div class="task-title">Hesabat hazırla</div>
+              <div class="task-meta"><span class="task-type-badge type-gorev">GÖREV</span> Dünən · Bakı Filialı</div>
+            </div>
+          </div>
+          <div class="task-item">
+            <div class="task-check" style="border-color:#EB8909"></div>
+            <div class="task-content">
+              <div class="task-title">Müştəri cavabı yaz</div>
+              <div class="task-meta"><span class="task-type-badge type-todo">TODO</span> 2 gün əvvəl · <span class="task-proj-badge">İş Layihəsi</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="task-section">
+          <div class="section-header"><span class="section-title">Bugün</span><div class="section-line"></div><span class="section-count">6</span></div>
+          <div class="task-item">
+            <div class="task-check" style="border-color:#DC4C3E"></div>
+            <div class="task-content">
+              <div class="task-title">Sprint planlaması keçir</div>
+              <div class="task-meta"><span class="task-type-badge type-gorev">GÖREV</span> P1 · Bakı Filialı / İT</div>
+            </div>
+          </div>
+          <div class="task-item">
+            <div class="task-check" style="border-color:#EB8909"></div>
+            <div class="task-content">
+              <div class="task-title">Müqavilə imzala</div>
+              <div class="task-meta"><span class="task-type-badge type-gorev">GÖREV</span> P2 · Leyla Hüseynova</div>
+            </div>
+          </div>
+          <div class="task-item">
+            <div class="task-check" style="border-color:#246FE0"></div>
+            <div class="task-content">
+              <div class="task-title">API dokumentasiya yaz</div>
+              <div class="task-meta"><span class="task-type-badge type-gorev">GÖREV</span> P3 · Bakı Filialı / İT</div>
+            </div>
+          </div>
+          <div class="task-item">
+            <div class="task-check" style="border-color:#DC4C3E"></div>
+            <div class="task-content">
+              <div class="task-title">Dizayn review et</div>
+              <div class="task-meta"><span class="task-type-badge type-todo">TODO</span> <span class="task-proj-badge">Şəxsi</span></div>
+            </div>
+          </div>
+          <div class="task-item">
+            <div class="task-check" style="border-color:#808080"></div>
+            <div class="task-content">
+              <div class="task-title">Aptekdən dərman al</div>
+              <div class="task-meta"><span class="task-type-badge type-todo">TODO</span> <span class="task-proj-badge">Alış-veriş</span></div>
+            </div>
+          </div>
+          <div class="task-item">
+            <div class="task-check" style="border-color:#808080"></div>
+            <div class="task-content">
+              <div class="task-title">Server yeniləmə planla</div>
+              <div class="task-meta"><span class="task-type-badge type-gorev">GÖREV</span> P4 · Gəncə Filialı</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="quick-add-bar">＋ Bugünə tapşırıq əlavə et...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- GƏLƏNLƏR — Inbox -->
+<!-- ═══════════════════════════════════════ -->
+<div class="proposal" id="p2">
+  <div class="desc-card">
+    <h3>Gələnlər (Inbox) — Tarixsiz / Yeni Tapşırıqlar</h3>
+    <p>Tarixsiz TODO tapşırıqları + sənə assign edilmiş yeni GÖREV-lər burada görünür. Hər tapşırığın yanında tip badge-i. İstifadəçi buradan tarix təyin edib digər görünüşlərə göndərir.</p>
+  </div>
+
+  <div class="mockup-frame">
+    <div class="mockup-title-bar"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><span style="margin-left:8px;font-size:12px;color:#808080">WorkFlow Pro</span></div>
+    <div class="mockup-body">
+      <div class="sidebar">
+        <div class="s-profile"><div class="s-avatar">HƏ</div><div class="s-name">Həsən Əliyev</div></div>
+        <button class="s-add"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC4C3E" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg> Tapşırıq əlavə et</button>
+        <button class="s-btn"><span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><text x="12" y="19" text-anchor="middle" fill="currentColor" font-size="9" font-weight="bold" stroke="none">21</text></svg></span> Bugün <span class="badge">8</span></button>
+        <button class="s-btn active"><span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z"/></svg></span> Gələnlər <span class="badge">3</span></button>
+        <button class="s-btn"><span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg></span> Gələcək</button>
+        <div class="s-divider"></div>
+        <button class="s-btn"><span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg></span> Tapşırıqlar</button>
+        <button class="s-btn"><span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></span> Todo</button>
+        <div class="s-divider"></div>
+        <div class="s-label">Layihələr <button>＋</button></div>
+        <button class="s-btn"><span class="s-dot" style="background:#DC4C3E"></span> İş Layihəsi</button>
+        <button class="s-btn"><span class="s-dot" style="background:#058527"></span> Şəxsi</button>
+      </div>
+
+      <div class="content">
+        <h2>Gələnlər</h2>
+        <div class="subtitle">Tarixsiz və yeni tapşırıqlar</div>
+
+        <div class="view-tabs">
+          <div class="view-tab active">Hamısı <span class="count">5</span></div>
+          <div class="view-tab"><span class="task-type-badge type-gorev" style="margin-right:2px">GÖREV</span> Tapşırıqlar <span style="font-size:10px;color:#B3B3B3;margin-left:2px">2</span></div>
+          <div class="view-tab"><span class="task-type-badge type-todo" style="margin-right:2px">TODO</span> Şəxsi <span style="font-size:10px;color:#B3B3B3;margin-left:2px">3</span></div>
+        </div>
+
+        <div class="task-item">
+          <div class="task-check" style="border-color:#EB8909"></div>
+          <div class="task-content">
+            <div class="task-title">Yeni işçi üçün kompüter hazırla</div>
+            <div class="task-meta"><span class="task-type-badge type-gorev">GÖREV</span> Leyla Hüseynova tərəfindən · Bakı Filialı</div>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-check" style="border-color:#246FE0"></div>
+          <div class="task-content">
+            <div class="task-title">Ofis üçün kağız al</div>
+            <div class="task-meta"><span class="task-type-badge type-todo">TODO</span> <span class="task-proj-badge">Alış-veriş</span></div>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-check" style="border-color:#808080"></div>
+          <div class="task-content">
+            <div class="task-title">Git branch strategiyası yaz</div>
+            <div class="task-meta"><span class="task-type-badge type-todo">TODO</span> <span class="task-proj-badge">İş Layihəsi</span></div>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-check" style="border-color:#DC4C3E"></div>
+          <div class="task-content">
+            <div class="task-title">Müqavilə şərtlərini yoxla</div>
+            <div class="task-meta"><span class="task-type-badge type-gorev">GÖREV</span> Admin tərəfindən · Gəncə Filialı</div>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-check" style="border-color:#808080"></div>
+          <div class="task-content">
+            <div class="task-title">Kitab oxu — Clean Code</div>
+            <div class="task-meta"><span class="task-type-badge type-todo">TODO</span> <span class="task-proj-badge">Şəxsi</span></div>
+          </div>
+        </div>
+
+        <div class="quick-add-bar">＋ Gələnlərə tapşırıq əlavə et...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- GƏLƏCƏK — Siyahı + Təqvim -->
+<!-- ═══════════════════════════════════════ -->
+<div class="proposal" id="p3">
+  <div class="desc-card">
+    <h3>Gələcək — Siyahı + Təqvim Görünüşü</h3>
+    <p>İki görünüş arasında keçid: <b>Siyahı</b> (gün-gün timeline) və <b>Təqvim</b> (aylıq grid). Hər ikisində GÖREV + TODO birlikdə göstərilir. Təqvimdə hər günün xanasında tapşırıq sayı və mini siyahı var.</p>
+  </div>
+
+  <!-- ══ Siyahı görünüşü ══ -->
+  <div id="gelecek-list" style="margin-bottom:24px">
+    <div style="font-size:12px;font-weight:700;color:#808080;margin-bottom:8px">📋 Siyahı görünüşü</div>
+    <div class="mockup-frame">
+      <div class="mockup-title-bar"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><span style="margin-left:8px;font-size:12px;color:#808080">WorkFlow Pro — Gələcək (Siyahı)</span></div>
+      <div class="mockup-body">
+        <div class="sidebar">
+          <div class="s-profile"><div class="s-avatar">HƏ</div><div class="s-name">Həsən Əliyev</div></div>
+          <button class="s-add"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC4C3E" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg> Tapşırıq əlavə et</button>
+          <button class="s-btn"><span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><text x="12" y="19" text-anchor="middle" fill="currentColor" font-size="9" font-weight="bold" stroke="none">21</text></svg></span> Bugün <span class="badge">8</span></button>
+          <button class="s-btn"><span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z"/></svg></span> Gələnlər <span class="badge-gray">3</span></button>
+          <button class="s-btn active"><span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg></span> Gələcək</button>
+          <div class="s-divider"></div>
+          <button class="s-btn"><span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg></span> Tapşırıqlar</button>
+          <button class="s-btn"><span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></span> Todo</button>
+          <div class="s-divider"></div>
+          <div class="s-label">Layihələr <button>＋</button></div>
+          <button class="s-btn"><span class="s-dot" style="background:#DC4C3E"></span> İş Layihəsi</button>
+          <button class="s-btn"><span class="s-dot" style="background:#058527"></span> Şəxsi</button>
+        </div>
+
+        <div class="content">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+            <div>
+              <h2>Gələcək</h2>
+              <div class="subtitle" style="margin-bottom:0">Qarşıdakı günlər</div>
+            </div>
+            <!-- View toggle -->
+            <div style="display:flex;border-radius:8px;overflow:hidden;border:1.5px solid #EBEBEB">
+              <button style="padding:6px 14px;font-size:11px;font-weight:700;border:none;cursor:pointer;background:#DC4C3E;color:#fff;display:flex;align-items:center;gap:4px">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+                Siyahı
+              </button>
+              <button style="padding:6px 14px;font-size:11px;font-weight:700;border:none;cursor:pointer;background:#fff;color:#808080;display:flex;align-items:center;gap:4px">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>
+                Təqvim
+              </button>
+            </div>
+          </div>
+
+          <div class="view-tabs">
+            <div class="view-tab active">Hamısı <span class="count">9</span></div>
+            <div class="view-tab"><span class="task-type-badge type-gorev" style="margin-right:2px">GÖREV</span> Tapşırıqlar <span style="font-size:10px;color:#B3B3B3;margin-left:2px">5</span></div>
+            <div class="view-tab"><span class="task-type-badge type-todo" style="margin-right:2px">TODO</span> Şəxsi <span style="font-size:10px;color:#B3B3B3;margin-left:2px">4</span></div>
+          </div>
+
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#B3B3B3;padding:4px 0 8px">Mart 2026</div>
+
+          <!-- Bugün -->
+          <div>
+            <div class="day-header">
+              <div class="day-circle" style="background:#DC4C3E;color:#fff">21</div>
+              <div class="day-info"><span class="day-name" style="color:#DC4C3E">Bugün</span><span class="day-date">Cümə</span></div>
+              <div class="section-line" style="background:#FEE2E0"></div>
+              <span class="section-count" style="background:#FEE2E0;color:#DC4C3E">3</span>
+            </div>
+            <div style="margin-left:42px">
+              <div class="task-item"><div class="task-check" style="border-color:#DC4C3E"></div><div class="task-content"><div class="task-title">Sprint planlaması</div><div class="task-meta"><span class="task-type-badge type-gorev">GÖREV</span> Bakı Filialı</div></div></div>
+              <div class="task-item"><div class="task-check" style="border-color:#246FE0"></div><div class="task-content"><div class="task-title">Dizayn review</div><div class="task-meta"><span class="task-type-badge type-todo">TODO</span> <span class="task-proj-badge">Şəxsi</span></div></div></div>
+              <div class="task-item"><div class="task-check" style="border-color:#808080"></div><div class="task-content"><div class="task-title">Aptekdən dərman al</div><div class="task-meta"><span class="task-type-badge type-todo">TODO</span> <span class="task-proj-badge">Alış-veriş</span></div></div></div>
+            </div>
+          </div>
+
+          <!-- Sabah -->
+          <div>
+            <div class="day-header">
+              <div class="day-circle" style="color:#246FE0">22</div>
+              <div class="day-info"><span class="day-name">Sabah</span><span class="day-date" style="color:#246FE0">Şənbə</span></div>
+              <div class="section-line"></div>
+              <span class="section-count">2</span>
+            </div>
+            <div style="margin-left:42px">
+              <div class="task-item"><div class="task-check" style="border-color:#EB8909"></div><div class="task-content"><div class="task-title">Müqavilə imzala</div><div class="task-meta"><span class="task-type-badge type-gorev">GÖREV</span> Gəncə Filialı</div></div></div>
+              <div class="task-item"><div class="task-check" style="border-color:#808080"></div><div class="task-content"><div class="task-title">Ev təmizliyi</div><div class="task-meta"><span class="task-type-badge type-todo">TODO</span> <span class="task-proj-badge">Şəxsi</span></div></div></div>
+            </div>
+          </div>
+
+          <!-- Bazar -->
+          <div>
+            <div class="day-header">
+              <div class="day-circle" style="color:#246FE0">23</div>
+              <div class="day-info"><span class="day-name" style="color:#246FE0">Bazar</span><span class="day-date">23 Mart</span></div>
+              <div class="section-line"></div>
+            </div>
+            <div style="margin-left:42px;padding:4px 0">
+              <div class="quick-add-bar" style="opacity:0.5;font-size:11px;padding:6px 10px">＋ Tapşırıq əlavə et</div>
+            </div>
+          </div>
+
+          <!-- B.e -->
+          <div>
+            <div class="day-header">
+              <div class="day-circle">24</div>
+              <div class="day-info"><span class="day-name">Bazar ertəsi</span><span class="day-date">24 Mart</span></div>
+              <div class="section-line"></div>
+              <span class="section-count">1</span>
+            </div>
+            <div style="margin-left:42px">
+              <div class="task-item"><div class="task-check" style="border-color:#DC4C3E"></div><div class="task-content"><div class="task-title">Həftəlik hesabat göndər</div><div class="task-meta"><span class="task-type-badge type-gorev">GÖREV</span> P1 · Bakı Filialı</div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ Təqvim görünüşü ══ -->
+  <div id="gelecek-cal">
+    <div style="font-size:12px;font-weight:700;color:#808080;margin-bottom:8px">📅 Təqvim görünüşü</div>
+    <div class="mockup-frame">
+      <div class="mockup-title-bar"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><span style="margin-left:8px;font-size:12px;color:#808080">WorkFlow Pro — Gələcək (Təqvim)</span></div>
+      <div class="mockup-body">
+        <div class="sidebar">
+          <div class="s-profile"><div class="s-avatar">HƏ</div><div class="s-name">Həsən Əliyev</div></div>
+          <button class="s-add"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC4C3E" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg> Tapşırıq əlavə et</button>
+          <button class="s-btn"><span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><text x="12" y="19" text-anchor="middle" fill="currentColor" font-size="9" font-weight="bold" stroke="none">21</text></svg></span> Bugün <span class="badge">8</span></button>
+          <button class="s-btn"><span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z"/></svg></span> Gələnlər <span class="badge-gray">3</span></button>
+          <button class="s-btn active"><span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg></span> Gələcək</button>
+          <div class="s-divider"></div>
+          <button class="s-btn"><span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg></span> Tapşırıqlar</button>
+          <button class="s-btn"><span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></span> Todo</button>
+          <div class="s-divider"></div>
+          <div class="s-label">Layihələr <button>＋</button></div>
+          <button class="s-btn"><span class="s-dot" style="background:#DC4C3E"></span> İş Layihəsi</button>
+          <button class="s-btn"><span class="s-dot" style="background:#058527"></span> Şəxsi</button>
+        </div>
+
+        <div class="content" style="padding:20px 24px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+            <div>
+              <h2>Gələcək</h2>
+              <div class="subtitle" style="margin-bottom:0">Aylıq təqvim</div>
+            </div>
+            <!-- View toggle -->
+            <div style="display:flex;border-radius:8px;overflow:hidden;border:1.5px solid #EBEBEB">
+              <button style="padding:6px 14px;font-size:11px;font-weight:700;border:none;cursor:pointer;background:#fff;color:#808080;display:flex;align-items:center;gap:4px">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+                Siyahı
+              </button>
+              <button style="padding:6px 14px;font-size:11px;font-weight:700;border:none;cursor:pointer;background:#DC4C3E;color:#fff;display:flex;align-items:center;gap:4px">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>
+                Təqvim
+              </button>
+            </div>
+          </div>
+
+          <!-- Month nav -->
+          <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:16px">
+            <button style="background:none;border:none;cursor:pointer;font-size:18px;color:#B3B3B3;padding:4px 8px">‹</button>
+            <span style="font-size:16px;font-weight:700;color:#1F1F1F">Mart 2026</span>
+            <button style="background:none;border:none;cursor:pointer;font-size:18px;color:#B3B3B3;padding:4px 8px">›</button>
+          </div>
+
+          <!-- Calendar grid -->
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:#EBEBEB;border:1px solid #EBEBEB;border-radius:12px;overflow:hidden">
+            <!-- Day names -->
+            <div style="background:#FAFAFA;padding:8px;text-align:center;font-size:10px;font-weight:700;color:#B3B3B3">B.e</div>
+            <div style="background:#FAFAFA;padding:8px;text-align:center;font-size:10px;font-weight:700;color:#B3B3B3">Ç.a</div>
+            <div style="background:#FAFAFA;padding:8px;text-align:center;font-size:10px;font-weight:700;color:#B3B3B3">Ç</div>
+            <div style="background:#FAFAFA;padding:8px;text-align:center;font-size:10px;font-weight:700;color:#B3B3B3">C.a</div>
+            <div style="background:#FAFAFA;padding:8px;text-align:center;font-size:10px;font-weight:700;color:#B3B3B3">C</div>
+            <div style="background:#FAFAFA;padding:8px;text-align:center;font-size:10px;font-weight:700;color:#246FE0">Ş</div>
+            <div style="background:#FAFAFA;padding:8px;text-align:center;font-size:10px;font-weight:700;color:#246FE0">B</div>
+
+            <!-- Haze 23 feb — empty + week 1 -->
+            <div style="background:#FAFAFA;padding:6px;min-height:72px"></div>
+            <div style="background:#FAFAFA;padding:6px;min-height:72px"></div>
+            <div style="background:#FAFAFA;padding:6px;min-height:72px"></div>
+            <div style="background:#FAFAFA;padding:6px;min-height:72px"></div>
+            <div style="background:#FAFAFA;padding:6px;min-height:72px"></div>
+            <div style="background:#FAFAFA;padding:6px;min-height:72px"></div>
+            <!-- 1 mart -->
+            <div style="background:#fff;padding:6px;min-height:72px"><span style="font-size:11px;font-weight:600;color:#B3B3B3">1</span></div>
+
+            <!-- week 2 -->
+            <div style="background:#fff;padding:6px;min-height:72px"><span style="font-size:11px;font-weight:600;color:#1F1F1F">2</span></div>
+            <div style="background:#fff;padding:6px;min-height:72px"><span style="font-size:11px;font-weight:600;color:#1F1F1F">3</span></div>
+            <div style="background:#fff;padding:6px;min-height:72px"><span style="font-size:11px;font-weight:600;color:#1F1F1F">4</span></div>
+            <div style="background:#fff;padding:6px;min-height:72px"><span style="font-size:11px;font-weight:600;color:#1F1F1F">5</span></div>
+            <div style="background:#fff;padding:6px;min-height:72px"><span style="font-size:11px;font-weight:600;color:#1F1F1F">6</span></div>
+            <div style="background:#fff;padding:6px;min-height:72px"><span style="font-size:11px;font-weight:600;color:#246FE0">7</span></div>
+            <div style="background:#fff;padding:6px;min-height:72px"><span style="font-size:11px;font-weight:600;color:#246FE0">8</span></div>
+
+            <!-- week 3 -->
+            <div style="background:#fff;padding:6px;min-height:72px"><span style="font-size:11px;font-weight:600;color:#1F1F1F">9</span></div>
+            <div style="background:#fff;padding:6px;min-height:72px"><span style="font-size:11px;font-weight:600;color:#1F1F1F">10</span></div>
+            <div style="background:#fff;padding:6px;min-height:72px"><span style="font-size:11px;font-weight:600;color:#1F1F1F">11</span></div>
+            <div style="background:#fff;padding:6px;min-height:72px"><span style="font-size:11px;font-weight:600;color:#1F1F1F">12</span></div>
+            <div style="background:#fff;padding:6px;min-height:72px"><span style="font-size:11px;font-weight:600;color:#1F1F1F">13</span></div>
+            <div style="background:#fff;padding:6px;min-height:72px"><span style="font-size:11px;font-weight:600;color:#246FE0">14</span></div>
+            <div style="background:#fff;padding:6px;min-height:72px"><span style="font-size:11px;font-weight:600;color:#246FE0">15</span></div>
+
+            <!-- week 4 -->
+            <div style="background:#fff;padding:6px;min-height:72px"><span style="font-size:11px;font-weight:600;color:#1F1F1F">16</span></div>
+            <div style="background:#fff;padding:6px;min-height:72px"><span style="font-size:11px;font-weight:600;color:#1F1F1F">17</span></div>
+            <div style="background:#fff;padding:6px;min-height:72px"><span style="font-size:11px;font-weight:600;color:#1F1F1F">18</span></div>
+            <div style="background:#fff;padding:6px;min-height:72px">
+              <span style="font-size:11px;font-weight:600;color:#1F1F1F">19</span>
+              <div style="margin-top:2px"><div style="font-size:8px;padding:1px 4px;border-radius:3px;background:#E8F0FE;color:#246FE0;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Sprint review</div></div>
+            </div>
+            <div style="background:#fff;padding:6px;min-height:72px">
+              <span style="font-size:11px;font-weight:600;color:#1F1F1F">20</span>
+              <div style="margin-top:2px"><div style="font-size:8px;padding:1px 4px;border-radius:3px;background:#FFF3E0;color:#EB8909;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Hesabat yaz</div></div>
+            </div>
+            <!-- 21 — Bugün -->
+            <div style="background:#FFF5F3;padding:6px;min-height:72px;position:relative">
+              <div style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#DC4C3E;color:#fff;font-size:11px;font-weight:700">21</div>
+              <div style="margin-top:2px">
+                <div style="font-size:8px;padding:1px 4px;border-radius:3px;background:#E8F0FE;color:#246FE0;font-weight:600;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Sprint plan</div>
+                <div style="font-size:8px;padding:1px 4px;border-radius:3px;background:#FFF3E0;color:#EB8909;font-weight:600;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Review et</div>
+                <div style="font-size:7px;color:#B3B3B3;font-weight:600">+1 daha</div>
+              </div>
+            </div>
+            <div style="background:#fff;padding:6px;min-height:72px">
+              <span style="font-size:11px;font-weight:600;color:#246FE0">22</span>
+              <div style="margin-top:2px">
+                <div style="font-size:8px;padding:1px 4px;border-radius:3px;background:#E8F0FE;color:#246FE0;font-weight:600;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Müqavilə</div>
+                <div style="font-size:8px;padding:1px 4px;border-radius:3px;background:#FFF3E0;color:#EB8909;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Ev təmizliyi</div>
+              </div>
+            </div>
+
+            <!-- week 5 -->
+            <div style="background:#fff;padding:6px;min-height:72px"><span style="font-size:11px;font-weight:600;color:#246FE0">23</span></div>
+            <div style="background:#fff;padding:6px;min-height:72px">
+              <span style="font-size:11px;font-weight:600;color:#1F1F1F">24</span>
+              <div style="margin-top:2px"><div style="font-size:8px;padding:1px 4px;border-radius:3px;background:#E8F0FE;color:#246FE0;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Hesabat göndər</div></div>
+            </div>
+            <div style="background:#fff;padding:6px;min-height:72px"><span style="font-size:11px;font-weight:600;color:#1F1F1F">25</span></div>
+            <div style="background:#fff;padding:6px;min-height:72px">
+              <span style="font-size:11px;font-weight:600;color:#1F1F1F">26</span>
+              <div style="margin-top:2px"><div style="font-size:8px;padding:1px 4px;border-radius:3px;background:#FFF3E0;color:#EB8909;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">CI/CD pipeline</div></div>
+            </div>
+            <div style="background:#fff;padding:6px;min-height:72px"><span style="font-size:11px;font-weight:600;color:#1F1F1F">27</span></div>
+            <div style="background:#fff;padding:6px;min-height:72px"><span style="font-size:11px;font-weight:600;color:#246FE0">28</span></div>
+            <div style="background:#fff;padding:6px;min-height:72px"><span style="font-size:11px;font-weight:600;color:#246FE0">29</span></div>
+
+            <!-- week 6 -->
+            <div style="background:#fff;padding:6px;min-height:72px"><span style="font-size:11px;font-weight:600;color:#1F1F1F">30</span></div>
+            <div style="background:#fff;padding:6px;min-height:72px"><span style="font-size:11px;font-weight:600;color:#1F1F1F">31</span></div>
+            <div style="background:#FAFAFA;padding:6px;min-height:72px"><span style="font-size:11px;font-weight:600;color:#D4D4D4">1</span></div>
+            <div style="background:#FAFAFA;padding:6px;min-height:72px"><span style="font-size:11px;font-weight:600;color:#D4D4D4">2</span></div>
+            <div style="background:#FAFAFA;padding:6px;min-height:72px"><span style="font-size:11px;font-weight:600;color:#D4D4D4">3</span></div>
+            <div style="background:#FAFAFA;padding:6px;min-height:72px"><span style="font-size:11px;font-weight:600;color:#D4D4D4">4</span></div>
+            <div style="background:#FAFAFA;padding:6px;min-height:72px"><span style="font-size:11px;font-weight:600;color:#D4D4D4">5</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- LAYİHƏLƏR -->
+<!-- ═══════════════════════════════════════ -->
+<div class="proposal" id="p4">
+  <div class="desc-card">
+    <h3>Layihələr — Şəxsi Todo Qruplaşdırması</h3>
+    <p>Sidebar-da layihə klikləyəndə o layihəyə aid bütün tapşırıqlar göstərilir. Layihələr yalnız TODO tipi tapşırıqları qruplaşdırır. GÖREV-lər layihələrə bağlı deyil (onlar filial/şöbə bazalıdır).</p>
+  </div>
+
+  <div class="mockup-frame">
+    <div class="mockup-title-bar"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><span style="margin-left:8px;font-size:12px;color:#808080">WorkFlow Pro</span></div>
+    <div class="mockup-body">
+      <div class="sidebar">
+        <div class="s-profile"><div class="s-avatar">HƏ</div><div class="s-name">Həsən Əliyev</div></div>
+        <button class="s-add"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC4C3E" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg> Tapşırıq əlavə et</button>
+        <button class="s-btn"><span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><text x="12" y="19" text-anchor="middle" fill="currentColor" font-size="9" font-weight="bold" stroke="none">21</text></svg></span> Bugün <span class="badge">8</span></button>
+        <button class="s-btn"><span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z"/></svg></span> Gələnlər <span class="badge-gray">3</span></button>
+        <button class="s-btn"><span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg></span> Gələcək</button>
+        <div class="s-divider"></div>
+        <button class="s-btn"><span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg></span> Tapşırıqlar</button>
+        <button class="s-btn"><span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></span> Todo</button>
+        <div class="s-divider"></div>
+        <div class="s-label">Layihələr <button>＋</button></div>
+        <button class="s-btn active"><span class="s-dot" style="background:#DC4C3E"></span> İş Layihəsi <span class="badge">4</span></button>
+        <button class="s-btn"><span class="s-dot" style="background:#058527"></span> Şəxsi <span class="badge-gray">2</span></button>
+        <button class="s-btn"><span class="s-dot" style="background:#246FE0"></span> Alış-veriş <span class="badge-gray">1</span></button>
+      </div>
+
+      <div class="content">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+          <span class="s-dot" style="background:#DC4C3E;width:12px;height:12px"></span>
+          <h2>İş Layihəsi</h2>
+          <span style="font-size:11px;color:#B3B3B3;font-weight:600">4 tapşırıq</span>
+        </div>
+        <div class="subtitle">Layihə tapşırıqları</div>
+
+        <div class="task-item">
+          <div class="task-check" style="border-color:#DC4C3E"></div>
+          <div class="task-content">
+            <div class="task-title">API dokumentasiya yaz</div>
+            <div class="task-meta">Bugün</div>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-check" style="border-color:#EB8909"></div>
+          <div class="task-content">
+            <div class="task-title">CI/CD pipeline qur</div>
+            <div class="task-meta">Sabah</div>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-check" style="border-color:#246FE0"></div>
+          <div class="task-content">
+            <div class="task-title">Unit test yaz — auth modulu</div>
+            <div class="task-meta">24 Mart</div>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-check" style="border-color:#808080"></div>
+          <div class="task-content">
+            <div class="task-title">Kod review proseduru hazırla</div>
+            <div class="task-meta">Tarixsiz</div>
+          </div>
+        </div>
+
+        <div class="quick-add-bar">＋ İş Layihəsi-nə tapşırıq əlavə et...</div>
+
+        <div style="margin-top:24px;padding-top:16px;border-top:1px solid #EBEBEB">
+          <button style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:#808080;background:none;border:none;cursor:pointer;padding:4px 0">
+            <span style="font-size:10px;transform:rotate(0deg);display:inline-block;transition:transform 0.15s">▶</span>
+            Tamamlanan (3)
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- GÖREV QRUPLAŞMASI — Yeni Konsept -->
+<!-- ═══════════════════════════════════════ -->
+<div class="proposal" id="p5">
+  <div class="desc-card">
+    <h3>Görev Qruplaşması — İşçi Görünüşü</h3>
+    <p>Müdür Əliyə 5 alt-görev verir. Əli öz ekranında bunları <b>1 kart</b> olaraq görür (ana görev adı ilə). Kart üzərində progress bar göstərilir. Kliklədikdə modal açılır — hər alt-görevin ayrıca statusu, notu, başlama/tamamlama/iptal butonu olur.</p>
+    <ul>
+      <li>İşçi 5 ayrı kart yox, 1 qruplanmış kart görür</li>
+      <li>Progress bar: 3/5 tamamlandı = 60%</li>
+      <li>Kliklədikdə alt-görevlər açılır</li>
+      <li>Hər alt-görev üçün: Başla → Tamamla / İptal et</li>
+      <li class="x">Müdür eyni modalda hamısının statusunu görür</li>
+    </ul>
+  </div>
+
+  <!-- ═══ KÖHNƏ vs YENİ MÜQAYİSƏ ═══ -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px">
+    <!-- Köhnə -->
+    <div style="border:1px solid #EBEBEB;border-radius:12px;overflow:hidden">
+      <div style="background:#FEE2E0;padding:10px 16px;font-size:12px;font-weight:700;color:#DC4C3E;text-align:center">❌ Köhnə — 5 ayrı kart (çaşqınlıq)</div>
+      <div style="padding:12px;background:#fff">
+        <div style="border:1px solid #EBEBEB;border-radius:8px;padding:8px 12px;margin-bottom:6px;font-size:12px;display:flex;align-items:center;gap:8px">
+          <div style="width:14px;height:14px;border-radius:50%;border:2px solid #EB8909;flex-shrink:0"></div>
+          DNS ayarlarını yenilə
+        </div>
+        <div style="border:1px solid #EBEBEB;border-radius:8px;padding:8px 12px;margin-bottom:6px;font-size:12px;display:flex;align-items:center;gap:8px">
+          <div style="width:14px;height:14px;border-radius:50%;border:2px solid #EB8909;flex-shrink:0"></div>
+          SSL sertifikat qur
+        </div>
+        <div style="border:1px solid #EBEBEB;border-radius:8px;padding:8px 12px;margin-bottom:6px;font-size:12px;display:flex;align-items:center;gap:8px">
+          <div style="width:14px;height:14px;border-radius:50%;border:2px solid #EB8909;flex-shrink:0"></div>
+          Backup sistemi qur
+        </div>
+        <div style="border:1px solid #EBEBEB;border-radius:8px;padding:8px 12px;margin-bottom:6px;font-size:12px;display:flex;align-items:center;gap:8px">
+          <div style="width:14px;height:14px;border-radius:50%;border:2px solid #EB8909;flex-shrink:0"></div>
+          Load balancer konfiqurasiya
+        </div>
+        <div style="border:1px solid #EBEBEB;border-radius:8px;padding:8px 12px;font-size:12px;display:flex;align-items:center;gap:8px">
+          <div style="width:14px;height:14px;border-radius:50%;border:2px solid #EB8909;flex-shrink:0"></div>
+          Monitoring sistemi qur
+        </div>
+        <p style="font-size:10px;color:#B3B3B3;text-align:center;margin-top:8px">Hansı göreve aiddir? Bilinmir!</p>
+      </div>
+    </div>
+
+    <!-- Yeni -->
+    <div style="border:1px solid #EBEBEB;border-radius:12px;overflow:hidden">
+      <div style="background:#E8F5E9;padding:10px 16px;font-size:12px;font-weight:700;color:#058527;text-align:center">✅ Yeni — 1 qruplanmış kart</div>
+      <div style="padding:12px;background:#fff">
+        <div style="border:1.5px solid #246FE0;border-radius:10px;padding:14px 16px;background:#F8FAFF">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <div style="width:32px;height:32px;border-radius:8px;background:#246FE0;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0">5</div>
+            <div>
+              <div style="font-size:14px;font-weight:700;color:#1F1F1F">Server infrastruktur yeniləmə</div>
+              <div style="font-size:11px;color:#B3B3B3">Həsən Əliyev · Bakı Filialı / İT</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+            <div style="flex:1;height:6px;background:#E8E8E8;border-radius:3px;overflow:hidden"><div style="width:60%;height:100%;background:#058527;border-radius:3px"></div></div>
+            <span style="font-size:11px;font-weight:700;color:#058527">3/5</span>
+          </div>
+          <div style="font-size:10px;color:#808080">Kliklə → alt-görevlər açılır</div>
+        </div>
+        <p style="font-size:10px;color:#058527;text-align:center;margin-top:8px;font-weight:600">Təmiz, aydın, 1 kart!</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ İŞÇİ SIYAHISI MOCKUP ═══ -->
+  <div style="font-size:12px;font-weight:700;color:#808080;margin-bottom:8px">📋 İşçi ekranı — Əlinin gördüyü (Bugün səhifəsi)</div>
+  <div class="mockup-frame" style="margin-bottom:24px">
+    <div class="mockup-title-bar"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><span style="margin-left:8px;font-size:12px;color:#808080">WorkFlow Pro — Əli Məmmədov</span></div>
+    <div class="mockup-body">
+      <div class="sidebar">
+        <div class="s-profile"><div class="s-avatar" style="background:#EB8909">ƏM</div><div class="s-name">Əli Məmmədov</div></div>
+        <button class="s-add"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC4C3E" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg> Tapşırıq əlavə et</button>
+        <button class="s-btn active"><span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><text x="12" y="19" text-anchor="middle" fill="currentColor" font-size="9" font-weight="bold" stroke="none">22</text></svg></span> Bugün <span class="badge">4</span></button>
+        <button class="s-btn"><span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z"/></svg></span> Gələnlər</button>
+        <button class="s-btn"><span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg></span> Gələcək</button>
+        <div class="s-divider"></div>
+        <button class="s-btn"><span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg></span> Tapşırıqlar</button>
+        <button class="s-btn"><span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></span> Todo</button>
+        <div class="s-divider"></div>
+        <div class="s-label">Layihələr <button>＋</button></div>
+        <button class="s-btn"><span class="s-dot" style="background:#DC4C3E"></span> İş</button>
+      </div>
+
+      <div class="content">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+          <h2>Bugün</h2>
+          <span class="subtitle" style="margin-bottom:0">Şənbə, 22 Mart 2026</span>
+        </div>
+        <div class="view-tabs">
+          <div class="view-tab active">Hamısı <span class="count">4</span></div>
+          <div class="view-tab"><span class="task-type-badge type-gorev" style="margin-right:2px">GÖREV</span> Tapşırıqlar <span style="font-size:10px;color:#B3B3B3;margin-left:2px">3</span></div>
+          <div class="view-tab"><span class="task-type-badge type-todo" style="margin-right:2px">TODO</span> Şəxsi <span style="font-size:10px;color:#B3B3B3;margin-left:2px">1</span></div>
+        </div>
+
+        <!-- GÖREV — Qruplanmış Kart -->
+        <div style="border:1.5px solid #246FE0;border-radius:12px;padding:14px 16px;margin-bottom:10px;cursor:pointer;background:#FAFBFF;transition:all 0.15s" onmouseover="this.style.boxShadow='0 2px 12px rgba(36,111,224,0.12)'" onmouseout="this.style.boxShadow='none'">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <div style="width:36px;height:36px;border-radius:8px;background:#246FE0;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;flex-shrink:0">5</div>
+            <div style="flex:1">
+              <div style="font-size:14px;font-weight:700;color:#1F1F1F">Server infrastruktur yeniləmə</div>
+              <div style="font-size:11px;color:#B3B3B3;margin-top:1px">
+                <span class="task-type-badge type-gorev">GÖREV</span>
+                Həsən Əliyev · Bakı Filialı / İT
+              </div>
+            </div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B3B3B3" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="flex:1;height:6px;background:#E8E8E8;border-radius:3px;overflow:hidden"><div style="width:60%;height:100%;background:#058527;border-radius:3px;transition:width 0.3s"></div></div>
+            <span style="font-size:11px;font-weight:700;color:#058527">3/5</span>
+          </div>
+        </div>
+
+        <!-- GÖREV — Tək kart (normal) -->
+        <div class="task-item" style="border:1px solid #EBEBEB;border-radius:10px;margin-bottom:8px;padding:12px">
+          <div class="task-check" style="border-color:#EB8909"></div>
+          <div class="task-content">
+            <div class="task-title">Müştəri bazasını yenilə</div>
+            <div class="task-meta"><span class="task-type-badge type-gorev">GÖREV</span> P2 · Leyla Hüseynova · Bakı Filialı</div>
+          </div>
+        </div>
+
+        <!-- GÖREV — Qruplanmış Kart (2) -->
+        <div style="border:1.5px solid #9333EA;border-radius:12px;padding:14px 16px;margin-bottom:10px;cursor:pointer;background:#FDFAFF;transition:all 0.15s" onmouseover="this.style.boxShadow='0 2px 12px rgba(147,51,234,0.12)'" onmouseout="this.style.boxShadow='none'">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <div style="width:36px;height:36px;border-radius:8px;background:#9333EA;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;flex-shrink:0">3</div>
+            <div style="flex:1">
+              <div style="font-size:14px;font-weight:700;color:#1F1F1F">Ofis yenidən təşkilatlandırma</div>
+              <div style="font-size:11px;color:#B3B3B3;margin-top:1px">
+                <span class="task-type-badge type-gorev">GÖREV</span>
+                Admin · Gəncə Filialı
+              </div>
+            </div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B3B3B3" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="flex:1;height:6px;background:#E8E8E8;border-radius:3px;overflow:hidden"><div style="width:33%;height:100%;background:#EB8909;border-radius:3px"></div></div>
+            <span style="font-size:11px;font-weight:700;color:#EB8909">1/3</span>
+          </div>
+        </div>
+
+        <!-- TODO — Normal kart -->
+        <div class="task-item" style="border:1px solid #EBEBEB;border-radius:10px;margin-bottom:8px;padding:12px">
+          <div class="task-check" style="border-color:#808080"></div>
+          <div class="task-content">
+            <div class="task-title">Kitab oxu — Clean Architecture</div>
+            <div class="task-meta"><span class="task-type-badge type-todo">TODO</span> <span class="task-proj-badge">Şəxsi</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ MODAL MOCKUP — Alt-görev detay ═══ -->
+  <div style="font-size:12px;font-weight:700;color:#808080;margin-bottom:8px">📱 Klikləyincə açılan modal — Alt-görevlər</div>
+  <div class="mockup-frame">
+    <div class="mockup-title-bar"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><span style="margin-left:8px;font-size:12px;color:#808080">WorkFlow Pro — Görev Detay Modalı</span></div>
+    <div style="display:flex;height:620px">
+      <!-- Sol — arxa plan blur -->
+      <div style="flex:1;background:#F5F3F0;opacity:0.4;position:relative">
+        <div style="position:absolute;inset:0;background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center">
+        </div>
+      </div>
+
+      <!-- Modal -->
+      <div style="width:520px;background:#fff;padding:28px 24px;overflow-y:auto;border-left:1px solid #EBEBEB">
+        <!-- Header -->
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px">
+          <div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+              <span class="task-type-badge type-gorev" style="font-size:10px;padding:2px 8px">GÖREV</span>
+              <span style="font-size:11px;color:#B3B3B3">Bakı Filialı / İT</span>
+            </div>
+            <h2 style="font-size:18px;font-weight:800;color:#1F1F1F;margin-bottom:4px">Server infrastruktur yeniləmə</h2>
+            <div style="font-size:12px;color:#808080">
+              <span style="font-weight:600">Həsən Əliyev</span> tərəfindən · 20 Mart 2026
+            </div>
+          </div>
+          <button style="background:none;border:none;cursor:pointer;padding:4px">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B3B3B3" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        <!-- Progress -->
+        <div style="background:#F8FAFF;border-radius:10px;padding:12px 16px;margin-bottom:20px;border:1px solid #E8F0FE">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <span style="font-size:12px;font-weight:700;color:#246FE0">Ümumi irəliləyiş</span>
+            <span style="font-size:18px;font-weight:800;color:#058527">60%</span>
+          </div>
+          <div style="height:8px;background:#E8E8E8;border-radius:4px;overflow:hidden"><div style="width:60%;height:100%;background:linear-gradient(90deg,#058527,#28C840);border-radius:4px"></div></div>
+          <div style="display:flex;justify-content:space-between;margin-top:6px">
+            <span style="font-size:10px;color:#B3B3B3">3 tamamlandı · 1 davam edir · 1 gözləyir</span>
+            <span style="font-size:10px;font-weight:600;color:#058527">3/5</span>
+          </div>
+        </div>
+
+        <!-- Alt-görev siyahısı -->
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#B3B3B3;margin-bottom:10px">Alt-görevlər</div>
+
+        <!-- 1 — Tamamlandı -->
+        <div style="border:1px solid #E8F5E9;border-radius:10px;padding:12px 14px;margin-bottom:8px;background:#FAFFF8">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="width:24px;height:24px;border-radius:50%;background:#058527;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+            </div>
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:600;color:#1F1F1F;text-decoration:line-through;opacity:0.6">DNS ayarlarını yenilə</div>
+              <div style="font-size:10px;color:#058527;font-weight:600;margin-top:1px">Tamamlandı · 20 Mart, 14:30</div>
+            </div>
+            <span style="font-size:9px;padding:2px 8px;border-radius:5px;background:#E8F5E9;color:#058527;font-weight:700">TAMAMLANDI</span>
+          </div>
+        </div>
+
+        <!-- 2 — Tamamlandı -->
+        <div style="border:1px solid #E8F5E9;border-radius:10px;padding:12px 14px;margin-bottom:8px;background:#FAFFF8">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="width:24px;height:24px;border-radius:50%;background:#058527;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+            </div>
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:600;color:#1F1F1F;text-decoration:line-through;opacity:0.6">SSL sertifikat qur</div>
+              <div style="font-size:10px;color:#058527;font-weight:600;margin-top:1px">Tamamlandı · 21 Mart, 09:15</div>
+            </div>
+            <span style="font-size:9px;padding:2px 8px;border-radius:5px;background:#E8F5E9;color:#058527;font-weight:700">TAMAMLANDI</span>
+          </div>
+        </div>
+
+        <!-- 3 — Tamamlandı -->
+        <div style="border:1px solid #E8F5E9;border-radius:10px;padding:12px 14px;margin-bottom:8px;background:#FAFFF8">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="width:24px;height:24px;border-radius:50%;background:#058527;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+            </div>
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:600;color:#1F1F1F;text-decoration:line-through;opacity:0.6">Backup sistemi qur</div>
+              <div style="font-size:10px;color:#058527;font-weight:600;margin-top:1px">Tamamlandı · 21 Mart, 16:45</div>
+            </div>
+            <span style="font-size:9px;padding:2px 8px;border-radius:5px;background:#E8F5E9;color:#058527;font-weight:700">TAMAMLANDI</span>
+          </div>
+        </div>
+
+        <!-- 4 — Başladı (davam edir) -->
+        <div style="border:1.5px solid #246FE0;border-radius:10px;padding:12px 14px;margin-bottom:8px;background:#F8FAFF">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+            <div style="width:24px;height:24px;border-radius:50%;border:2.5px solid #246FE0;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <div style="width:8px;height:8px;border-radius:50%;background:#246FE0;animation:pulse 1.5s infinite"></div>
+            </div>
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:700;color:#1F1F1F">Load balancer konfiqurasiya</div>
+              <div style="font-size:10px;color:#246FE0;font-weight:600;margin-top:1px">Davam edir · 22 Mart, 10:00-dan bəri</div>
+            </div>
+            <span style="font-size:9px;padding:2px 8px;border-radius:5px;background:#E8F0FE;color:#246FE0;font-weight:700">BAŞLADI</span>
+          </div>
+          <!-- Not sahəsi -->
+          <div style="background:#fff;border:1px solid #E8E8E8;border-radius:6px;padding:8px 10px;font-size:11px;color:#808080;margin-bottom:8px">
+            <span style="color:#B3B3B3">📝</span> Nginx konfiqurasiyası hazırlanır, upstream-lər test edilir...
+          </div>
+          <!-- Butonlar -->
+          <div style="display:flex;gap:6px">
+            <button style="flex:1;padding:8px;border-radius:8px;border:none;background:#058527;color:#fff;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+              Tamamla
+            </button>
+            <button style="padding:8px 14px;border-radius:8px;border:1.5px solid #DC4C3E;background:#fff;color:#DC4C3E;font-size:11px;font-weight:700;cursor:pointer">İptal et</button>
+          </div>
+        </div>
+
+        <!-- 5 — Gözləyir -->
+        <div style="border:1.5px solid #EBEBEB;border-radius:10px;padding:12px 14px;margin-bottom:8px;background:#fff">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+            <div style="width:24px;height:24px;border-radius:50%;border:2px solid #D4D4D4;flex-shrink:0"></div>
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:600;color:#1F1F1F">Monitoring sistemi qur</div>
+              <div style="font-size:10px;color:#B3B3B3;margin-top:1px">Hələ başlanmayıb</div>
+            </div>
+            <span style="font-size:9px;padding:2px 8px;border-radius:5px;background:#F5F3F0;color:#B3B3B3;font-weight:700">GÖZLƏYİR</span>
+          </div>
+          <button style="width:100%;padding:8px;border-radius:8px;border:1.5px solid #246FE0;background:#F8FAFF;color:#246FE0;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 3l14 9-14 9V3z"/></svg>
+            Başla
+          </button>
+        </div>
+
+        <!-- İptal edilmiş nümunə (opsional) -->
+        <div style="border:1px solid #FEE2E0;border-radius:10px;padding:12px 14px;margin-bottom:8px;background:#FFFAFA;opacity:0.7">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="width:24px;height:24px;border-radius:50%;background:#DC4C3E;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </div>
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:600;color:#DC4C3E;text-decoration:line-through">Köhnə server söndür (nümunə)</div>
+              <div style="font-size:10px;color:#DC4C3E;margin-top:1px">İptal edildi · Səbəb: Hələ istifadə olunur</div>
+            </div>
+            <span style="font-size:9px;padding:2px 8px;border-radius:5px;background:#FEE2E0;color:#DC4C3E;font-weight:700">İPTAL</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- TAPŞIRIQLAR — YENİ FİLTR DİZAYNI -->
+<!-- ═══════════════════════════════════════ -->
+<div class="proposal" id="p6">
+  <div class="desc-card">
+    <h3>Tapşırıqlar — Yeni Filtr Dizaynı</h3>
+    <p>Köhnə select dropdown-lar əvəzinə, bütün filtrləri tab stili ilə göstəririk. Status filtrləri üstdə, digər filtrlər (filial, işçi, prioritet) ikinci sətirdə. Daha aydın və Todoist stilinə uyğun.</p>
+  </div>
+
+  <div class="mockup-frame">
+    <div class="mockup-title-bar"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><span style="margin-left:8px;font-size:12px;color:#808080">WorkFlow Pro — Tapşırıqlar (Yeni Filtr)</span></div>
+    <div class="mockup-body">
+      <div class="sidebar">
+        <div class="s-profile"><div class="s-avatar">HƏ</div><div class="s-name">Həsən Əliyev</div></div>
+        <button class="s-add"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC4C3E" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg> Tapşırıq əlavə et</button>
+        <button class="s-btn"><span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><text x="12" y="19" text-anchor="middle" fill="currentColor" font-size="9" font-weight="bold" stroke="none">22</text></svg></span> Bugün</button>
+        <button class="s-btn"><span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z"/></svg></span> Gələnlər</button>
+        <button class="s-btn"><span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg></span> Gələcək</button>
+        <div class="s-divider"></div>
+        <button class="s-btn active"><span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg></span> Tapşırıqlar</button>
+        <button class="s-btn"><span class="s-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></span> Todo</button>
+      </div>
+
+      <div class="content" style="padding:20px 28px">
+        <!-- Header -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+          <h2 style="font-size:22px">Tapşırıqlar</h2>
+          <button style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;border:none;background:#DC4C3E;color:#fff;font-size:12px;font-weight:700;cursor:pointer">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+            Tapşırıq əlavə et
+          </button>
+        </div>
+        <div class="subtitle" style="margin-bottom:12px">Şirkət tapşırıqları · 24 ədəd</div>
+
+        <!-- ═══ STATUS TAB FİLTRLƏRİ ═══ -->
+        <div class="view-tabs" style="margin-bottom:12px">
+          <div class="view-tab active">Hamısı <span class="count">24</span></div>
+          <div class="view-tab">
+            <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#808080;margin-right:4px"></span>
+            Gözləyir <span style="font-size:10px;color:#B3B3B3;margin-left:2px">8</span>
+          </div>
+          <div class="view-tab">
+            <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#246FE0;margin-right:4px"></span>
+            Davam edir <span style="font-size:10px;color:#B3B3B3;margin-left:2px">6</span>
+          </div>
+          <div class="view-tab">
+            <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#EB8909;margin-right:4px"></span>
+            Onay gözləyir <span style="font-size:10px;color:#B3B3B3;margin-left:2px">3</span>
+          </div>
+          <div class="view-tab">
+            <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#058527;margin-right:4px"></span>
+            Tamamlandı <span style="font-size:10px;color:#B3B3B3;margin-left:2px">5</span>
+          </div>
+          <div class="view-tab">
+            <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#DC4C3E;margin-right:4px"></span>
+            Rədd <span style="font-size:10px;color:#B3B3B3;margin-left:2px">2</span>
+          </div>
+        </div>
+
+        <!-- ═══ FİLİAL + PRİORİTET + İŞÇİ chip filtrlər ═══ -->
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;align-items:center">
+          <!-- Filial chips -->
+          <button style="padding:6px 12px;border-radius:20px;border:none;background:#DC4C3E;color:#fff;font-size:11px;font-weight:700;cursor:pointer">Bütün filiallar</button>
+          <button style="padding:6px 12px;border-radius:20px;border:1.5px solid #EBEBEB;background:#fff;color:#1F1F1F;font-size:11px;font-weight:600;cursor:pointer">Bakı Filialı</button>
+          <button style="padding:6px 12px;border-radius:20px;border:1.5px solid #EBEBEB;background:#fff;color:#1F1F1F;font-size:11px;font-weight:600;cursor:pointer">Gəncə Filialı</button>
+
+          <span style="width:1px;height:20px;background:#EBEBEB;margin:0 4px"></span>
+
+          <!-- Prioritet chips -->
+          <button style="padding:6px 12px;border-radius:20px;border:1.5px solid #EBEBEB;background:#fff;color:#1F1F1F;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px">
+            <span style="width:8px;height:8px;border-radius:50%;background:#DC4C3E"></span> Kritik
+          </button>
+          <button style="padding:6px 12px;border-radius:20px;border:1.5px solid #EBEBEB;background:#fff;color:#1F1F1F;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px">
+            <span style="width:8px;height:8px;border-radius:50%;background:#EB8909"></span> Yüksək
+          </button>
+          <button style="padding:6px 12px;border-radius:20px;border:1.5px solid #EBEBEB;background:#fff;color:#1F1F1F;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px">
+            <span style="width:8px;height:8px;border-radius:50%;background:#246FE0"></span> Orta
+          </button>
+          <button style="padding:6px 12px;border-radius:20px;border:1.5px solid #EBEBEB;background:#fff;color:#808080;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px">
+            <span style="width:8px;height:8px;border-radius:50%;background:#D4D4D4"></span> Aşağı
+          </button>
+
+          <span style="width:1px;height:20px;background:#EBEBEB;margin:0 4px"></span>
+
+          <!-- İşçi dropdown -->
+          <button style="padding:6px 12px;border-radius:20px;border:1.5px solid #EBEBEB;background:#fff;color:#808080;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 7a4 4 0 100 8 4 4 0 000-8z"/></svg>
+            Bütün işçilər ▾
+          </button>
+        </div>
+
+        <!-- ═══ TAPŞIRIQ KARTLARI ═══ -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <!-- Kart 1 -->
+          <div style="border:1px solid #EBEBEB;border-radius:10px;padding:12px;cursor:pointer;transition:all 0.15s;background:#fff" onmouseover="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.06)'" onmouseout="this.style.boxShadow='none'">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+              <span style="font-size:9px;padding:2px 6px;border-radius:4px;background:#E8F0FE;color:#246FE0;font-weight:700">Davam edir</span>
+              <span style="font-size:10px;color:#DC4C3E;font-weight:600">🔴 Kritik</span>
+            </div>
+            <div style="font-size:13px;font-weight:600;color:#1F1F1F;margin-bottom:4px">Sprint planlaması keçir</div>
+            <div style="font-size:10px;color:#B3B3B3">Bakı Filialı / İT · Bugün</div>
+          </div>
+
+          <!-- Kart 2 -->
+          <div style="border:1px solid #EBEBEB;border-radius:10px;padding:12px;cursor:pointer;background:#fff">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+              <span style="font-size:9px;padding:2px 6px;border-radius:4px;background:#FFF3E0;color:#EB8909;font-weight:700">Onay gözləyir</span>
+              <span style="font-size:10px;color:#EB8909;font-weight:600">🟠 Yüksək</span>
+            </div>
+            <div style="font-size:13px;font-weight:600;color:#1F1F1F;margin-bottom:4px">Müqavilə hazırla</div>
+            <div style="font-size:10px;color:#B3B3B3">Gəncə Filialı · 2 gün qalıb</div>
+          </div>
+
+          <!-- Kart 3 -->
+          <div style="border:1px solid #EBEBEB;border-radius:10px;padding:12px;cursor:pointer;background:#fff">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+              <span style="font-size:9px;padding:2px 6px;border-radius:4px;background:#F0F0F0;color:#808080;font-weight:700">Gözləyir</span>
+              <span style="font-size:10px;color:#246FE0;font-weight:600">🔵 Orta</span>
+            </div>
+            <div style="font-size:13px;font-weight:600;color:#1F1F1F;margin-bottom:4px">API dokumentasiya yaz</div>
+            <div style="font-size:10px;color:#B3B3B3">Bakı Filialı / İT · 5 gün qalıb</div>
+          </div>
+
+          <!-- Kart 4 — tamamlanmış -->
+          <div style="border:1px solid #E6F4EA;border-radius:10px;padding:12px;cursor:pointer;background:#FAFFF8;opacity:0.7">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+              <span style="font-size:9px;padding:2px 6px;border-radius:4px;background:#E6F4EA;color:#058527;font-weight:700">✓ Tamamlandı</span>
+              <span style="font-size:10px;color:#808080;font-weight:600">⚪ Aşağı</span>
+            </div>
+            <div style="font-size:13px;font-weight:600;color:#1F1F1F;margin-bottom:4px;text-decoration:line-through;opacity:0.6">Server yeniləmə</div>
+            <div style="font-size:10px;color:#B3B3B3">Bakı Filialı · Dünən</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- TAPŞIRIQ ƏLAVƏ ET — 5 DİZAYN TƏKLİFİ -->
+<!-- ═══════════════════════════════════════ -->
+<div class="proposal" id="p7">
+  <div class="desc-card">
+    <h3>Tapşırıq Əlavə Et — 5 Dizayn Təklifi</h3>
+    <p>"Tapşırıq əlavə et" butonuna klikləyəndə GÖREV və TODO seçimi üçün 5 fərqli sadə dizayn.</p>
+  </div>
+
+  <!-- ═══ 1. Dropdown menyu ═══ -->
+  <div style="margin-bottom:32px">
+    <div style="font-size:13px;font-weight:700;color:#1F1F1F;margin-bottom:8px;display:flex;align-items:center;gap:6px">
+      <span style="background:#DC4C3E;color:#fff;width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800">1</span>
+      Dropdown menyu — ən sadə
+    </div>
+    <div style="display:inline-block;position:relative;margin-left:20px">
+      <button style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;border:none;background:#DC4C3E;color:#fff;font-size:12px;font-weight:700;cursor:pointer">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        Tapşırıq əlavə et ▾
+      </button>
+      <div style="position:absolute;top:42px;left:0;background:#fff;border-radius:10px;border:1px solid #EBEBEB;box-shadow:0 8px 24px rgba(0,0,0,0.1);width:200px;overflow:hidden;z-index:10">
+        <div style="padding:8px 12px;font-size:12px;font-weight:600;color:#246FE0;cursor:pointer;display:flex;align-items:center;gap:8px;border-bottom:1px solid #F0F0F0" onmouseover="this.style.background='#F8FAFF'" onmouseout="this.style.background='#fff'">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#246FE0" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+          GÖREV yarat
+        </div>
+        <div style="padding:8px 12px;font-size:12px;font-weight:600;color:#EB8909;cursor:pointer;display:flex;align-items:center;gap:8px" onmouseover="this.style.background='#FFFCF8'" onmouseout="this.style.background='#fff'">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#EB8909" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+          TODO yarat
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 2. Split button ═══ -->
+  <div style="margin-bottom:32px">
+    <div style="font-size:13px;font-weight:700;color:#1F1F1F;margin-bottom:8px;display:flex;align-items:center;gap:6px">
+      <span style="background:#DC4C3E;color:#fff;width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800">2</span>
+      Split button — 2 buton yan-yana
+    </div>
+    <div style="display:flex;gap:0;margin-left:20px">
+      <button style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px 0 0 8px;border:none;background:#246FE0;color:#fff;font-size:12px;font-weight:700;cursor:pointer">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        GÖREV
+      </button>
+      <button style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:0 8px 8px 0;border:none;background:#EB8909;color:#fff;font-size:12px;font-weight:700;cursor:pointer;border-left:1px solid rgba(255,255,255,0.3)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        TODO
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══ 3. Toggle tab — buton daxilində ═══ -->
+  <div style="margin-bottom:32px">
+    <div style="font-size:13px;font-weight:700;color:#1F1F1F;margin-bottom:8px;display:flex;align-items:center;gap:6px">
+      <span style="background:#DC4C3E;color:#fff;width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800">3</span>
+      Sidebar-da 2 ayrı buton
+    </div>
+    <div style="margin-left:20px;background:#FCFAF8;border:1px solid #EBEBEB;border-radius:10px;padding:12px;width:220px">
+      <button style="width:100%;display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;border:none;background:none;font-size:12px;font-weight:600;color:#246FE0;cursor:pointer;margin-bottom:2px" onmouseover="this.style.background='#F0F4FF'" onmouseout="this.style.background='none'">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#246FE0" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        GÖREV əlavə et
+      </button>
+      <button style="width:100%;display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;border:none;background:none;font-size:12px;font-weight:600;color:#EB8909;cursor:pointer" onmouseover="this.style.background='#FFF8F0'" onmouseout="this.style.background='none'">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#EB8909" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        TODO əlavə et
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══ 4. Popup bottom sheet ═══ -->
+  <div style="margin-bottom:32px">
+    <div style="font-size:13px;font-weight:700;color:#1F1F1F;margin-bottom:8px;display:flex;align-items:center;gap:6px">
+      <span style="background:#DC4C3E;color:#fff;width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800">4</span>
+      Mini popup — butonun yanında açılır
+    </div>
+    <div style="display:inline-flex;gap:8px;align-items:flex-start;margin-left:20px">
+      <button style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;border:none;background:#DC4C3E;color:#fff;font-size:12px;font-weight:700;cursor:pointer">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        Tapşırıq əlavə et
+      </button>
+      <div style="background:#fff;border-radius:12px;border:1px solid #EBEBEB;box-shadow:0 8px 24px rgba(0,0,0,0.1);padding:12px;width:260px">
+        <p style="font-size:10px;font-weight:700;color:#B3B3B3;text-transform:uppercase;margin-bottom:8px">Növ seçin</p>
+        <div style="display:flex;gap:8px">
+          <div style="flex:1;border:1.5px solid #E8F0FE;border-radius:10px;padding:12px;text-align:center;cursor:pointer" onmouseover="this.style.borderColor='#246FE0'" onmouseout="this.style.borderColor='#E8F0FE'">
+            <div style="font-size:18px;margin-bottom:4px">📋</div>
+            <div style="font-size:12px;font-weight:700;color:#246FE0">GÖREV</div>
+            <div style="font-size:9px;color:#B3B3B3;margin-top:2px">Şirkət</div>
+          </div>
+          <div style="flex:1;border:1.5px solid #FFF3E0;border-radius:10px;padding:12px;text-align:center;cursor:pointer" onmouseover="this.style.borderColor='#EB8909'" onmouseout="this.style.borderColor='#FFF3E0'">
+            <div style="font-size:18px;margin-bottom:4px">✅</div>
+            <div style="font-size:12px;font-weight:700;color:#EB8909">TODO</div>
+            <div style="font-size:9px;color:#B3B3B3;margin-top:2px">Şəxsi</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 5. İnline tab — form üstündə ═══ -->
+  <div style="margin-bottom:32px">
+    <div style="font-size:13px;font-weight:700;color:#1F1F1F;margin-bottom:8px;display:flex;align-items:center;gap:6px">
+      <span style="background:#DC4C3E;color:#fff;width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800">5</span>
+      Form daxilində tab switch — modal açılır, içində GÖREV/TODO tab keçidi
+    </div>
+    <div style="margin-left:20px;background:#fff;border:1px solid #EBEBEB;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.08);width:420px;overflow:hidden">
+      <!-- Modal header -->
+      <div style="padding:16px 20px 0;display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:15px;font-weight:700;color:#1F1F1F">Tapşırıq əlavə et</span>
+        <span style="color:#B3B3B3;cursor:pointer;font-size:16px">✕</span>
+      </div>
+      <!-- Tab switch -->
+      <div style="display:flex;margin:12px 20px 0;border-radius:8px;overflow:hidden;background:#F0F0F0;padding:3px">
+        <button style="flex:1;padding:7px;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;background:#246FE0;color:#fff">📋 GÖREV</button>
+        <button style="flex:1;padding:7px;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;background:transparent;color:#808080">✅ TODO</button>
+      </div>
+      <!-- Form preview -->
+      <div style="padding:16px 20px">
+        <input style="width:100%;padding:10px 12px;border:1px solid #EBEBEB;border-radius:8px;font-size:13px;outline:none" placeholder="Tapşırıq adı..." />
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <span style="padding:4px 8px;border-radius:6px;background:#F0F0F0;font-size:10px;color:#808080">📅 Tarix</span>
+          <span style="padding:4px 8px;border-radius:6px;background:#F0F0F0;font-size:10px;color:#808080">🏢 Filial</span>
+          <span style="padding:4px 8px;border-radius:6px;background:#F0F0F0;font-size:10px;color:#808080">👤 İşçi</span>
+        </div>
+        <button style="width:100%;margin-top:12px;padding:9px;border:none;border-radius:8px;background:#DC4C3E;color:#fff;font-size:12px;font-weight:700;cursor:pointer">Əlavə et</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+function show(idx) {
+  document.querySelectorAll('.proposal').forEach((p, i) => p.classList.toggle('active', i === idx));
+  document.querySelectorAll('.tab-bar button').forEach((b, i) => b.classList.toggle('active', i === idx));
+}
+</script>
+
+<style>
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+</style>
+
+</body>
+</html>

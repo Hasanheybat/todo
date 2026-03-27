@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tema Testi — Dashboard (4 Tema × Real Data)</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#08080C;color:#fff}
+.hdr{padding:20px 32px 6px}
+.hdr h1{font-size:22px;font-weight:800;color:#fff}
+.hdr p{font-size:11px;color:#555;margin-top:2px}
+
+/* Tabs */
+.tabs{display:flex;gap:6px;padding:12px 32px 16px}
+.tabs button{padding:8px 16px;border:1.5px solid #1E1E2A;border-radius:10px;background:#111118;font-size:11px;font-weight:600;cursor:pointer;transition:.2s;color:#555;display:flex;align-items:center;gap:6px}
+.tabs button.a{border-color:var(--c);background:var(--bg);color:var(--c)}
+.tabs button:hover:not(.a){border-color:#333;color:#999}
+.container{padding:0 32px 40px}
+.proposal{display:none}.proposal.active{display:block;animation:fadeUp .3s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1}}
+
+/* Frame */
+.frame{border-radius:16px;overflow:hidden;max-width:1140px;margin:0 auto;box-shadow:0 4px 24px rgba(0,0,0,.3)}
+.tbar{display:flex;align-items:center;gap:7px;padding:10px 14px}
+.dt{width:11px;height:11px;border-radius:50%}.dr{background:#FF5F57}.dy{background:#FFBD2E}.dg{background:#28C840}
+.body{display:flex;min-height:620px}
+
+/* ═══ SIDEBAR ═══ */
+.sb{width:230px;padding:12px 8px;flex-shrink:0;overflow-y:auto;display:flex;flex-direction:column;gap:1px}
+.sb .prof{display:flex;align-items:center;gap:8px;padding:8px;border-radius:10px;margin-bottom:8px}
+.sb .av{width:30px;height:30px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.sb .nm{font-size:12px;font-weight:600}.sb .rl{font-size:9px}
+.sb .add{display:flex;align-items:center;gap:7px;padding:7px 8px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;margin-bottom:4px;border:none;width:100%;text-align:left}
+.sb .nv{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;font-size:12px;font-weight:400;cursor:pointer;transition:.1s}
+.sb .nv:hover{opacity:.9}
+.sb .nv.a{font-weight:600}
+.sb .nv .bd{margin-left:auto;font-size:10px;font-weight:700;padding:1px 6px;border-radius:8px}
+.sb .dv{height:1px;margin:6px 0}
+.sb .lb{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;padding:6px 8px 3px}
+.sb .pdot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0}
+
+/* ═══ CONTENT ═══ */
+.ct{flex:1;overflow-y:auto;padding:20px 24px}
+.ct h2{font-size:18px;font-weight:700;margin-bottom:2px}
+.ct .st{font-size:11px;margin-bottom:14px}
+
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+.stat{padding:14px;border-radius:12px}
+.stat .n{font-size:24px;font-weight:800}.stat .l{font-size:9px;font-weight:600;margin-top:1px;text-transform:uppercase;letter-spacing:.5px}
+.stat .bar{height:3px;border-radius:2px;margin-top:6px;overflow:hidden}
+.stat .bf{height:100%;border-radius:2px}
+
+/* Filter tabs */
+.ftabs{display:flex;gap:0;margin-bottom:12px;border-bottom:2px solid}
+.ftab{padding:8px 14px;font-size:11px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:.15s;display:flex;align-items:center;gap:5px}
+.ftab.a{border-bottom-color:currentColor}
+.ftab .cnt{font-size:9px;padding:1px 5px;border-radius:8px;font-weight:700}
+
+/* Chip filters */
+.chips{display:flex;gap:5px;margin-bottom:12px;flex-wrap:wrap}
+.chip{padding:4px 10px;border-radius:14px;font-size:10px;font-weight:600;cursor:pointer;transition:.15s;border:1px solid}
+.chip.a{font-weight:700}
+
+/* Task cards */
+.card{padding:10px 12px;border-radius:10px;margin-bottom:5px;display:flex;align-items:flex-start;gap:10px;cursor:pointer;transition:.15s;border:1px solid}
+.card:hover{transform:translateX(2px)}
+.card .ck{width:16px;height:16px;border-radius:50%;border:2px solid;flex-shrink:0;margin-top:1px}
+.card .info{flex:1;min-width:0}
+.card .tt{font-size:12px;font-weight:500;margin-bottom:2px}
+.card .mt{font-size:10px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.card .tg{font-size:8px;font-weight:700;padding:2px 6px;border-radius:4px}
+.card .status-badge{font-size:8px;font-weight:700;padding:2px 6px;border-radius:4px}
+.card .pr-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.card .progress{display:flex;align-items:center;gap:6px;margin-top:4px}
+.card .pbar{flex:1;height:4px;border-radius:2px;overflow:hidden;max-width:100px}
+.card .pfill{height:100%;border-radius:2px}
+.card .ppct{font-size:9px;font-weight:700}
+
+/* Section headers */
+.sec-hdr{display:flex;align-items:center;gap:8px;padding:6px 0;margin-top:8px}
+.sec-hdr .sec-title{font-size:11px;font-weight:700}.sec-hdr .sec-line{flex:1;height:1px}.sec-hdr .sec-cnt{font-size:9px;font-weight:700;padding:2px 6px;border-radius:8px}
+
+/* Notification popup */
+.notif-popup{position:absolute;top:44px;right:12px;width:320px;border-radius:14px;padding:0;overflow:hidden;z-index:50;display:none;box-shadow:0 8px 30px rgba(0,0,0,.15)}
+.notif-popup.show{display:block}
+.notif-hdr{padding:12px 16px;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:space-between}
+.notif-hdr .mark-read{font-size:10px;font-weight:600;cursor:pointer}
+.notif-item{display:flex;gap:10px;padding:10px 16px;cursor:pointer;transition:.1s}
+.notif-item:hover{opacity:.8}
+.notif-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.notif-info{flex:1;min-width:0}
+.notif-title{font-size:11px;font-weight:600}
+.notif-msg{font-size:10px;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.notif-time{font-size:9px;margin-top:2px}
+
+/* Profile popup */
+.prof-popup{position:absolute;top:44px;right:12px;width:200px;border-radius:12px;padding:6px 0;z-index:50;display:none;box-shadow:0 8px 30px rgba(0,0,0,.15)}
+.prof-popup.show{display:block}
+.prof-popup .pp-item{display:flex;align-items:center;gap:8px;padding:8px 14px;font-size:12px;cursor:pointer;transition:.1s}
+.prof-popup .pp-item:hover{opacity:.8}
+
+/* Quick add bar */
+.qadd{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1.5px dashed;border-radius:8px;font-size:11px;cursor:pointer;transition:.15s;margin-top:8px}
+.qadd:hover{opacity:.8}
+
+/* Header bar inside frame */
+.hbar{display:flex;align-items:center;gap:8px;padding:10px 16px;position:relative}
+.hbar .search{flex:1;padding:6px 12px;border-radius:8px;font-size:12px;border:1px solid;outline:none}
+.hbar .hbtn{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;border:none;font-size:14px}
+.hbar .hbtn .dot-notif{position:absolute;top:4px;right:4px;width:7px;height:7px;border-radius:50%}
+
+/* ═══════════════════════════════════ */
+/* THEME: FOREST                      */
+/* ═══════════════════════════════════ */
+.t-forest{--bg:#F0FDF4;--sf:#fff;--tx:#14332A;--tx2:#6B8F80;--tx3:#A7C4B8;--bd:#D1FAE5;--pr:#059669;--pr2:#34D399;--prl:rgba(5,150,105,.08);--sbg:#064E3B;--stx:rgba(255,255,255,.6);--stxa:#fff;--shv:rgba(255,255,255,.08);--sac:rgba(52,211,153,.2);--sdv:rgba(255,255,255,.08);--slb:rgba(255,255,255,.3);--sbd:rgba(52,211,153,.25);--sbt:#34D399;--sav:rgba(52,211,153,.3);--red:#DC2626;--org:#F97316;--blue:#2563EB;--gray:#9CA3AF}
+.t-forest .tbar{background:#ECFDF5;border-bottom:1px solid #D1FAE5}
+.t-forest .sb{background:var(--sbg)}
+.t-forest .sb .prof{background:rgba(255,255,255,.06)}
+.t-forest .sb .av{background:var(--sav);color:#fff}
+.t-forest .sb .nm{color:var(--stxa)}.t-forest .sb .rl{color:var(--stx)}
+.t-forest .sb .add{background:var(--sac);color:var(--sbt)}
+.t-forest .sb .nv{color:var(--stx)}.t-forest .sb .nv.a{color:var(--stxa);background:var(--sac)}
+.t-forest .sb .nv .bd{background:var(--sbd);color:var(--sbt)}
+.t-forest .sb .dv{background:var(--sdv)}.t-forest .sb .lb{color:var(--slb)}
+.t-forest .ct{background:var(--bg)}
+.t-forest .ct h2{color:var(--tx)}.t-forest .ct .st{color:var(--tx2)}
+.t-forest .stat{background:var(--sf);border:1px solid var(--bd)}.t-forest .stat .n{color:var(--pr)}.t-forest .stat .l{color:var(--tx2)}.t-forest .stat .bar{background:#E5F5ED}.t-forest .stat .bf{background:var(--pr)}
+.t-forest .ftabs{border-color:var(--bd)}.t-forest .ftab{color:var(--tx2)}.t-forest .ftab.a{color:var(--pr)}.t-forest .ftab .cnt{background:var(--prl);color:var(--pr)}
+.t-forest .chip{border-color:var(--bd);color:var(--tx2);background:var(--sf)}.t-forest .chip.a{border-color:var(--pr);background:var(--prl);color:var(--pr)}
+.t-forest .card{background:var(--sf);border-color:var(--bd)}.t-forest .card:hover{border-color:var(--pr)}.t-forest .card .tt{color:var(--tx)}.t-forest .card .mt{color:var(--tx2)}
+.t-forest .card .tg.gorev{background:rgba(5,150,105,.08);color:var(--pr)}.t-forest .card .tg.todo{background:rgba(52,211,153,.08);color:var(--pr2)}
+.t-forest .card .status-badge.created{background:#E5F5ED;color:var(--pr)}.t-forest .card .status-badge.progress{background:#FFF7ED;color:var(--org)}.t-forest .card .status-badge.pending{background:#FFF3E0;color:#D97706}.t-forest .card .status-badge.completed{background:#ECFDF5;color:#059669}.t-forest .card .status-badge.rejected{background:#FEF2F2;color:var(--red)}
+.t-forest .card .pbar{background:#E5F5ED}.t-forest .card .pfill{background:var(--pr)}
+.t-forest .sec-hdr .sec-title{color:var(--pr)}.t-forest .sec-hdr .sec-line{background:var(--bd)}.t-forest .sec-hdr .sec-cnt{background:var(--prl);color:var(--pr)}.t-forest .sec-hdr.red .sec-title{color:var(--red)}.t-forest .sec-hdr.red .sec-cnt{background:#FEF2F2;color:var(--red)}
+.t-forest .qadd{border-color:var(--bd);color:var(--tx3)}.t-forest .qadd:hover{border-color:var(--pr);color:var(--pr)}
+.t-forest .hbar{background:var(--sf);border-bottom:1px solid var(--bd)}.t-forest .hbar .search{border-color:var(--bd);background:var(--bg);color:var(--tx)}.t-forest .hbar .hbtn{background:var(--bg);color:var(--tx2)}.t-forest .hbar .hbtn .dot-notif{background:var(--pr)}
+.t-forest .notif-popup{background:var(--sf);border:1px solid var(--bd)}.t-forest .notif-hdr{color:var(--tx);border-bottom:1px solid var(--bd)}.t-forest .notif-hdr .mark-read{color:var(--pr)}.t-forest .notif-item{border-bottom:1px solid var(--bd)}.t-forest .notif-icon{background:var(--prl)}.t-forest .notif-title{color:var(--tx)}.t-forest .notif-msg{color:var(--tx2)}.t-forest .notif-time{color:var(--tx3)}
+.t-forest .prof-popup{background:var(--sf);border:1px solid var(--bd)}.t-forest .prof-popup .pp-item{color:var(--tx)}
+
+/* ═══ THEME: SUNSET ═══ */
+.t-sunset{--bg:#FFFBF5;--sf:#fff;--tx:#431407;--tx2:#C2956B;--tx3:#DDB895;--bd:#FED7AA;--pr:#F97316;--pr2:#FBBF24;--prl:rgba(249,115,22,.08);--sbg:#7C2D12;--stx:rgba(255,255,255,.65);--stxa:#fff;--shv:rgba(255,255,255,.08);--sac:rgba(251,191,36,.25);--sdv:rgba(255,255,255,.1);--slb:rgba(255,255,255,.3);--sbd:rgba(251,191,36,.3);--sbt:#FBBF24;--sav:#F97316;--red:#DC2626;--org:#F97316;--blue:#2563EB;--gray:#9CA3AF}
+.t-sunset .tbar{background:#FFF7ED;border-bottom:1px solid #FED7AA}
+.t-sunset .sb{background:var(--sbg)}
+.t-sunset .sb .prof{background:rgba(255,255,255,.06)}
+.t-sunset .sb .av{background:var(--sav);color:#fff}
+.t-sunset .sb .nm{color:var(--stxa)}.t-sunset .sb .rl{color:var(--stx)}
+.t-sunset .sb .add{background:var(--sac);color:var(--sbt)}
+.t-sunset .sb .nv{color:var(--stx)}.t-sunset .sb .nv.a{color:var(--stxa);background:var(--sac)}
+.t-sunset .sb .nv .bd{background:var(--sbd);color:var(--sbt)}
+.t-sunset .sb .dv{background:var(--sdv)}.t-sunset .sb .lb{color:var(--slb)}
+.t-sunset .ct{background:var(--bg)}
+.t-sunset .ct h2{color:var(--tx)}.t-sunset .ct .st{color:var(--tx2)}
+.t-sunset .stat{background:var(--sf);border:1px solid var(--bd)}.t-sunset .stat .n{color:var(--pr)}.t-sunset .stat .l{color:var(--tx2)}.t-sunset .stat .bar{background:#FFF0DD}.t-sunset .stat .bf{background:var(--pr)}
+.t-sunset .ftabs{border-color:var(--bd)}.t-sunset .ftab{color:var(--tx2)}.t-sunset .ftab.a{color:var(--pr)}.t-sunset .ftab .cnt{background:var(--prl);color:var(--pr)}
+.t-sunset .chip{border-color:var(--bd);color:var(--tx2);background:var(--sf)}.t-sunset .chip.a{border-color:var(--pr);background:var(--prl);color:var(--pr)}
+.t-sunset .card{background:var(--sf);border-color:var(--bd)}.t-sunset .card:hover{border-color:var(--pr)}.t-sunset .card .tt{color:var(--tx)}.t-sunset .card .mt{color:var(--tx2)}
+.t-sunset .card .tg.gorev{background:var(--prl);color:var(--pr)}.t-sunset .card .tg.todo{background:rgba(251,191,36,.08);color:#D97706}
+.t-sunset .card .status-badge.created{background:#FFF7ED;color:var(--pr)}.t-sunset .card .status-badge.progress{background:#FFF3E0;color:#D97706}.t-sunset .card .status-badge.pending{background:#FFFBEB;color:#B45309}.t-sunset .card .status-badge.completed{background:#ECFDF5;color:#059669}.t-sunset .card .status-badge.rejected{background:#FEF2F2;color:var(--red)}
+.t-sunset .card .pbar{background:#FFF0DD}.t-sunset .card .pfill{background:var(--pr)}
+.t-sunset .sec-hdr .sec-title{color:var(--pr)}.t-sunset .sec-hdr .sec-line{background:var(--bd)}.t-sunset .sec-hdr .sec-cnt{background:var(--prl);color:var(--pr)}.t-sunset .sec-hdr.red .sec-title{color:var(--red)}.t-sunset .sec-hdr.red .sec-cnt{background:#FEF2F2;color:var(--red)}
+.t-sunset .qadd{border-color:var(--bd);color:var(--tx3)}.t-sunset .qadd:hover{border-color:var(--pr);color:var(--pr)}
+.t-sunset .hbar{background:var(--sf);border-bottom:1px solid var(--bd)}.t-sunset .hbar .search{border-color:var(--bd);background:var(--bg);color:var(--tx)}.t-sunset .hbar .hbtn{background:var(--bg);color:var(--tx2)}.t-sunset .hbar .hbtn .dot-notif{background:var(--pr)}
+.t-sunset .notif-popup{background:var(--sf);border:1px solid var(--bd)}.t-sunset .notif-hdr{color:var(--tx);border-bottom:1px solid var(--bd)}.t-sunset .notif-hdr .mark-read{color:var(--pr)}.t-sunset .notif-item{border-bottom:1px solid var(--bd)}.t-sunset .notif-icon{background:var(--prl)}.t-sunset .notif-title{color:var(--tx)}.t-sunset .notif-msg{color:var(--tx2)}.t-sunset .notif-time{color:var(--tx3)}
+.t-sunset .prof-popup{background:var(--sf);border:1px solid var(--bd)}.t-sunset .prof-popup .pp-item{color:var(--tx)}
+
+/* ═══ THEME: SLATE ═══ */
+.t-slate{--bg:#FBFBFB;--sf:#fff;--tx:#171717;--tx2:#999;--tx3:#CCC;--bd:#EBEBEB;--pr:#2563EB;--pr2:#3B82F6;--prl:rgba(37,99,235,.06);--sbg:#F6F6F6;--stx:#999;--stxa:#171717;--shv:#F0F0F0;--sac:#EBEBEB;--sdv:#EBEBEB;--slb:#BBB;--sbd:transparent;--sbt:#999;--sav:#171717;--red:#DC2626;--org:#F97316;--blue:#2563EB;--gray:#9CA3AF}
+.t-slate .tbar{background:#F6F6F6;border-bottom:1px solid #EBEBEB}
+.t-slate .sb{background:var(--sbg);border-right:1px solid var(--bd)}
+.t-slate .sb .prof{background:transparent}
+.t-slate .sb .av{background:var(--sav);color:#fff;border-radius:6px}
+.t-slate .sb .nm{color:var(--stxa)}.t-slate .sb .rl{color:var(--stx)}
+.t-slate .sb .add{background:#EBEBEB;color:var(--stxa)}
+.t-slate .sb .nv{color:var(--stx)}.t-slate .sb .nv.a{color:var(--stxa);background:var(--sac);font-weight:600}
+.t-slate .sb .nv .bd{color:var(--stx)}
+.t-slate .sb .dv{background:var(--sdv)}.t-slate .sb .lb{color:var(--slb)}
+.t-slate .ct{background:var(--bg)}
+.t-slate .ct h2{color:var(--tx)}.t-slate .ct .st{color:var(--tx2)}
+.t-slate .stat{background:var(--sf);border:1px solid var(--bd)}.t-slate .stat .n{color:var(--tx)}.t-slate .stat .l{color:var(--tx2)}.t-slate .stat .bar{background:#F0F0F0}.t-slate .stat .bf{background:var(--pr)}
+.t-slate .ftabs{border-color:var(--bd)}.t-slate .ftab{color:var(--tx2)}.t-slate .ftab.a{color:var(--tx)}.t-slate .ftab .cnt{background:#F5F5F5;color:var(--tx2)}
+.t-slate .chip{border-color:var(--bd);color:var(--tx2);background:var(--sf)}.t-slate .chip.a{border-color:var(--tx);background:#F5F5F5;color:var(--tx)}
+.t-slate .card{background:var(--sf);border-color:transparent;border-bottom:1px solid var(--bd);border-radius:0}.t-slate .card:hover{background:#FAFAFA}.t-slate .card .tt{color:var(--tx)}.t-slate .card .mt{color:var(--tx2)}
+.t-slate .card .tg.gorev{background:var(--prl);color:var(--pr)}.t-slate .card .tg.todo{background:#F5F5F5;color:#666}
+.t-slate .card .status-badge.created{background:#F5F5F5;color:var(--tx2)}.t-slate .card .status-badge.progress{background:#FFF7ED;color:var(--org)}.t-slate .card .status-badge.pending{background:#FFFBEB;color:#B45309}.t-slate .card .status-badge.completed{background:#ECFDF5;color:#059669}.t-slate .card .status-badge.rejected{background:#FEF2F2;color:var(--red)}
+.t-slate .card .pbar{background:#F0F0F0}.t-slate .card .pfill{background:var(--pr)}
+.t-slate .sec-hdr .sec-title{color:var(--tx2)}.t-slate .sec-hdr .sec-line{background:var(--bd)}.t-slate .sec-hdr .sec-cnt{background:#F5F5F5;color:var(--tx2)}.t-slate .sec-hdr.red .sec-title{color:var(--red)}.t-slate .sec-hdr.red .sec-cnt{background:#FEF2F2;color:var(--red)}
+.t-slate .qadd{border-color:var(--bd);color:var(--tx3)}.t-slate .qadd:hover{border-color:var(--tx2);color:var(--tx2)}
+.t-slate .hbar{background:var(--sf);border-bottom:1px solid var(--bd)}.t-slate .hbar .search{border-color:var(--bd);background:#F6F6F6;color:var(--tx)}.t-slate .hbar .hbtn{background:#F6F6F6;color:var(--tx2)}.t-slate .hbar .hbtn .dot-notif{background:var(--pr)}
+.t-slate .notif-popup{background:var(--sf);border:1px solid var(--bd)}.t-slate .notif-hdr{color:var(--tx);border-bottom:1px solid var(--bd)}.t-slate .notif-hdr .mark-read{color:var(--pr)}.t-slate .notif-item{border-bottom:1px solid var(--bd)}.t-slate .notif-icon{background:#F5F5F5}.t-slate .notif-title{color:var(--tx)}.t-slate .notif-msg{color:var(--tx2)}.t-slate .notif-time{color:var(--tx3)}
+.t-slate .prof-popup{background:var(--sf);border:1px solid var(--bd)}.t-slate .prof-popup .pp-item{color:var(--tx)}
+
+/* ═══ THEME: ICE ═══ */
+.t-ice{--bg:#F0F7FF;--sf:#fff;--tx:#0F1729;--tx2:#6B82A8;--tx3:#A3B8D4;--bd:#D0E0F5;--pr:#1D4ED8;--pr2:#3B82F6;--prl:rgba(29,78,216,.08);--sbg:#E5F0FF;--stx:#6B82A8;--stxa:#fff;--shv:#D5E5FF;--sac:#1D4ED8;--sdv:#D0E0F5;--slb:#6B82A8;--sbd:rgba(29,78,216,.1);--sbt:#1D4ED8;--sav:rgba(255,255,255,.2);--red:#DC2626;--org:#F97316;--blue:#1D4ED8;--gray:#9CA3AF}
+.t-ice .tbar{background:#E5F0FF;border-bottom:1px solid #D0E0F5}
+.t-ice .sb{background:var(--sbg);border-right:1px solid var(--bd)}
+.t-ice .sb .prof{background:var(--sac);border-radius:10px}
+.t-ice .sb .av{background:var(--sav);color:#fff}
+.t-ice .sb .nm{color:#fff}.t-ice .sb .rl{color:rgba(255,255,255,.7)}
+.t-ice .sb .add{background:var(--prl);color:var(--pr)}
+.t-ice .sb .nv{color:var(--stx)}.t-ice .sb .nv.a{color:var(--stxa);background:var(--sac)}
+.t-ice .sb .nv .bd{background:var(--sbd);color:var(--sbt)}
+.t-ice .sb .dv{background:var(--sdv)}.t-ice .sb .lb{color:var(--slb)}
+.t-ice .ct{background:var(--bg)}
+.t-ice .ct h2{color:var(--tx)}.t-ice .ct .st{color:var(--tx2)}
+.t-ice .stat{background:var(--sf);border:1px solid var(--bd)}.t-ice .stat .n{color:var(--pr)}.t-ice .stat .l{color:var(--tx2)}.t-ice .stat .bar{background:#E0ECFA}.t-ice .stat .bf{background:var(--pr)}
+.t-ice .ftabs{border-color:var(--bd)}.t-ice .ftab{color:var(--tx2)}.t-ice .ftab.a{color:var(--pr)}.t-ice .ftab .cnt{background:var(--prl);color:var(--pr)}
+.t-ice .chip{border-color:var(--bd);color:var(--tx2);background:var(--sf)}.t-ice .chip.a{border-color:var(--pr);background:var(--prl);color:var(--pr)}
+.t-ice .card{background:var(--sf);border-color:var(--bd)}.t-ice .card:hover{border-color:var(--pr)}.t-ice .card .tt{color:var(--tx)}.t-ice .card .mt{color:var(--tx2)}
+.t-ice .card .tg.gorev{background:var(--prl);color:var(--pr)}.t-ice .card .tg.todo{background:rgba(96,165,250,.08);color:var(--pr2)}
+.t-ice .card .status-badge.created{background:#EFF6FF;color:var(--pr)}.t-ice .card .status-badge.progress{background:#FFF7ED;color:var(--org)}.t-ice .card .status-badge.pending{background:#FFFBEB;color:#B45309}.t-ice .card .status-badge.completed{background:#ECFDF5;color:#059669}.t-ice .card .status-badge.rejected{background:#FEF2F2;color:var(--red)}
+.t-ice .card .pbar{background:#E0ECFA}.t-ice .card .pfill{background:var(--pr)}
+.t-ice .sec-hdr .sec-title{color:var(--pr)}.t-ice .sec-hdr .sec-line{background:var(--bd)}.t-ice .sec-hdr .sec-cnt{background:var(--prl);color:var(--pr)}.t-ice .sec-hdr.red .sec-title{color:var(--red)}.t-ice .sec-hdr.red .sec-cnt{background:#FEF2F2;color:var(--red)}
+.t-ice .qadd{border-color:var(--bd);color:var(--tx3)}.t-ice .qadd:hover{border-color:var(--pr);color:var(--pr)}
+.t-ice .hbar{background:var(--sf);border-bottom:1px solid var(--bd)}.t-ice .hbar .search{border-color:var(--bd);background:var(--bg);color:var(--tx)}.t-ice .hbar .hbtn{background:var(--bg);color:var(--tx2)}.t-ice .hbar .hbtn .dot-notif{background:var(--pr)}
+.t-ice .notif-popup{background:var(--sf);border:1px solid var(--bd)}.t-ice .notif-hdr{color:var(--tx);border-bottom:1px solid var(--bd)}.t-ice .notif-hdr .mark-read{color:var(--pr)}.t-ice .notif-item{border-bottom:1px solid var(--bd)}.t-ice .notif-icon{background:var(--prl)}.t-ice .notif-title{color:var(--tx)}.t-ice .notif-msg{color:var(--tx2)}.t-ice .notif-time{color:var(--tx3)}
+.t-ice .prof-popup{background:var(--sf);border:1px solid var(--bd)}.t-ice .prof-popup .pp-item{color:var(--tx)}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <h1>🎨 Dashboard Tema Testi — Real Demo Data</h1>
+  <p>4 tema × Bugün səhifəsi × Bildiriş popup × Profil popup × Filtr tabları × Chip filtrlər</p>
+</div>
+
+<div class="tabs">
+  <button class="a" onclick="show(0)" style="--c:#059669;--bg:rgba(5,150,105,.08)">🌿 Forest</button>
+  <button onclick="show(1)" style="--c:#F97316;--bg:rgba(249,115,22,.08)">🌅 Sunset</button>
+  <button onclick="show(2)" style="--c:#888;--bg:rgba(136,136,136,.06)">📐 Slate</button>
+  <button onclick="show(3)" style="--c:#1D4ED8;--bg:rgba(29,78,216,.08)">❄️ Ice</button>
+</div>
+
+<div class="container" id="proposals"></div>
+
+<script>
+const themes = ['forest','sunset','slate','ice']
+const themeEmojis = {forest:'🌿',sunset:'🌅',slate:'📐',ice:'❄️'}
+
+const TASKS = [
+  {title:'Müştəri CRM Miqrasiyası — Q1 2026',status:'progress',priority:'CRITICAL',type:'GOREV',assignees:3,subs:5,subsDone:2,due:'01 Apr',dept:'İT',biz:'Bakı'},
+  {title:'Korporativ Veb Sayt Yenilənməsi',status:'progress',priority:'HIGH',type:'GOREV',assignees:4,subs:6,subsDone:1,due:'15 Apr',dept:'İT',biz:'Bakı'},
+  {title:'ISO 9001 Sertifikasiya Sənədləri',status:'progress',priority:'CRITICAL',type:'GOREV',assignees:2,subs:0,subsDone:0,due:'15 Mar',dept:'HR',biz:'Bakı',overdue:true},
+  {title:'Aylıq satış hesabatı hazırla',status:'progress',priority:'HIGH',type:'GOREV',assignees:1,subs:0,subsDone:0,due:'25 Mar',dept:'Satış',biz:'Bakı'},
+  {title:'Aylıq Maliyyə Hesabatı — Fevral',status:'pending',priority:'HIGH',type:'GOREV',assignees:1,subs:0,subsDone:0,due:'10 Mar',dept:'Maliyyə',biz:'Bakı',overdue:true},
+  {title:'Gəncə Marketinq Strategiyası 2026',status:'created',priority:'HIGH',type:'GOREV',assignees:3,subs:4,subsDone:0,due:'10 Apr',dept:'Satış',biz:'Gəncə'},
+  {title:'Müştəri məmnuniyyət sorğusu',status:'created',priority:'MEDIUM',type:'GOREV',assignees:2,subs:0,subsDone:0,due:'28 Mar',dept:'Marketinq',biz:'Bakı'},
+  {title:'İşçi təlim proqramı',status:'progress',priority:'MEDIUM',type:'GOREV',assignees:1,subs:0,subsDone:0,due:'30 Mar',dept:'HR',biz:'Bakı'},
+  // Todoist TODO
+  {title:'Auth sistemi (JWT + Refresh)',status:'progress',priority:'HIGH',type:'TODO',due:'Bugün',labels:['iş','təcili']},
+  {title:'Rəng paleti və tipografiya sistemi',status:'created',priority:'MEDIUM',type:'TODO',due:'Bugün',labels:['dizayn']},
+  {title:'Komponent kitabxanası (Storybook)',status:'created',priority:'MEDIUM',type:'TODO',due:'Sabah',labels:['dizayn','iş'],subs:5,subsDone:1},
+  {title:'Google Analytics 4 quraşdır',status:'created',priority:'HIGH',type:'TODO',due:'Bugün',labels:['iş']},
+  {title:'LinkedIn kontenti planla (4 həftə)',status:'created',priority:'MEDIUM',type:'TODO',due:'Sabah'},
+  {title:'Diş həkimi randevusu — 28 Mart',status:'created',priority:'MEDIUM',type:'TODO',due:'28 Mar'},
+]
+
+const NOTIFS = [
+  {icon:'🔔',type:'SYSTEM',title:'Sistem yeniləməsi',msg:'WorkFlow Pro v2.1 — yeni tema sistemi əlavə edildi',time:'2 saat'},
+  {icon:'✅',type:'TASK_COMPLETED',title:'2/5 alt görev tamamlandı',msg:'CRM Miqrasiyası — CSV export və data təmizləmə bitdi',time:'3 saat'},
+  {icon:'💬',type:'COMMENT',title:'Şərh əlavə edildi',msg:'Nigar "Satış hesabatı" tapşırığına şərh yazdı',time:'5 saat'},
+  {icon:'⏰',type:'TODO_DUE',title:'Tapşırıq vaxtı yaxınlaşır',msg:'"Auth sistemi" sabah deadline-dır',time:'6 saat'},
+  {icon:'💬',type:'COMMENT',title:'Yeni şərh',msg:'Tural "İşçi təlimi" tapşırığına şərh yazdı',time:'8 saat'},
+  {icon:'✅',type:'COMPLETED',title:'Tapşırıq tamamlandı',msg:'"Ofis avadanlıq inventarı" tamamlanıb',time:'1 gün'},
+]
+
+function buildMockup(theme) {
+  const t = 't-' + theme
+  const statusMap = {created:'Yaradılıb',progress:'Davam edir',pending:'Onay gözləyir',completed:'Tamamlandı',rejected:'Rədd'}
+  const prColors = {CRITICAL:'#DC2626',HIGH:'#F97316',MEDIUM:'#2563EB',LOW:'#9CA3AF'}
+
+  let taskCards = ''
+  // Gecikmiş bölmə
+  const overdue = TASKS.filter(x => x.overdue)
+  if (overdue.length) {
+    taskCards += `<div class="sec-hdr red"><span class="sec-title">⚠️ Gecikmiş</span><span class="sec-line"></span><span class="sec-cnt">${overdue.length}</span></div>`
+    overdue.forEach(x => taskCards += buildCard(x, prColors))
+  }
+
+  // Bugün
+  const today = TASKS.filter(x => x.due === 'Bugün' && !x.overdue)
+  taskCards += `<div class="sec-hdr"><span class="sec-title">📅 Bugün</span><span class="sec-line"></span><span class="sec-cnt">${today.length}</span></div>`
+  today.forEach(x => taskCards += buildCard(x, prColors))
+
+  // Davam edən
+  const inProg = TASKS.filter(x => x.status === 'progress' && !x.overdue && x.due !== 'Bugün')
+  taskCards += `<div class="sec-hdr"><span class="sec-title">🔄 Davam edən</span><span class="sec-line"></span><span class="sec-cnt">${inProg.length}</span></div>`
+  inProg.forEach(x => taskCards += buildCard(x, prColors))
+
+  // Gözləyən
+  const waiting = TASKS.filter(x => (x.status === 'created' || x.status === 'pending') && !x.overdue && x.due !== 'Bugün')
+  taskCards += `<div class="sec-hdr"><span class="sec-title">📋 Gözləyən</span><span class="sec-line"></span><span class="sec-cnt">${waiting.length}</span></div>`
+  waiting.forEach(x => taskCards += buildCard(x, prColors))
+
+  let notifItems = NOTIFS.map(n => `
+    <div class="notif-item"><div class="notif-icon">${n.icon}</div><div class="notif-info"><div class="notif-title">${n.title}</div><div class="notif-msg">${n.msg}</div><div class="notif-time">${n.time} əvvəl</div></div></div>
+  `).join('')
+
+  return `
+  <div class="frame ${t}" id="frame-${theme}">
+    <div class="tbar"><div class="dt dr"></div><div class="dt dy"></div><div class="dt dg"></div><span style="margin-left:8px;font-size:11px;opacity:.5">WorkFlow Pro — ${themeEmojis[theme]} ${theme.charAt(0).toUpperCase()+theme.slice(1)}</span></div>
+    <div class="body">
+      <div class="sb">
+        <div class="prof"><div class="av">LH</div><div><div class="nm">Leyla Hüseynova</div><div class="rl">Bakı Müdürü</div></div></div>
+        <div class="add" onclick="event.stopPropagation()">＋ Tapşırıq əlavə et</div>
+        <div class="nv a">📅 Bugün <span class="bd">14</span></div>
+        <div class="nv">📥 Gələnlər <span class="bd" style="opacity:.5">3</span></div>
+        <div class="nv">📆 Gələcək</div>
+        <div class="dv"></div>
+        <div class="nv">📋 Tapşırıqlar</div>
+        <div class="nv">✅ Todo</div>
+        <div class="nv">📑 Şablonlar</div>
+        <div class="dv"></div>
+        <div class="lb">Layihələr</div>
+        <div class="nv"><span class="pdot" style="background:#7C3AED"></span> Veb Dizayn</div>
+        <div class="nv"><span class="pdot" style="background:#059669"></span> Mobil Tətbiq</div>
+        <div class="nv"><span class="pdot" style="background:#F97316"></span> Marketinq Planı</div>
+        <div class="nv"><span class="pdot" style="background:#EC4899"></span> Şəxsi</div>
+        <div class="dv"></div>
+        <div class="lb">Etiketlər</div>
+        <div class="nv"><span class="pdot" style="background:#DC4C3E"></span> təcili</div>
+        <div class="nv"><span class="pdot" style="background:#246FE0"></span> iş</div>
+        <div class="nv"><span class="pdot" style="background:#9333EA"></span> görüş</div>
+        <div class="nv"><span class="pdot" style="background:#059669"></span> dizayn</div>
+        <div class="dv"></div>
+        <div class="lb">İdarəetmə</div>
+        <div class="nv">👥 İşçilər</div>
+        <div class="nv">🛡️ Rollar</div>
+        <div class="nv">💰 Maliyyə</div>
+        <div class="nv">💳 Maaş/HR</div>
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+        <div class="hbar">
+          <input class="search" placeholder="🔍 Axtar... (tapşırıq, todo, layihə)" />
+          <button class="hbtn" onclick="toggleNotif('${theme}')">🔔<span class="dot-notif"></span></button>
+          <button class="hbtn" onclick="toggleProf('${theme}')">👤</button>
+          <div class="notif-popup" id="notif-${theme}">
+            <div class="notif-hdr">🔔 Bildirişlər (6) <span class="mark-read">Hamısını oxu</span></div>
+            ${notifItems}
+          </div>
+          <div class="prof-popup" id="prof-${theme}">
+            <div class="pp-item" style="border-bottom:1px solid #eee;padding-bottom:8px"><strong>Leyla Hüseynova</strong></div>
+            <div class="pp-item">⚙️ Tənzimləmələr</div>
+            <div class="pp-item">🎨 Tema dəyiş</div>
+            <div class="pp-item" style="color:#DC2626">🚪 Çıxış</div>
+          </div>
+        </div>
+        <div class="ct">
+          <h2>Bugün</h2>
+          <div class="st">22 Mart 2026, Bazar — 14 tapşırıq (GÖREV + TODO)</div>
+
+          <div class="stats">
+            <div class="stat"><div class="n">20</div><div class="l">Aktiv tapşırıq</div><div class="bar"><div class="bf" style="width:60%"></div></div></div>
+            <div class="stat"><div class="n">4</div><div class="l">Tamamlanan</div><div class="bar"><div class="bf" style="width:25%;background:#10B981"></div></div></div>
+            <div class="stat"><div class="n" style="color:#DC2626">2</div><div class="l">Gecikmiş</div><div class="bar"><div class="bf" style="width:15%;background:#DC2626"></div></div></div>
+            <div class="stat"><div class="n">76.2K</div><div class="l">Gəlir (₼)</div><div class="bar"><div class="bf" style="width:78%"></div></div></div>
+          </div>
+
+          <div class="ftabs">
+            <div class="ftab a">Hamısı <span class="cnt">14</span></div>
+            <div class="ftab">GÖREV <span class="cnt">8</span></div>
+            <div class="ftab">TODO <span class="cnt">6</span></div>
+          </div>
+
+          <div class="chips">
+            <div class="chip a">Bütün filiallar</div>
+            <div class="chip">Bakı</div>
+            <div class="chip">Gəncə</div>
+            <div style="width:1px;background:#ddd;margin:0 4px"></div>
+            <div class="chip"><span class="pr-dot" style="background:#DC2626;display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:3px"></span>Kritik</div>
+            <div class="chip"><span class="pr-dot" style="background:#F97316;display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:3px"></span>Yüksək</div>
+            <div class="chip"><span class="pr-dot" style="background:#2563EB;display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:3px"></span>Orta</div>
+          </div>
+
+          ${taskCards}
+
+          <div class="qadd">＋ Tapşırıq əlavə et...</div>
+        </div>
+      </div>
+    </div>
+  </div>`
+}
+
+function buildCard(x, prColors) {
+  const pc = prColors[x.priority] || '#9CA3AF'
+  const statusCls = {created:'created',progress:'progress',pending:'pending',completed:'completed',rejected:'rejected'}[x.status]
+  const statusMap = {created:'Yaradılıb',progress:'Davam edir',pending:'Onay gözləyir',completed:'Tamamlandı',rejected:'Rədd'}
+  let meta = ''
+  if (x.biz) meta += `<span>${x.biz}</span>`
+  if (x.dept) meta += `<span>· ${x.dept}</span>`
+  if (x.assignees) meta += `<span>· 👤 ${x.assignees}</span>`
+  if (x.due) meta += `<span>· 📅 ${x.due}</span>`
+  if (x.labels) meta += x.labels.map(l => `<span style="font-size:9px;padding:1px 5px;border-radius:8px;background:rgba(0,0,0,.04)">@${l}</span>`).join('')
+
+  let progress = ''
+  if (x.subs) {
+    const pct = Math.round((x.subsDone/x.subs)*100)
+    progress = `<div class="progress"><div class="pbar"><div class="pfill" style="width:${pct}%"></div></div><span class="ppct">${x.subsDone}/${x.subs}</span></div>`
+  }
+
+  return `
+    <div class="card">
+      <div class="ck" style="border-color:${pc}"></div>
+      <div class="info">
+        <div class="tt">${x.title}</div>
+        <div class="mt">
+          <span class="status-badge ${statusCls}">${statusMap[x.status]}</span>
+          <span class="tg ${x.type.toLowerCase()}">${x.type}</span>
+          ${meta}
+        </div>
+        ${progress}
+      </div>
+      <div class="pr-dot" style="background:${pc}"></div>
+    </div>`
+}
+
+// Render all 4
+let html = ''
+themes.forEach((t,i) => {
+  html += `<div class="proposal${i===0?' active':''}" id="p${i}">${buildMockup(t)}</div>`
+})
+document.getElementById('proposals').innerHTML = html
+
+function show(i) {
+  document.querySelectorAll('.proposal').forEach(p => p.classList.remove('active'))
+  document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('a'))
+  document.getElementById('p'+i).classList.add('active')
+  document.querySelectorAll('.tabs button')[i].classList.add('a')
+  // close popups
+  document.querySelectorAll('.notif-popup,.prof-popup').forEach(p => p.classList.remove('show'))
+}
+
+function toggleNotif(theme) {
+  event.stopPropagation()
+  document.querySelectorAll('.prof-popup').forEach(p => p.classList.remove('show'))
+  document.getElementById('notif-'+theme).classList.toggle('show')
+}
+function toggleProf(theme) {
+  event.stopPropagation()
+  document.querySelectorAll('.notif-popup').forEach(p => p.classList.remove('show'))
+  document.getElementById('prof-'+theme).classList.toggle('show')
+}
+document.addEventListener('click', () => {
+  document.querySelectorAll('.notif-popup,.prof-popup').forEach(p => p.classList.remove('show'))
+})
+</script>
+</body>
+</html>

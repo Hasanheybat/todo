@@ -1,0 +1,40 @@
+// Ortaq tiplər — WorkFlow Pro
+
+export enum UserRole {
+  SUPER_ADMIN = 'SUPER_ADMIN',
+  TENANT_ADMIN = 'TENANT_ADMIN',
+  BUSINESS_MANAGER = 'BUSINESS_MANAGER',
+  TEAM_MANAGER = 'TEAM_MANAGER',
+  EMPLOYEE = 'EMPLOYEE',
+}
+
+export enum TaskStatus {
+  CREATED = 'CREATED',
+  IN_PROGRESS = 'IN_PROGRESS',
+  COMPLETED = 'COMPLETED',
+  PENDING_APPROVAL = 'PENDING_APPROVAL',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
+}
+
+export enum TodoStatus {
+  PENDING = 'PENDING',
+  IN_PROGRESS = 'IN_PROGRESS',
+  COMPLETED = 'COMPLETED',
+  PENDING_APPROVAL = 'PENDING_APPROVAL',
+  ACCEPTED = 'ACCEPTED',
+}
+
+export enum Priority {
+  CRITICAL = 'CRITICAL',
+  HIGH = 'HIGH',
+  MEDIUM = 'MEDIUM',
+  LOW = 'LOW',
+  INFO = 'INFO',
+}
+
+export enum TodoVisibility {
+  PRIVATE = 'PRIVATE',
+  TEAM = 'TEAM',
+  BUSINESS = 'BUSINESS',
+}

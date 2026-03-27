@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WorkFlow Pro — Split-Screen Live Dashboard</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#08080C;color:#fff;overflow:hidden;height:100vh}
+
+/* ═══ TOP BAR ═══ */
+.top-bar{display:flex;align-items:center;gap:12px;padding:12px 24px;background:#111;border-bottom:1px solid #222}
+.top-bar h1{font-size:16px;font-weight:800;color:#fff;margin-right:auto}
+.theme-btn{width:36px;height:36px;border-radius:10px;border:2.5px solid transparent;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;font-size:14px;position:relative}
+.theme-btn:hover{transform:scale(1.1)}
+.theme-btn.active{border-color:#fff;box-shadow:0 0 12px rgba(255,255,255,.2)}
+.refresh-btn{padding:6px 14px;border-radius:8px;background:#333;color:#fff;border:none;font-size:12px;font-weight:600;cursor:pointer;transition:.15s;font-family:inherit}
+.refresh-btn:hover{background:#444}
+.status-indicator{font-size:12px;padding:4px 10px;border-radius:8px;background:#1a1a1a}
+
+/* ═══ SPLIT LAYOUT ═══ */
+.split-container{display:flex;height:calc(100vh - 56px);overflow:hidden}
+.panel{flex:1;display:flex;flex-direction:column;overflow:hidden;border-right:1px solid #222}
+.panel:last-child{border-right:none}
+.panel-header{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid}
+.panel-avatar{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.panel-name{font-size:13px;font-weight:700}
+.panel-role{font-size:10px;opacity:.6}
+.panel-body{flex:1;display:flex;overflow:hidden}
+
+/* ═══ MINI SIDEBAR ═══ */
+.mini-sb{width:180px;padding:10px 6px;flex-shrink:0;overflow-y:auto;display:flex;flex-direction:column;gap:2px}
+.mini-sb::-webkit-scrollbar{width:3px}.mini-sb::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
+.mini-sb .ms-label{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;padding:6px 6px 2px;opacity:.5}
+.mini-sb .ms-item{display:flex;align-items:center;gap:6px;padding:5px 6px;border-radius:6px;font-size:11px;cursor:default}
+.mini-sb .ms-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.mini-sb .ms-count{margin-left:auto;font-size:9px;font-weight:700;padding:1px 5px;border-radius:6px}
+
+/* ═══ CONTENT AREA ═══ */
+.panel-content{flex:1;overflow-y:auto;padding:14px 16px}
+.panel-content::-webkit-scrollbar{width:4px}.panel-content::-webkit-scrollbar-thumb{background:rgba(0,0,0,.08);border-radius:2px}
+
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px}
+.stat{padding:10px;border-radius:10px;transition:.15s}
+.stat .n{font-size:20px;font-weight:800}.stat .l{font-size:8px;font-weight:600;margin-top:1px;text-transform:uppercase;letter-spacing:.4px}
+.stat .bar{height:3px;border-radius:2px;margin-top:5px;overflow:hidden}
+.stat .bf{height:100%;border-radius:2px}
+
+/* Section headers */
+.sec-hdr{display:flex;align-items:center;gap:8px;padding:6px 0;margin-top:6px}
+.sec-hdr .sec-icon{font-size:12px}.sec-hdr .sec-title{font-size:11px;font-weight:700}
+.sec-hdr .sec-line{flex:1;height:1px}.sec-hdr .sec-cnt{font-size:9px;font-weight:700;padding:2px 6px;border-radius:8px}
+
+/* GOREV cards */
+.gcard{padding:10px 12px;border-radius:10px;margin-bottom:5px;cursor:pointer;transition:.15s;border:1px solid}
+.gcard:hover{transform:translateX(2px)}
+.gcard-top{display:flex;align-items:flex-start;gap:10px}
+.gcard-pbar{width:4px;border-radius:2px;min-height:36px;flex-shrink:0}
+.gcard-info{flex:1;min-width:0}
+.gcard-title{font-size:12px;font-weight:600;margin-bottom:3px}
+.gcard-meta{display:flex;align-items:center;gap:6px;font-size:10px;flex-wrap:wrap}
+.gcard-meta .gm-av{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;margin-left:-4px;border:1.5px solid #fff}
+.gcard-meta .gm-av:first-child{margin-left:0}
+.gcard-badge{font-size:8px;font-weight:700;padding:2px 6px;border-radius:4px}
+.gcard-actions{display:flex;gap:4px;margin-top:6px}
+.gcard-act-btn{padding:3px 8px;border-radius:6px;border:none;font-size:9px;font-weight:600;cursor:pointer;transition:.15s;font-family:inherit}
+.gcard-act-btn:hover{opacity:.85}
+.gcard-act-btn.start{background:#EFF6FF;color:#2563EB}
+.gcard-act-btn.complete{background:#F0FDF4;color:#059669}
+.gcard-act-btn.disabled{opacity:.4;cursor:default}
+
+/* TODO items */
+.todo-item{display:flex;align-items:flex-start;gap:8px;padding:7px 10px;border-radius:8px;cursor:pointer;transition:.15s;margin-bottom:3px;border:1px solid transparent}
+.todo-item:hover{transform:translateX(2px)}
+.todo-cb{width:16px;height:16px;border-radius:50%;border:2px solid;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.2s;font-size:9px;color:transparent}
+.todo-cb:hover{opacity:.7}
+.todo-cb.checked{color:#fff}
+.todo-title{font-size:11px;font-weight:500;flex:1}
+.todo-title.done{text-decoration:line-through;opacity:.5}
+.todo-due{font-size:9px;opacity:.6}
+.todo-priority{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+
+/* Notifications */
+.notif-section{margin-top:8px}
+.notif-toggle{display:flex;align-items:center;gap:6px;cursor:pointer;padding:4px 0;font-size:11px;font-weight:600;user-select:none}
+.notif-toggle .arrow{transition:.2s;display:inline-block;font-size:9px}
+.notif-toggle .arrow.open{transform:rotate(90deg)}
+.notif-list{overflow:hidden;transition:.3s}
+.notif-item{display:flex;gap:8px;padding:6px 8px;border-radius:6px;margin-bottom:2px;font-size:10px;cursor:default}
+.notif-icon{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0}
+.notif-text{flex:1;min-width:0}
+.notif-msg{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.notif-time{font-size:9px;opacity:.5;margin-top:1px}
+
+/* Loading / Error */
+.loading{text-align:center;padding:40px;font-size:13px;opacity:.6}
+.loading .spinner{display:inline-block;width:24px;height:24px;border:3px solid rgba(255,255,255,.1);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;margin-bottom:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.error-msg{text-align:center;padding:30px;color:#DC2626;font-size:12px}
+
+/* Toast */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(100px);background:#059669;color:#fff;padding:10px 20px;border-radius:10px;font-size:12px;font-weight:600;z-index:999;transition:.3s;opacity:0;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+/* Modal */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(2px)}
+.modal-overlay.show{display:flex}
+.modal{border-radius:14px;max-width:520px;width:90%;max-height:80vh;overflow-y:auto;position:relative;animation:modalIn .2s ease}
+@keyframes modalIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+.modal-close{position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:8px;border:none;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:.15s}
+.modal-close:hover{opacity:.7}
+.modal-body{padding:20px}
+.modal-title{font-size:15px;font-weight:700;margin-bottom:4px;padding-right:32px}
+.modal-desc{font-size:11px;opacity:.6;margin-bottom:12px}
+.modal-section{margin-bottom:10px}
+.modal-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;opacity:.5}
+.modal-detail-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:11px;margin-bottom:4px}
+.modal-detail-row .mdl{font-weight:600;min-width:80px}
+
+/* ═══ THEME VARIABLES ═══ */
+.t-forest{--bg:#F0FDF4;--sf:#fff;--tx:#14332A;--tx2:#6B8F80;--tx3:#A7C4B8;--bd:#D1FAE5;--pr:#059669;--pr2:#34D399;--prl:rgba(5,150,105,.08);--sbg:#064E3B;--stx:rgba(255,255,255,.6);--stxa:#fff;--shv:rgba(255,255,255,.08);--sac:rgba(52,211,153,.2);--sdv:rgba(255,255,255,.08);--slb:rgba(255,255,255,.3);--sbd:rgba(52,211,153,.25);--sbt:#34D399;--sav:rgba(52,211,153,.3);--red:#DC2626;--org:#F97316;--blue:#2563EB;--gray:#9CA3AF}
+.t-sunset{--bg:#FFFBF5;--sf:#fff;--tx:#431407;--tx2:#C2956B;--tx3:#DDB895;--bd:#FED7AA;--pr:#F97316;--pr2:#FBBF24;--prl:rgba(249,115,22,.08);--sbg:#7C2D12;--stx:rgba(255,255,255,.65);--stxa:#fff;--shv:rgba(255,255,255,.08);--sac:rgba(251,191,36,.25);--sdv:rgba(255,255,255,.1);--slb:rgba(255,255,255,.3);--sbd:rgba(251,191,36,.3);--sbt:#FBBF24;--sav:#F97316;--red:#DC2626;--org:#F97316;--blue:#2563EB;--gray:#9CA3AF}
+.t-slate{--bg:#FBFBFB;--sf:#fff;--tx:#171717;--tx2:#999;--tx3:#CCC;--bd:#EBEBEB;--pr:#2563EB;--pr2:#3B82F6;--prl:rgba(37,99,235,.06);--sbg:#F6F6F6;--stx:#999;--stxa:#171717;--shv:#F0F0F0;--sac:#EBEBEB;--sdv:#EBEBEB;--slb:#BBB;--sbd:transparent;--sbt:#999;--sav:#171717;--red:#DC2626;--org:#F97316;--blue:#2563EB;--gray:#9CA3AF}
+.t-ice{--bg:#F0F7FF;--sf:#fff;--tx:#0F1729;--tx2:#6B82A8;--tx3:#A3B8D4;--bd:#D0E0F5;--pr:#1D4ED8;--pr2:#3B82F6;--prl:rgba(29,78,216,.08);--sbg:#E5F0FF;--stx:#4A6A90;--stxa:#0F1729;--shv:#D5E5FF;--sac:#1D4ED8;--sdv:#D0E0F5;--slb:#6B82A8;--sbd:rgba(29,78,216,.12);--sbt:#1D4ED8;--sav:rgba(29,78,216,.15);--red:#DC2626;--org:#F97316;--blue:#1D4ED8;--gray:#9CA3AF}
+
+/* Panel header per theme */
+[class*="t-"] .panel-header{background:var(--sf);border-color:var(--bd)}.panel-name-t{color:var(--tx)}.panel-role-t{color:var(--tx2)}
+[class*="t-"] .panel-avatar.owner{background:var(--pr);color:#fff}
+[class*="t-"] .panel-avatar.worker{background:#7C3AED;color:#fff}
+
+/* Mini sidebar per theme */
+.t-forest .mini-sb{background:var(--sbg)}.t-forest .mini-sb .ms-label{color:var(--slb)}.t-forest .mini-sb .ms-item{color:var(--stx)}.t-forest .mini-sb .ms-count{background:var(--sbd);color:var(--sbt)}
+.t-sunset .mini-sb{background:var(--sbg)}.t-sunset .mini-sb .ms-label{color:var(--slb)}.t-sunset .mini-sb .ms-item{color:var(--stx)}.t-sunset .mini-sb .ms-count{background:var(--sbd);color:var(--sbt)}
+.t-slate .mini-sb{background:var(--sbg);border-right:1px solid var(--bd)}.t-slate .mini-sb .ms-label{color:var(--slb)}.t-slate .mini-sb .ms-item{color:var(--stx)}.t-slate .mini-sb .ms-count{background:#EBEBEB;color:var(--stx)}
+.t-ice .mini-sb{background:var(--sbg);border-right:1px solid var(--bd)}.t-ice .mini-sb .ms-label{color:var(--slb)}.t-ice .mini-sb .ms-item{color:var(--stx)}.t-ice .mini-sb .ms-count{background:var(--sbd);color:var(--sbt)}
+
+/* Content per theme */
+[class*="t-"] .panel-content{background:var(--bg)}
+
+/* Stats per theme */
+[class*="t-"] .stat{background:var(--sf);border:1px solid var(--bd)}
+[class*="t-"] .stat .n{color:var(--pr)}[class*="t-"] .stat .l{color:var(--tx2)}
+[class*="t-"] .stat .bar{background:var(--bd)}[class*="t-"] .stat .bf{background:var(--pr)}
+
+/* Section headers per theme */
+[class*="t-"] .sec-hdr .sec-title{color:var(--pr)}[class*="t-"] .sec-hdr .sec-line{background:var(--bd)}[class*="t-"] .sec-hdr .sec-cnt{background:var(--prl);color:var(--pr)}
+
+/* GOREV cards per theme */
+[class*="t-"] .gcard{background:var(--sf);border-color:var(--bd)}[class*="t-"] .gcard:hover{border-color:var(--pr)}
+[class*="t-"] .gcard-title{color:var(--tx)}[class*="t-"] .gcard-meta{color:var(--tx2)}
+/* Status badge-lər — hər zaman oxunaqlı */
+.gcard-badge.badge-CREATED{background:#EFF6FF;color:#2563EB}
+.gcard-badge.badge-IN_PROGRESS{background:#FFF7ED;color:#C2410C}
+.gcard-badge.badge-PENDING_APPROVAL{background:#FFFBEB;color:#B45309}
+.gcard-badge.badge-COMPLETED{background:#ECFDF5;color:#047857}
+.gcard-badge.badge-REJECTED{background:#FEF2F2;color:#B91C1C}
+.gcard-badge.badge-APPROVED{background:#ECFDF5;color:#047857}
+.gcard-badge.badge-PENDING{background:#F5F5F5;color:#666}
+.gcard-badge.badge-IN_PROGRESS_A{background:#FFF7ED;color:#C2410C}
+.gcard-badge.badge-COMPLETED_A{background:#ECFDF5;color:#047857}
+.gcard-badge.badge-DECLINED{background:#FEF2F2;color:#B91C1C}
+/* Notification yazıları */
+[class*="t-"] .notif-title{color:var(--tx);font-weight:600}
+/* Section header yazıları */
+.sec-hd{font-size:12px;font-weight:700;padding:8px 0 4px;display:flex;align-items:center;gap:6px}
+.sec-hd .sec-cnt{font-size:9px;font-weight:700;padding:1px 6px;border-radius:8px}
+[class*="t-"] .sec-hd{color:var(--tx)}[class*="t-"] .sec-hd .sec-cnt{background:var(--prl);color:var(--pr)}
+.sec-hd.red{color:#DC2626}.sec-hd.red .sec-cnt{background:#FEF2F2;color:#DC2626}
+/* TODO checkbox yazıları */
+.todo-row{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;cursor:pointer;font-size:12px;transition:.1s}
+.todo-row:hover{opacity:.8}
+[class*="t-"] .todo-row{color:var(--tx)}
+
+/* Status badges */
+.badge-CREATED{background:#F0FDF4;color:#059669}
+.badge-IN_PROGRESS{background:#EFF6FF;color:#2563EB}
+.badge-PENDING_APPROVAL{background:#FFFBEB;color:#B45309}
+.badge-COMPLETED{background:#ECFDF5;color:#059669}
+.badge-REJECTED{background:#FEF2F2;color:#DC2626}
+.badge-WAITING{background:#FFF7ED;color:#F97316}
+
+/* TODO per theme */
+[class*="t-"] .todo-item{background:var(--sf)}[class*="t-"] .todo-item:hover{border-color:var(--bd)}
+[class*="t-"] .todo-title{color:var(--tx)}[class*="t-"] .todo-due{color:var(--tx2)}
+
+/* Notification per theme */
+[class*="t-"] .notif-toggle{color:var(--tx)}
+[class*="t-"] .notif-item{background:var(--sf)}[class*="t-"] .notif-icon{background:var(--prl)}
+[class*="t-"] .notif-msg{color:var(--tx2)}[class*="t-"] .notif-time{color:var(--tx3)}
+
+/* Modal — direct background (no theme dependency for overlay) */
+.modal{background:#fff;border:1px solid #E5E5E5}
+.modal-close{background:#F5F5F5;color:#666}
+.modal-title{color:#1F1F1F}.modal-desc{color:#808080}
+.modal-label{color:#808080;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.modal-detail-row{color:#1F1F1F;font-size:12px;padding:4px 0}
+.modal-detail-row span{color:#666}
+/* Theme overrides for modal */
+[class*="t-"] .modal{background:var(--sf,#fff);border:1px solid var(--bd,#E5E5E5)}
+[class*="t-"] .modal-close{background:var(--bg,#F5F5F5);color:var(--tx2,#666)}
+[class*="t-"] .modal-title{color:var(--tx,#1F1F1F)}[class*="t-"] .modal-desc{color:var(--tx2,#808080)}
+[class*="t-"] .modal-label{color:var(--tx2,#808080)}
+[class*="t-"] .modal-detail-row{color:var(--tx,#1F1F1F)}
+/* Modal overlay gets theme from JS */
+.modal-overlay.t-forest .modal{background:#fff;border:1px solid #D1FAE5}
+.modal-overlay.t-forest .modal-title{color:#14332A}.modal-overlay.t-forest .modal-desc{color:#6B8F80}
+.modal-overlay.t-sunset .modal{background:#fff;border:1px solid #FED7AA}
+.modal-overlay.t-sunset .modal-title{color:#431407}.modal-overlay.t-sunset .modal-desc{color:#C2956B}
+.modal-overlay.t-slate .modal{background:#fff;border:1px solid #EBEBEB}
+.modal-overlay.t-slate .modal-title{color:#171717}.modal-overlay.t-slate .modal-desc{color:#999}
+.modal-overlay.t-ice .modal{background:#fff;border:1px solid #D0E0F5}
+.modal-overlay.t-ice .modal-title{color:#0F1729}.modal-overlay.t-ice .modal-desc{color:#6B82A8}
+
+/* Priority colors */
+.pr-urgent{background:#DC2626}.pr-high{background:#F97316}.pr-medium{background:#FBBF24}.pr-low{background:#9CA3AF}
+.pr-border-urgent{border-color:#DC2626}.pr-border-high{border-color:#F97316}.pr-border-medium{border-color:#FBBF24}.pr-border-low{border-color:#9CA3AF}
+
+/* Avatar colors */
+.av-1{background:#059669;color:#fff}.av-2{background:#7C3AED;color:#fff}.av-3{background:#DC2626;color:#fff}
+.av-4{background:#2563EB;color:#fff}.av-5{background:#F97316;color:#fff}.av-6{background:#EC4899;color:#fff}
+
+/* Divider between panels */
+.panel-divider{width:2px;background:#222;flex-shrink:0}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="top-bar">
+  <h1>WorkFlow Pro — Split-Screen Live</h1>
+  <div class="theme-btn" style="background:#064E3B" onclick="switchTheme('forest',this)" title="Forest">🌿</div>
+  <div class="theme-btn active" style="background:#7C2D12" onclick="switchTheme('sunset',this)" title="Sunset">🌅</div>
+  <div class="theme-btn" style="background:#E0E0E0" onclick="switchTheme('slate',this)" title="Slate">📐</div>
+  <div class="theme-btn" style="background:#B0CEFF" onclick="switchTheme('ice',this)" title="Ice">❄️</div>
+  <button class="refresh-btn" onclick="refreshAll()">🔄 Yenilə</button>
+  <div class="status-indicator" id="statusIndicator">⏳ Yüklənir...</div>
+</div>
+
+<!-- SPLIT CONTAINER -->
+<div class="split-container t-sunset" id="mainFrame">
+  <!-- LEFT PANEL: Hasan -->
+  <div class="panel" id="panelLeft">
+    <div class="panel-header">
+      <div class="panel-avatar owner">HƏ</div>
+      <div>
+        <div class="panel-name" style="color:var(--tx)">👑 Həsən Əliyev</div>
+        <div class="panel-role" style="color:var(--tx2)">Şirkət Sahibi</div>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="mini-sb" id="sidebarLeft"></div>
+      <div class="panel-content" id="contentLeft">
+        <div class="loading"><div class="spinner"></div><br>Giriş edilir...</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel-divider"></div>
+
+  <!-- RIGHT PANEL: Nigar -->
+  <div class="panel" id="panelRight">
+    <div class="panel-header">
+      <div class="panel-avatar worker">NƏ</div>
+      <div>
+        <div class="panel-name" style="color:var(--tx)">👷 Nigar Əhmədova</div>
+        <div class="panel-role" style="color:var(--tx2)">İşçi</div>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="mini-sb" id="sidebarRight"></div>
+      <div class="panel-content" id="contentRight">
+        <div class="loading"><div class="spinner"></div><br>Giriş edilir...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+const API = 'http://localhost:4000';
+const USERS = {
+  left: { email: 'hasan@techflow.az', password: '123456', token: null, user: null, data: {} },
+  right: { email: 'nigar@techflow.az', password: '123456', token: null, user: null, data: {} }
+};
+
+let currentTheme = 'sunset';
+
+// ═══ THEME SWITCHING ═══
+function switchTheme(theme, btn) {
+  currentTheme = theme;
+  const frame = document.getElementById('mainFrame');
+  frame.className = 'split-container t-' + theme;
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+}
+
+// ═══ API HELPERS ═══
+async function apiCall(method, path, token, body) {
+  const opts = {
+    method,
+    headers: { 'Content-Type': 'application/json' }
+  };
+  if (token) opts.headers['Authorization'] = 'Bearer ' + token;
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(API + path, opts);
+  if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
+  return res.json();
+}
+
+async function login(side) {
+  const u = USERS[side];
+  const res = await apiCall('POST', '/auth/login', null, { email: u.email, password: u.password });
+  u.token = res.accessToken || res.access_token || (res.data && res.data.accessToken);
+  u.user = res.user || (res.data && res.data.user) || res;
+  // Try different response shapes
+  if (!u.token && res.token) u.token = res.token;
+  if (!u.token && res.tokens) u.token = res.tokens.accessToken;
+  return u;
+}
+
+// ═══ FETCH ALL DATA ═══
+async function fetchAllData(side) {
+  const u = USERS[side];
+  const t = u.token;
+
+  const fetches = [
+    apiCall('GET', '/tasks', t).catch(() => []),
+    apiCall('GET', '/todoist/tasks/today', t).catch(() => []),
+    apiCall('GET', '/todoist/projects', t).catch(() => []),
+    apiCall('GET', '/todoist/labels', t).catch(() => []),
+    apiCall('GET', '/notifications', t).catch(() => [])
+  ];
+
+  // Finance only for Hasan
+  if (side === 'left') {
+    fetches.push(apiCall('GET', '/finance/summary', t).catch(() => null));
+  }
+
+  const results = await Promise.all(fetches);
+  u.data.tasks = Array.isArray(results[0]) ? results[0] : (results[0]?.data || results[0]?.tasks || []);
+  u.data.todos = Array.isArray(results[1]) ? results[1] : (results[1]?.data || results[1]?.tasks || []);
+  u.data.projects = Array.isArray(results[2]) ? results[2] : (results[2]?.data || results[2]?.projects || []);
+  u.data.labels = Array.isArray(results[3]) ? results[3] : (results[3]?.data || results[3]?.labels || []);
+  u.data.notifications = Array.isArray(results[4]) ? results[4] : (results[4]?.data || results[4]?.notifications || []);
+  if (side === 'left') {
+    u.data.finance = results[5];
+  }
+}
+
+// ═══ RENDER MINI SIDEBAR ═══
+function renderSidebar(side) {
+  const u = USERS[side];
+  const el = document.getElementById(side === 'left' ? 'sidebarLeft' : 'sidebarRight');
+  const tasks = u.data.tasks || [];
+  const todos = u.data.todos || [];
+  const projects = u.data.projects || [];
+  const labels = u.data.labels || [];
+
+  let html = `
+    <div class="ms-label">Ümumi</div>
+    <div class="ms-item">📋 GÖREV <span class="ms-count">${tasks.length}</span></div>
+    <div class="ms-item">✅ TODO <span class="ms-count">${todos.length}</span></div>
+    <div class="ms-item">🔔 Bildiriş <span class="ms-count">${(u.data.notifications || []).length}</span></div>
+  `;
+
+  if (projects.length > 0) {
+    html += '<div class="ms-label" style="margin-top:8px">Layihələr</div>';
+    const colors = ['#7C3AED','#059669','#F97316','#EC4899','#2563EB','#DC2626'];
+    projects.forEach((p, i) => {
+      html += `<div class="ms-item"><span class="ms-dot" style="background:${p.color || colors[i % colors.length]}"></span> ${esc(p.name)}</div>`;
+    });
+  }
+
+  if (labels.length > 0) {
+    html += '<div class="ms-label" style="margin-top:8px">Etiketlər</div>';
+    labels.forEach(l => {
+      html += `<div class="ms-item"><span class="ms-dot" style="background:${l.color || '#9CA3AF'}"></span> ${esc(l.name)}</div>`;
+    });
+  }
+
+  el.innerHTML = html;
+}
+
+// ═══ RENDER CONTENT ═══
+function renderContent(side) {
+  const u = USERS[side];
+  const el = document.getElementById(side === 'left' ? 'contentLeft' : 'contentRight');
+  const tasks = u.data.tasks || [];
+  const todos = u.data.todos || [];
+  const notifs = u.data.notifications || [];
+
+  let html = '';
+
+  // Stats row
+  const finVal = (side === 'left' && u.data.finance) ? (u.data.finance.totalIncome || u.data.finance.income || 0) : null;
+  html += '<div class="stats">';
+  html += statCard(tasks.length, 'GÖREV', 65);
+  html += statCard(todos.length, 'TODO', 40);
+  html += statCard(notifs.length, 'BİLDİRİŞ', 30);
+  if (side === 'left') {
+    html += statCard(finVal !== null ? formatMoney(finVal) : '--', 'MALİYYƏ', 50);
+  } else {
+    const completed = tasks.filter(t => {
+      const assignees = t.assignees || t.taskAssignees || [];
+      return assignees.some(a => (a.userId === u.user?.id || a.user?.id === u.user?.id) && a.status === 'COMPLETED');
+    }).length;
+    html += statCard(completed, 'TAMAMLANDI', tasks.length > 0 ? Math.round(completed/tasks.length*100) : 0);
+  }
+  html += '</div>';
+
+  // GOREV section
+  html += '<div class="sec-hdr"><span class="sec-icon">📋</span><span class="sec-title">GÖREV</span><div class="sec-line"></div><span class="sec-cnt">' + tasks.length + '</span></div>';
+
+  if (tasks.length === 0) {
+    html += '<div style="padding:12px;font-size:11px;opacity:.5;text-align:center">Tapşırıq yoxdur</div>';
+  } else {
+    tasks.slice(0, 10).forEach(task => {
+      html += renderGorevCard(task, side);
+    });
+    if (tasks.length > 10) {
+      html += '<div style="padding:6px;font-size:10px;opacity:.5;text-align:center">+' + (tasks.length - 10) + ' daha...</div>';
+    }
+  }
+
+  // TODO section
+  html += '<div class="sec-hdr" style="margin-top:14px"><span class="sec-icon">✅</span><span class="sec-title">TODO (Bugün)</span><div class="sec-line"></div><span class="sec-cnt">' + todos.length + '</span></div>';
+
+  if (todos.length === 0) {
+    html += '<div style="padding:12px;font-size:11px;opacity:.5;text-align:center">Bugünkü tapşırıq yoxdur</div>';
+  } else {
+    todos.slice(0, 8).forEach(todo => {
+      html += renderTodoItem(todo);
+    });
+  }
+
+  // Notifications section
+  html += `
+    <div class="notif-section">
+      <div class="notif-toggle" onclick="toggleNotifs('${side}')">
+        <span class="arrow" id="notifArrow_${side}">▶</span>
+        🔔 Bildirişlər (${notifs.length})
+      </div>
+      <div class="notif-list" id="notifList_${side}" style="max-height:0;overflow:hidden">
+  `;
+  notifs.slice(0, 8).forEach(n => {
+    html += renderNotifItem(n);
+  });
+  html += '</div></div>';
+
+  el.innerHTML = html;
+}
+
+function statCard(val, label, pct) {
+  return `<div class="stat"><div class="n">${val}</div><div class="l">${label}</div><div class="bar"><div class="bf" style="width:${pct}%"></div></div></div>`;
+}
+
+function renderGorevCard(task, side) {
+  const title = task.title || task.name || 'Adsız tapşırıq';
+  const status = task.status || 'CREATED';
+  const priority = task.priority || 'MEDIUM';
+  const dueDate = task.dueDate || task.deadline;
+  const assignees = task.assignees || task.taskAssignees || [];
+  const subtasks = task.subtasks || task.subTasks || [];
+
+  const priorityColors = { URGENT: '#DC2626', HIGH: '#F97316', MEDIUM: '#FBBF24', LOW: '#9CA3AF' };
+  const statusLabels = { CREATED: 'Yaradılıb', IN_PROGRESS: 'Davam edir', PENDING_APPROVAL: 'Onay gözləyir', COMPLETED: 'Tamamlandı', REJECTED: 'Rədd edildi' };
+
+  let html = `<div class="gcard" onclick="openTaskModal('${side}','${task.id}')">`;
+  html += '<div class="gcard-top">';
+  html += `<div class="gcard-pbar" style="background:${priorityColors[priority] || '#FBBF24'}"></div>`;
+  html += '<div class="gcard-info">';
+  html += `<div class="gcard-title">${esc(title)}</div>`;
+  html += '<div class="gcard-meta">';
+
+  // Assignee avatars
+  if (assignees.length > 0) {
+    assignees.slice(0, 3).forEach((a, i) => {
+      const name = a.user?.firstName || a.firstName || '?';
+      const initial = name.charAt(0).toUpperCase();
+      html += `<span class="gm-av av-${(i % 6) + 1}">${initial}</span>`;
+    });
+  }
+
+  // Status badge
+  html += `<span class="gcard-badge badge-${status}">${statusLabels[status] || status}</span>`;
+
+  // Due date
+  if (dueDate) {
+    const d = new Date(dueDate);
+    const isOverdue = d < new Date() && status !== 'COMPLETED';
+    html += `<span style="font-size:9px;${isOverdue ? 'color:#DC2626;font-weight:600' : ''}">📅 ${formatDate(d)}</span>`;
+  }
+
+  // Subtask count
+  if (subtasks.length > 0) {
+    const done = subtasks.filter(s => s.status === 'COMPLETED').length;
+    html += `<span style="font-size:9px">📝 ${done}/${subtasks.length}</span>`;
+  }
+
+  html += '</div>'; // meta
+
+  // Action buttons for Nigar
+  if (side === 'right') {
+    const userId = USERS.right.user?.id;
+    const myAssignment = assignees.find(a => (a.userId === userId || a.user?.id === userId));
+    if (myAssignment) {
+      const myStatus = myAssignment.status || 'WAITING';
+      html += '<div class="gcard-actions">';
+      if (myStatus === 'WAITING' || myStatus === 'CREATED') {
+        html += `<button class="gcard-act-btn start" onclick="event.stopPropagation();changeMyStatus('${task.id}','IN_PROGRESS')">▶ Başladım</button>`;
+      } else if (myStatus === 'IN_PROGRESS') {
+        html += `<button class="gcard-act-btn complete" onclick="event.stopPropagation();changeMyStatus('${task.id}','COMPLETED')">✓ Tamamladım</button>`;
+      } else if (myStatus === 'COMPLETED') {
+        html += '<span class="gcard-act-btn disabled">✓ Tamamlanıb</span>';
+      }
+      html += '</div>';
+    }
+  }
+
+  html += '</div>'; // info
+  html += '</div>'; // top
+  html += '</div>'; // gcard
+  return html;
+}
+
+function renderTodoItem(todo) {
+  const title = todo.content || todo.title || todo.name || 'Adsız';
+  const done = todo.isCompleted || todo.completed || false;
+  const priority = todo.priority || 4;
+  const dueDate = todo.dueDate || todo.due_date;
+  const prColors = { 1: '#DC2626', 2: '#F97316', 3: '#FBBF24', 4: '#9CA3AF' };
+
+  let html = `<div class="todo-item">`;
+  html += `<div class="todo-cb${done ? ' checked' : ''}" style="border-color:${prColors[priority] || '#9CA3AF'};${done ? 'background:' + (prColors[priority] || '#9CA3AF') : ''}">${done ? '✓' : ''}</div>`;
+  html += `<span class="todo-title${done ? ' done' : ''}">${esc(title)}</span>`;
+  if (dueDate) {
+    html += `<span class="todo-due">📅 ${formatDate(new Date(dueDate))}</span>`;
+  }
+  html += '</div>';
+  return html;
+}
+
+function renderNotifItem(n) {
+  const message = n.message || n.content || n.title || 'Bildiriş';
+  const time = n.createdAt ? timeAgo(new Date(n.createdAt)) : '';
+  const icons = { TASK_ASSIGNED: '📋', TASK_COMPLETED: '✅', TASK_STATUS_CHANGED: '🔄', COMMENT: '💬', APPROVAL_NEEDED: '⏳' };
+  const icon = icons[n.type] || '🔔';
+
+  return `<div class="notif-item"><div class="notif-icon">${icon}</div><div class="notif-text"><div class="notif-msg">${esc(message)}</div><div class="notif-time">${time}</div></div></div>`;
+}
+
+// ═══ TOGGLE NOTIFICATIONS ═══
+function toggleNotifs(side) {
+  const list = document.getElementById('notifList_' + side);
+  const arrow = document.getElementById('notifArrow_' + side);
+  if (list.style.maxHeight === '0px' || list.style.maxHeight === '') {
+    list.style.maxHeight = '300px';
+    arrow.classList.add('open');
+  } else {
+    list.style.maxHeight = '0px';
+    arrow.classList.remove('open');
+  }
+}
+
+// ═══ TASK DETAIL MODAL ═══
+function openTaskModal(side, taskId) {
+  const u = USERS[side];
+  const task = (u.data.tasks || []).find(t => t.id === taskId);
+  if (!task) return;
+
+  const body = document.getElementById('modalBody');
+  const title = task.title || task.name || 'Adsız';
+  const desc = task.description || '';
+  const status = task.status || 'CREATED';
+  const priority = task.priority || 'MEDIUM';
+  const assignees = task.assignees || task.taskAssignees || [];
+  const subtasks = task.subtasks || task.subTasks || [];
+  const dueDate = task.dueDate || task.deadline;
+  const branch = task.department?.name || task.branch?.name || task.business?.name || '';
+  const createdBy = task.createdBy?.firstName || task.creator?.firstName || '';
+
+  const statusLabels = { CREATED: 'Yaradılıb', IN_PROGRESS: 'Davam edir', PENDING_APPROVAL: 'Onay gözləyir', COMPLETED: 'Tamamlandı', REJECTED: 'Rədd edildi' };
+  const prLabels = { URGENT: 'Təcili', HIGH: 'Yüksək', MEDIUM: 'Orta', LOW: 'Aşağı' };
+
+  let html = `<div class="modal-title">${esc(title)}</div>`;
+  if (desc) html += `<div class="modal-desc">${esc(desc)}</div>`;
+
+  html += '<div class="modal-section">';
+  html += `<div class="modal-detail-row"><span class="mdl">Status:</span> <span class="gcard-badge badge-${status}">${statusLabels[status] || status}</span></div>`;
+  html += `<div class="modal-detail-row"><span class="mdl">Prioritet:</span> ${prLabels[priority] || priority}</div>`;
+  if (dueDate) html += `<div class="modal-detail-row"><span class="mdl">Son tarix:</span> ${formatDate(new Date(dueDate))}</div>`;
+  if (branch) html += `<div class="modal-detail-row"><span class="mdl">Filial:</span> ${esc(branch)}</div>`;
+  if (createdBy) html += `<div class="modal-detail-row"><span class="mdl">Yaradan:</span> ${esc(createdBy)}</div>`;
+  html += '</div>';
+
+  if (assignees.length > 0) {
+    html += '<div class="modal-section"><div class="modal-label">Təyin olunanlar</div>';
+    assignees.forEach((a, i) => {
+      const name = (a.user?.firstName || a.firstName || '?') + ' ' + (a.user?.lastName || a.lastName || '');
+      const aStatus = a.status || 'WAITING';
+      const statusLabelsA = { WAITING: 'Gözləyir', IN_PROGRESS: 'Davam edir', COMPLETED: 'Tamamlandı', REJECTED: 'Rədd' };
+      html += `<div style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:11px">`;
+      html += `<span class="gm-av av-${(i % 6) + 1}" style="width:22px;height:22px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:8px;font-weight:700">${name.charAt(0)}</span>`;
+      html += `<span style="flex:1">${esc(name.trim())}</span>`;
+      html += `<span class="gcard-badge badge-${aStatus}">${statusLabelsA[aStatus] || aStatus}</span>`;
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
+  if (subtasks.length > 0) {
+    html += '<div class="modal-section"><div class="modal-label">Alt tapşırıqlar</div>';
+    subtasks.forEach(s => {
+      const sName = s.title || s.name || s.content || 'Alt tapşırıq';
+      const sDone = s.status === 'COMPLETED';
+      html += `<div style="display:flex;align-items:center;gap:6px;padding:3px 0;font-size:11px">`;
+      html += `<span style="color:${sDone ? '#059669' : '#9CA3AF'}">${sDone ? '✅' : '⬜'}</span>`;
+      html += `<span style="${sDone ? 'text-decoration:line-through;opacity:.5' : ''}">${esc(sName)}</span>`;
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
+  body.innerHTML = html;
+  const overlay = document.getElementById('modalOverlay');
+  // Tema class-ı overlay-a əlavə et
+  overlay.className = 'modal-overlay show t-' + currentTheme;
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
+}
+
+// ═══ STATUS CHANGE (NIGAR) ═══
+async function changeMyStatus(taskId, newStatus) {
+  const u = USERS.right;
+  try {
+    await apiCall('PATCH', '/tasks/' + taskId + '/my-status', u.token, { status: newStatus });
+    showToast('Status dəyişdi! ✓');
+    // Refresh both panels after 1 second
+    setTimeout(() => refreshAll(), 1000);
+  } catch (e) {
+    showToast('Xəta: ' + e.message, true);
+  }
+}
+
+// ═══ TOAST ═══
+function showToast(msg, isError) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = isError ? '#DC2626' : '#059669';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ═══ REFRESH ALL ═══
+async function refreshAll() {
+  const indicator = document.getElementById('statusIndicator');
+  indicator.textContent = '⏳ Yenilənir...';
+  indicator.style.color = '#FBBF24';
+
+  try {
+    await Promise.all([fetchAllData('left'), fetchAllData('right')]);
+    renderSidebar('left');
+    renderSidebar('right');
+    renderContent('left');
+    renderContent('right');
+    indicator.textContent = '🟢 API Bağlı';
+    indicator.style.color = '#34D399';
+  } catch (e) {
+    indicator.textContent = '🔴 Yenilənmə xətası';
+    indicator.style.color = '#DC2626';
+  }
+}
+
+// ═══ HELPERS ═══
+function esc(s) {
+  if (!s) return '';
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function formatDate(d) {
+  const months = ['Yan','Fev','Mar','Apr','May','İyn','İyl','Avq','Sen','Okt','Noy','Dek'];
+  return d.getDate() + ' ' + months[d.getMonth()];
+}
+
+function formatMoney(n) {
+  if (typeof n !== 'number') return '--';
+  return n.toLocaleString('az-AZ') + ' ₼';
+}
+
+function timeAgo(d) {
+  const now = new Date();
+  const diff = Math.floor((now - d) / 1000);
+  if (diff < 60) return 'indi';
+  if (diff < 3600) return Math.floor(diff / 60) + ' dəq əvvəl';
+  if (diff < 86400) return Math.floor(diff / 3600) + ' saat əvvəl';
+  return Math.floor(diff / 86400) + ' gün əvvəl';
+}
+
+// ═══ INIT ═══
+async function init() {
+  const indicator = document.getElementById('statusIndicator');
+
+  try {
+    // Login both users
+    await Promise.all([login('left'), login('right')]);
+
+    // Fetch all data
+    await Promise.all([fetchAllData('left'), fetchAllData('right')]);
+
+    // Render
+    renderSidebar('left');
+    renderSidebar('right');
+    renderContent('left');
+    renderContent('right');
+
+    indicator.textContent = '🟢 API Bağlı';
+    indicator.style.color = '#34D399';
+  } catch (e) {
+    indicator.textContent = '🔴 API Bağlı deyil';
+    indicator.style.color = '#F87171';
+
+    const errorHTML = '<div class="error-msg">API bağlı deyil<br><span style="font-size:10px;opacity:.6">' + esc(e.message) + '</span><br><br><button onclick="init()" style="padding:6px 14px;border-radius:6px;border:none;background:#333;color:#fff;cursor:pointer;font-size:11px">Yenidən cəhd et</button></div>';
+    document.getElementById('contentLeft').innerHTML = errorHTML;
+    document.getElementById('contentRight').innerHTML = errorHTML;
+  }
+}
+
+// Close modal with Escape
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// Start
+init();
+</script>
+</body>
+</html>

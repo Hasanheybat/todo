@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WorkFlow Pro — 15 Dizayn Konsepti (2026 Trendləri)</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#08080C;color:#fff}
+.page-header{padding:28px 36px 8px}
+.page-header h1{font-size:26px;font-weight:800;background:linear-gradient(135deg,#FF6B6B,#4ECDC4,#6366F1);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.page-header p{font-size:12px;color:#666;margin-top:4px}
+
+.tab-bar{display:flex;gap:6px;padding:14px 36px 20px;flex-wrap:wrap}
+.tab-bar button{padding:8px 14px;border:1.5px solid #1E1E2A;border-radius:10px;background:#111118;font-size:11px;font-weight:600;cursor:pointer;transition:all .25s;color:#555}
+.tab-bar button.active{border-color:var(--ac,#6366F1);background:var(--abg,rgba(99,102,241,.08));color:var(--ac,#6366F1);box-shadow:0 0 16px var(--aglow,rgba(99,102,241,.12))}
+.tab-bar button:hover:not(.active){border-color:#333;color:#999}
+
+.proposals{padding:0 36px 60px}
+.proposal{display:none}
+.proposal.active{display:block;animation:fadeUp .35s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+.desc{background:#111118;border:1px solid #1E1E2A;border-radius:14px;padding:16px 20px;margin-bottom:20px}
+.desc h3{font-size:16px;font-weight:700;margin-bottom:4px}
+.desc p{font-size:12px;color:#777;line-height:1.6}
+.desc .tags{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap}
+.desc .tag{padding:3px 8px;border-radius:16px;font-size:9px;font-weight:600}
+
+.frame{border-radius:18px;overflow:hidden;max-width:1100px;margin:0 auto;box-shadow:0 6px 30px rgba(0,0,0,.35)}
+.tbar{display:flex;align-items:center;gap:7px;padding:10px 14px}
+.dot{width:11px;height:11px;border-radius:50%}
+.dr{background:#FF5F57}.dy{background:#FFBD2E}.dg{background:#28C840}
+.mbody{display:flex;min-height:580px}
+.sb{width:240px;padding:14px 10px;flex-shrink:0;overflow-y:auto;display:flex;flex-direction:column;gap:1px}
+.ct{flex:1;overflow-y:auto;padding:22px 26px}
+
+/* ═══ SHARED TASK ELEMENTS ═══ */
+.ck{width:18px;height:18px;border-radius:50%;border:2px solid;flex-shrink:0}
+.pd{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.tg{font-size:9px;font-weight:600;padding:2px 6px;border-radius:4px}
+
+/* ═══════════════════════════════════════════════════════ */
+/* D6: LAVENDER — Soft Purple 2026                       */
+/* ═══════════════════════════════════════════════════════ */
+.d6{--bg:#FAF8FF;--sb:#F3EEFF;--pr:#7C3AED;--pr2:#A78BFA;--txt:#2D1B69;--sub:#9B8EC4;--bdr:#E8E0F5;--card:#fff;--hover:#F0EBFF}
+.d6 .tbar{background:#F3EEFF;border-bottom:1px solid #E8E0F5}
+.d6 .sb{background:var(--sb);border-right:1px solid var(--bdr)}
+.d6 .ct{background:var(--bg)}
+.d6 .prof{display:flex;align-items:center;gap:9px;padding:10px;border-radius:14px;margin-bottom:12px;background:linear-gradient(135deg,#7C3AED,#A78BFA);color:#fff}
+.d6 .av{width:34px;height:34px;border-radius:12px;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.d6 .nm{font-size:12px;font-weight:600}.d6 .rl{font-size:9px;opacity:.8}
+.d6 .nv{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:10px;font-size:12px;font-weight:500;color:var(--sub);cursor:pointer;transition:.15s}
+.d6 .nv:hover{background:var(--hover);color:var(--txt)}
+.d6 .nv.a{background:var(--pr);color:#fff;font-weight:600;box-shadow:0 3px 10px rgba(124,58,237,.25)}
+.d6 .nv .b{margin-left:auto;font-size:10px;font-weight:700;color:var(--pr)}
+.d6 .dv{height:1px;background:var(--bdr);margin:8px 0}
+.d6 .lb{font-size:8px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.8px;padding:6px 10px 3px}
+.d6 h2{font-size:20px;font-weight:800;color:var(--txt)}.d6 .st{font-size:11px;color:var(--sub);margin:3px 0 16px}
+.d6 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.d6 .stat{padding:14px;border-radius:14px;background:var(--card);border:1px solid var(--bdr);text-align:center}
+.d6 .stat .n{font-size:26px;font-weight:800;color:var(--pr)}.d6 .stat .l{font-size:10px;color:var(--sub);margin-top:2px}
+.d6 .crd{padding:12px 14px;border-radius:12px;background:var(--card);border:1px solid var(--bdr);margin-bottom:7px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:.15s}
+.d6 .crd:hover{border-color:var(--pr);transform:translateX(3px);box-shadow:0 2px 10px rgba(124,58,237,.08)}
+.d6 .tt{font-size:12px;font-weight:500;color:var(--txt);flex:1}.d6 .mt{font-size:10px;color:var(--sub)}
+
+/* ═══════════════════════════════════════════════════════ */
+/* D7: CHARCOAL — Matte Dark Minimal                     */
+/* ═══════════════════════════════════════════════════════ */
+.d7{--bg:#161618;--sb:#1C1C1F;--pr:#E5E5E5;--acc:#F97316;--txt:#E5E5E5;--sub:#666;--bdr:#2A2A2E;--card:#1C1C1F}
+.d7 .tbar{background:#111113;border-bottom:1px solid #2A2A2E}
+.d7 .sb{background:var(--sb);border-right:1px solid var(--bdr)}
+.d7 .ct{background:var(--bg)}
+.d7 .prof{display:flex;align-items:center;gap:9px;padding:10px;border-radius:10px;margin-bottom:12px;background:#222225}
+.d7 .av{width:34px;height:34px;border-radius:8px;background:var(--acc);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.d7 .nm{font-size:12px;font-weight:600;color:var(--txt)}.d7 .rl{font-size:9px;color:var(--sub)}
+.d7 .nv{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;font-size:12px;font-weight:500;color:var(--sub);cursor:pointer;transition:.15s}
+.d7 .nv:hover{background:#222225;color:var(--txt)}
+.d7 .nv.a{color:var(--acc);font-weight:600;background:rgba(249,115,22,.08);border-left:3px solid var(--acc)}
+.d7 .nv .b{margin-left:auto;font-size:10px;font-weight:700;color:var(--acc)}
+.d7 .dv{height:1px;background:var(--bdr);margin:8px 0}
+.d7 .lb{font-size:8px;font-weight:700;color:#444;text-transform:uppercase;letter-spacing:1px;padding:6px 10px 3px}
+.d7 h2{font-size:20px;font-weight:800;color:var(--txt)}.d7 .st{font-size:11px;color:var(--sub);margin:3px 0 16px}
+.d7 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.d7 .stat{padding:14px;border-radius:10px;background:var(--card);border:1px solid var(--bdr)}
+.d7 .stat .n{font-size:26px;font-weight:800;color:var(--txt)}.d7 .stat .l{font-size:10px;color:var(--sub);margin-top:2px}
+.d7 .stat .bar{height:3px;border-radius:2px;background:#2A2A2E;margin-top:8px;overflow:hidden}
+.d7 .stat .bf{height:100%;border-radius:2px}
+.d7 .crd{padding:12px 14px;border-radius:8px;background:var(--card);border:1px solid var(--bdr);margin-bottom:6px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:.15s}
+.d7 .crd:hover{border-color:var(--acc);background:#1F1F22}
+.d7 .tt{font-size:12px;font-weight:500;color:var(--txt);flex:1}.d7 .mt{font-size:10px;color:var(--sub)}
+
+/* ═══════════════════════════════════════════════════════ */
+/* D8: CANDY — Pastel Playful                            */
+/* ═══════════════════════════════════════════════════════ */
+.d8{--bg:#FFF5F9;--sb:#FFF0F5;--pr:#E91E8C;--txt:#4A1942;--sub:#B88BA8;--bdr:#F5D5E5;--card:#fff}
+.d8 .tbar{background:#FFF0F5;border-bottom:1px solid #F5D5E5}
+.d8 .sb{background:var(--sb);border-right:1px solid var(--bdr)}
+.d8 .ct{background:var(--bg)}
+.d8 .prof{display:flex;align-items:center;gap:9px;padding:10px;border-radius:20px;margin-bottom:12px;background:linear-gradient(135deg,#E91E8C,#FF6BB5)}
+.d8 .av{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.3);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.d8 .nm{font-size:12px;font-weight:600;color:#fff}.d8 .rl{font-size:9px;color:rgba(255,255,255,.8)}
+.d8 .nv{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:14px;font-size:12px;font-weight:500;color:var(--sub);cursor:pointer;transition:.15s}
+.d8 .nv:hover{background:#FFE5F0;color:var(--txt)}
+.d8 .nv.a{background:var(--pr);color:#fff;font-weight:600;border-radius:14px}
+.d8 .nv .b{margin-left:auto;background:#FF6BB5;color:#fff;font-size:9px;padding:2px 6px;border-radius:8px;font-weight:700}
+.d8 .dv{height:1px;background:var(--bdr);margin:8px 0}
+.d8 .lb{font-size:8px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.8px;padding:6px 10px 3px}
+.d8 h2{font-size:20px;font-weight:800;color:var(--txt)}.d8 .st{font-size:11px;color:var(--sub);margin:3px 0 16px}
+.d8 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.d8 .stat{padding:14px;border-radius:16px;background:var(--card);border:1px solid var(--bdr);text-align:center}
+.d8 .stat .n{font-size:26px;font-weight:800}.d8 .stat .l{font-size:10px;color:var(--sub);margin-top:2px}
+.d8 .crd{padding:12px 14px;border-radius:14px;background:var(--card);border:1px solid var(--bdr);margin-bottom:7px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:.2s}
+.d8 .crd:hover{border-color:var(--pr);transform:scale(1.01);box-shadow:0 4px 16px rgba(233,30,140,.1)}
+.d8 .tt{font-size:12px;font-weight:500;color:var(--txt);flex:1}.d8 .mt{font-size:10px;color:var(--sub)}
+
+/* ═══════════════════════════════════════════════════════ */
+/* D9: SLATE — Notion/Linear Minimal                     */
+/* ═══════════════════════════════════════════════════════ */
+.d9{--bg:#FBFBFB;--sb:#F6F6F6;--pr:#171717;--acc:#2563EB;--txt:#171717;--sub:#999;--bdr:#EBEBEB;--card:#fff}
+.d9 .tbar{background:#F6F6F6;border-bottom:1px solid #EBEBEB}
+.d9 .sb{background:var(--sb);border-right:1px solid var(--bdr)}
+.d9 .ct{background:var(--bg)}
+.d9 .prof{display:flex;align-items:center;gap:9px;padding:10px;margin-bottom:12px}
+.d9 .av{width:28px;height:28px;border-radius:6px;background:var(--pr);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700}
+.d9 .nm{font-size:12px;font-weight:600;color:var(--txt)}.d9 .rl{font-size:9px;color:var(--sub)}
+.d9 .nv{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;font-size:12px;font-weight:400;color:var(--sub);cursor:pointer;transition:.1s}
+.d9 .nv:hover{background:#F0F0F0;color:var(--txt)}
+.d9 .nv.a{color:var(--txt);font-weight:600;background:#EBEBEB}
+.d9 .nv .b{margin-left:auto;font-size:10px;color:var(--sub)}
+.d9 .dv{height:1px;background:var(--bdr);margin:6px 0}
+.d9 .lb{font-size:9px;font-weight:600;color:#BBB;padding:8px 8px 3px}
+.d9 h2{font-size:18px;font-weight:700;color:var(--txt)}.d9 .st{font-size:11px;color:var(--sub);margin:2px 0 14px}
+.d9 .stats{display:flex;gap:20px;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--bdr)}
+.d9 .stat .n{font-size:22px;font-weight:700;color:var(--txt)}.d9 .stat .l{font-size:10px;color:var(--sub)}
+.d9 .crd{padding:8px 10px;border-radius:6px;margin-bottom:1px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:.1s}
+.d9 .crd:hover{background:#F5F5F5}
+.d9 .tt{font-size:13px;font-weight:400;color:var(--txt);flex:1}.d9 .mt{font-size:10px;color:var(--sub)}
+
+/* ═══════════════════════════════════════════════════════ */
+/* D10: COPPER — Luxury Dark Gold                        */
+/* ═══════════════════════════════════════════════════════ */
+.d10{--bg:#151210;--sb:#1A1714;--pr:#D4A574;--txt:#E8DDD0;--sub:#7A6B5A;--bdr:#2A2520;--card:#1E1B17}
+.d10 .tbar{background:#121010;border-bottom:1px solid #2A2520}
+.d10 .sb{background:var(--sb);border-right:1px solid var(--bdr)}
+.d10 .ct{background:var(--bg)}
+.d10 .prof{display:flex;align-items:center;gap:9px;padding:10px;border-radius:12px;margin-bottom:12px;background:linear-gradient(135deg,rgba(212,165,116,.15),rgba(212,165,116,.05));border:1px solid rgba(212,165,116,.2)}
+.d10 .av{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#D4A574,#B8895A);color:#151210;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.d10 .nm{font-size:12px;font-weight:600;color:var(--txt)}.d10 .rl{font-size:9px;color:var(--pr)}
+.d10 .nv{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;font-size:12px;font-weight:500;color:var(--sub);cursor:pointer;transition:.15s}
+.d10 .nv:hover{background:rgba(212,165,116,.06);color:var(--txt)}
+.d10 .nv.a{background:rgba(212,165,116,.12);color:var(--pr);font-weight:600;border:1px solid rgba(212,165,116,.25)}
+.d10 .nv .b{margin-left:auto;color:var(--pr);font-size:10px;font-weight:700}
+.d10 .dv{height:1px;background:var(--bdr);margin:8px 0}
+.d10 .lb{font-size:8px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:1px;padding:6px 10px 3px}
+.d10 h2{font-size:20px;font-weight:800;color:var(--pr)}.d10 .st{font-size:11px;color:var(--sub);margin:3px 0 16px}
+.d10 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.d10 .stat{padding:14px;border-radius:10px;background:var(--card);border:1px solid var(--bdr)}
+.d10 .stat .n{font-size:26px;font-weight:800;color:var(--pr)}.d10 .stat .l{font-size:10px;color:var(--sub);margin-top:2px}
+.d10 .crd{padding:12px 14px;border-radius:8px;background:var(--card);border:1px solid var(--bdr);margin-bottom:6px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:.15s}
+.d10 .crd:hover{border-color:var(--pr);background:rgba(212,165,116,.04)}
+.d10 .tt{font-size:12px;font-weight:500;color:var(--txt);flex:1}.d10 .mt{font-size:10px;color:var(--sub)}
+
+/* Shared classes for remaining 5 designs with unique structure */
+/* D11-D15 use completely different layouts */
+
+/* D11: MONO — Black & White Typography */
+.d11{--bg:#fff;--sb:#000;--txt:#000;--sub:#999;--bdr:#E5E5E5;--card:#F8F8F8}
+.d11 .tbar{background:#000;border:none}
+.d11 .sb{background:#000}
+.d11 .ct{background:#fff}
+.d11 .prof{padding:10px;margin-bottom:12px}
+.d11 .av{width:34px;height:34px;border-radius:50%;background:#fff;color:#000;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800}
+.d11 .nm{font-size:12px;font-weight:600;color:#fff}.d11 .rl{font-size:9px;color:#666}
+.d11 .nv{display:flex;align-items:center;gap:9px;padding:7px 10px;font-size:12px;font-weight:400;color:#666;cursor:pointer;transition:.1s;border-left:2px solid transparent}
+.d11 .nv:hover{color:#fff;border-left-color:#333}
+.d11 .nv.a{color:#fff;font-weight:700;border-left-color:#fff}
+.d11 .nv .b{margin-left:auto;color:#fff;font-size:10px;font-weight:700}
+.d11 .dv{height:1px;background:#222;margin:8px 0}
+.d11 .lb{font-size:8px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:2px;padding:6px 10px 3px}
+.d11 h2{font-size:32px;font-weight:900;color:#000;letter-spacing:-1px}.d11 .st{font-size:11px;color:#999;margin:3px 0 20px}
+.d11 .stats{display:flex;gap:30px;margin-bottom:24px}
+.d11 .stat .n{font-size:36px;font-weight:900;color:#000}.d11 .stat .l{font-size:10px;color:#999;text-transform:uppercase;letter-spacing:1px}
+.d11 .crd{padding:14px 0;border-bottom:1px solid #E5E5E5;display:flex;align-items:center;gap:12px;cursor:pointer;transition:.1s}
+.d11 .crd:hover{padding-left:8px}
+.d11 .tt{font-size:14px;font-weight:500;color:#000;flex:1}.d11 .mt{font-size:10px;color:#999}
+
+/* D12: CORAL — Warm Gradient 2026 */
+.d12{--bg:#FFF9F5;--sb:linear-gradient(180deg,#FF6B6B,#FF8E53);--txt:#2D1B0E;--sub:#B89080;--bdr:#F0DDD0;--card:#fff}
+.d12 .tbar{background:linear-gradient(90deg,#FF6B6B,#FF8E53);border:none}
+.d12 .sb{background:linear-gradient(180deg,#FF6B6B,#FF8E53)}
+.d12 .ct{background:var(--bg)}
+.d12 .prof{padding:10px;margin-bottom:12px}
+.d12 .av{width:34px;height:34px;border-radius:12px;background:rgba(255,255,255,.3);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.d12 .nm{font-size:12px;font-weight:600;color:#fff}.d12 .rl{font-size:9px;color:rgba(255,255,255,.75)}
+.d12 .nv{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:10px;font-size:12px;font-weight:500;color:rgba(255,255,255,.7);cursor:pointer;transition:.15s}
+.d12 .nv:hover{background:rgba(255,255,255,.15);color:#fff}
+.d12 .nv.a{background:rgba(255,255,255,.25);color:#fff;font-weight:600;backdrop-filter:blur(8px)}
+.d12 .nv .b{margin-left:auto;background:rgba(255,255,255,.3);font-size:9px;padding:2px 6px;border-radius:8px;font-weight:700;color:#fff}
+.d12 .dv{height:1px;background:rgba(255,255,255,.15);margin:8px 0}
+.d12 .lb{font-size:8px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.8px;padding:6px 10px 3px}
+.d12 h2{font-size:20px;font-weight:800;color:var(--txt)}.d12 .st{font-size:11px;color:var(--sub);margin:3px 0 16px}
+.d12 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.d12 .stat{padding:14px;border-radius:16px;background:var(--card);border:1px solid var(--bdr);text-align:center}
+.d12 .stat .n{font-size:26px;font-weight:800;color:#FF6B6B}.d12 .stat .l{font-size:10px;color:var(--sub);margin-top:2px}
+.d12 .crd{padding:12px 14px;border-radius:12px;background:var(--card);border:1px solid var(--bdr);margin-bottom:7px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:.2s}
+.d12 .crd:hover{border-color:#FF6B6B;box-shadow:0 3px 12px rgba(255,107,107,.12)}
+.d12 .tt{font-size:12px;font-weight:500;color:var(--txt);flex:1}.d12 .mt{font-size:10px;color:var(--sub)}
+
+/* D13: ICE — Cool Blue White */
+.d13{--bg:#F0F7FF;--sb:#E5F0FF;--pr:#1D4ED8;--txt:#0F1729;--sub:#6B82A8;--bdr:#D0E0F5;--card:#fff}
+.d13 .tbar{background:#E5F0FF;border-bottom:1px solid #D0E0F5}
+.d13 .sb{background:var(--sb);border-right:1px solid var(--bdr)}
+.d13 .ct{background:var(--bg)}
+.d13 .prof{display:flex;align-items:center;gap:9px;padding:10px;border-radius:12px;margin-bottom:12px;background:var(--pr)}
+.d13 .av{width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.2);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.d13 .nm{font-size:12px;font-weight:600;color:#fff}.d13 .rl{font-size:9px;color:rgba(255,255,255,.7)}
+.d13 .nv{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;font-size:12px;font-weight:500;color:var(--sub);cursor:pointer;transition:.15s}
+.d13 .nv:hover{background:#D5E5FF;color:var(--txt)}
+.d13 .nv.a{background:var(--pr);color:#fff;font-weight:600}
+.d13 .nv .b{margin-left:auto;font-size:10px;font-weight:700}
+.d13 .dv{height:1px;background:var(--bdr);margin:8px 0}
+.d13 .lb{font-size:8px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.8px;padding:6px 10px 3px}
+.d13 h2{font-size:20px;font-weight:800;color:var(--txt)}.d13 .st{font-size:11px;color:var(--sub);margin:3px 0 16px}
+.d13 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.d13 .stat{padding:14px;border-radius:12px;background:var(--card);border:1px solid var(--bdr)}
+.d13 .stat .n{font-size:26px;font-weight:800;color:var(--pr)}.d13 .stat .l{font-size:10px;color:var(--sub);margin-top:2px}
+.d13 .crd{padding:12px 14px;border-radius:10px;background:var(--card);border:1px solid var(--bdr);margin-bottom:7px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:.15s}
+.d13 .crd:hover{border-color:var(--pr);box-shadow:0 2px 8px rgba(29,78,216,.1)}
+.d13 .tt{font-size:12px;font-weight:500;color:var(--txt);flex:1}.d13 .mt{font-size:10px;color:var(--sub)}
+
+/* D14: TERRA — Earth Brown */
+.d14{--bg:#F5F0EB;--sb:#2C2420;--pr:#8B5E3C;--txt:#2C2420;--sub:#A08878;--bdr:#DDD0C5;--card:#fff}
+.d14 .tbar{background:#2C2420;border:none}
+.d14 .sb{background:var(--sb)}
+.d14 .ct{background:var(--bg)}
+.d14 .prof{display:flex;align-items:center;gap:9px;padding:10px;border-radius:12px;margin-bottom:12px;background:rgba(255,255,255,.06)}
+.d14 .av{width:34px;height:34px;border-radius:50%;background:var(--pr);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.d14 .nm{font-size:12px;font-weight:600;color:#E5DDD5}.d14 .rl{font-size:9px;color:#8A7A6A}
+.d14 .nv{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;font-size:12px;font-weight:500;color:#8A7A6A;cursor:pointer;transition:.15s}
+.d14 .nv:hover{background:rgba(255,255,255,.05);color:#E5DDD5}
+.d14 .nv.a{background:var(--pr);color:#fff;font-weight:600}
+.d14 .nv .b{margin-left:auto;color:var(--pr);font-size:10px;font-weight:700}
+.d14 .dv{height:1px;background:rgba(255,255,255,.06);margin:8px 0}
+.d14 .lb{font-size:8px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:1px;padding:6px 10px 3px}
+.d14 h2{font-size:20px;font-weight:800;color:var(--txt)}.d14 .st{font-size:11px;color:var(--sub);margin:3px 0 16px}
+.d14 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.d14 .stat{padding:16px;border-radius:14px;background:var(--card);border:1px solid var(--bdr)}
+.d14 .stat .n{font-size:28px;font-weight:800;color:var(--pr)}.d14 .stat .l{font-size:10px;color:var(--sub);margin-top:2px}
+.d14 .crd{padding:12px 14px;border-radius:10px;background:var(--card);border:1px solid var(--bdr);margin-bottom:7px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:.15s}
+.d14 .crd:hover{border-color:var(--pr)}
+.d14 .tt{font-size:12px;font-weight:500;color:var(--txt);flex:1}.d14 .mt{font-size:10px;color:var(--sub)}
+
+/* D15: INDIGO — Gradient Header Modern */
+.d15{--bg:#F8F9FC;--sb:#fff;--pr:#4F46E5;--txt:#1E1B4B;--sub:#818CF8;--bdr:#E5E7EB;--card:#fff}
+.d15 .tbar{background:linear-gradient(90deg,#4F46E5,#7C3AED);border:none}
+.d15 .sb{background:var(--sb);border-right:1px solid var(--bdr)}
+.d15 .ct{background:var(--bg)}
+.d15 .prof{display:flex;align-items:center;gap:9px;padding:10px;margin-bottom:12px}
+.d15 .av{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#4F46E5,#7C3AED);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.d15 .nm{font-size:12px;font-weight:600;color:var(--txt)}.d15 .rl{font-size:9px;color:var(--sub)}
+.d15 .nv{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:10px;font-size:12px;font-weight:500;color:#94A3B8;cursor:pointer;transition:.15s}
+.d15 .nv:hover{background:#F0F0FF;color:var(--txt)}
+.d15 .nv.a{background:linear-gradient(135deg,rgba(79,70,229,.1),rgba(124,58,237,.08));color:var(--pr);font-weight:600;border:1px solid rgba(79,70,229,.2)}
+.d15 .nv .b{margin-left:auto;background:var(--pr);color:#fff;font-size:9px;padding:2px 6px;border-radius:8px;font-weight:700}
+.d15 .dv{height:1px;background:var(--bdr);margin:8px 0}
+.d15 .lb{font-size:8px;font-weight:700;color:#CBD5E1;text-transform:uppercase;letter-spacing:.8px;padding:6px 10px 3px}
+.d15 h2{font-size:20px;font-weight:800;color:var(--txt)}.d15 .st{font-size:11px;color:#94A3B8;margin:3px 0 16px}
+.d15 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.d15 .stat{padding:14px;border-radius:12px;background:var(--card);border:1px solid var(--bdr);box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.d15 .stat .n{font-size:26px;font-weight:800;color:var(--pr)}.d15 .stat .l{font-size:10px;color:#94A3B8;margin-top:2px}
+.d15 .crd{padding:12px 14px;border-radius:10px;background:var(--card);border:1px solid var(--bdr);margin-bottom:7px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:.15s;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+.d15 .crd:hover{border-color:var(--pr);box-shadow:0 4px 12px rgba(79,70,229,.1)}
+.d15 .tt{font-size:12px;font-weight:500;color:var(--txt);flex:1}.d15 .mt{font-size:10px;color:#94A3B8}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>WorkFlow Pro — 15 Dizayn (2026 Trendləri)</h1>
+  <p>Rəng, layout, tipografiya, UX — hər biri tamamilə fərqli. Bazarda yer almaq üçün unikal vizual dil.</p>
+</div>
+
+<div class="tab-bar">
+  <button class="active" onclick="show(0)" style="--ac:#6366F1;--abg:rgba(99,102,241,.08);--aglow:rgba(99,102,241,.12)">🌌 Aurora</button>
+  <button onclick="show(1)" style="--ac:#FF8C42;--abg:rgba(255,140,66,.08);--aglow:rgba(255,140,66,.12)">🌅 Sunset</button>
+  <button onclick="show(2)" style="--ac:#0EA5E9;--abg:rgba(14,165,233,.08);--aglow:rgba(14,165,233,.12)">🌊 Ocean</button>
+  <button onclick="show(3)" style="--ac:#62C554;--abg:rgba(98,197,84,.08);--aglow:rgba(98,197,84,.12)">🌿 Forest</button>
+  <button onclick="show(4)" style="--ac:#00F5D4;--abg:rgba(0,245,212,.06);--aglow:rgba(0,245,212,.1)">⚡ Neon</button>
+  <button onclick="show(5)" style="--ac:#7C3AED;--abg:rgba(124,58,237,.08);--aglow:rgba(124,58,237,.12)">💜 Lavender</button>
+  <button onclick="show(6)" style="--ac:#F97316;--abg:rgba(249,115,22,.08);--aglow:rgba(249,115,22,.12)">🖤 Charcoal</button>
+  <button onclick="show(7)" style="--ac:#E91E8C;--abg:rgba(233,30,140,.08);--aglow:rgba(233,30,140,.12)">🍬 Candy</button>
+  <button onclick="show(8)" style="--ac:#888;--abg:rgba(136,136,136,.08);--aglow:rgba(136,136,136,.08)">📐 Slate</button>
+  <button onclick="show(9)" style="--ac:#D4A574;--abg:rgba(212,165,116,.08);--aglow:rgba(212,165,116,.12)">🥃 Copper</button>
+  <button onclick="show(10)" style="--ac:#E5E5E5;--abg:rgba(229,229,229,.06);--aglow:rgba(229,229,229,.06)">⬛ Mono</button>
+  <button onclick="show(11)" style="--ac:#FF6B6B;--abg:rgba(255,107,107,.08);--aglow:rgba(255,107,107,.12)">🔥 Coral</button>
+  <button onclick="show(12)" style="--ac:#1D4ED8;--abg:rgba(29,78,216,.08);--aglow:rgba(29,78,216,.12)">❄️ Ice</button>
+  <button onclick="show(13)" style="--ac:#8B5E3C;--abg:rgba(139,94,60,.08);--aglow:rgba(139,94,60,.12)">🏔️ Terra</button>
+  <button onclick="show(14)" style="--ac:#4F46E5;--abg:rgba(79,70,229,.08);--aglow:rgba(79,70,229,.12)">💎 Indigo</button>
+</div>
+
+<div class="proposals">
+
+<!-- Proposals 0-4 redirect to v1 -->
+<div class="proposal active" id="p0"><div class="desc"><h3 style="color:#6366F1">🌌 Aurora — İlk 5 dizayn ayrı səhifədədir</h3><p><a href="/design-concepts.html" style="color:#6366F1">→ İlk 5 dizaynı görmək üçün klikləyin</a></p></div></div>
+<div class="proposal" id="p1"><div class="desc"><h3 style="color:#FF8C42">🌅 Sunset</h3><p><a href="/design-concepts.html" style="color:#FF8C42">→ İlk 5 dizaynı görmək üçün klikləyin</a></p></div></div>
+<div class="proposal" id="p2"><div class="desc"><h3 style="color:#0EA5E9">🌊 Ocean</h3><p><a href="/design-concepts.html" style="color:#0EA5E9">→ İlk 5 dizaynı görmək üçün klikləyin</a></p></div></div>
+<div class="proposal" id="p3"><div class="desc"><h3 style="color:#62C554">🌿 Forest</h3><p><a href="/design-concepts.html" style="color:#62C554">→ İlk 5 dizaynı görmək üçün klikləyin</a></p></div></div>
+<div class="proposal" id="p4"><div class="desc"><h3 style="color:#00F5D4">⚡ Neon</h3><p><a href="/design-concepts.html" style="color:#00F5D4">→ İlk 5 dizaynı görmək üçün klikləyin</a></p></div></div>
+
+<!-- ═══ DESIGN 6: LAVENDER ═══ -->
+<div class="proposal" id="p5">
+  <div class="desc"><h3 style="color:#7C3AED">💜 Lavender — Yumşaq Bənövşəyi</h3><p>2026-nın ən populyar rəngi. Sakit amma güclü. Wellness, təhsil, SaaS platformaları üçün ideal. Gen-Z istifadəçilər üçün cəlbedici.</p><div class="tags"><span class="tag" style="background:rgba(124,58,237,.12);color:#7C3AED">2026 Trend</span><span class="tag" style="background:rgba(167,139,250,.12);color:#A78BFA">Gen-Z</span><span class="tag" style="background:rgba(236,72,153,.12);color:#EC4899">Soft Power</span></div></div>
+  <div class="frame d6"><div class="tbar d6"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div><span style="margin-left:8px;font-size:11px;color:#9B8EC4">WorkFlow Pro</span></div>
+    <div class="mbody"><div class="sb d6"><div class="prof"><div class="av">LH</div><div><div class="nm">Leyla Hüseynova</div><div class="rl">Bakı Müdürü</div></div></div><div class="nv a"><span>📅</span> Bugün <span class="b">8</span></div><div class="nv"><span>📥</span> Gələnlər</div><div class="nv"><span>📆</span> Gələcək</div><div class="dv"></div><div class="nv"><span>📋</span> Tapşırıqlar</div><div class="nv"><span>✅</span> Todo</div><div class="nv"><span>🔁</span> Şablonlar</div><div class="dv"></div><div class="lb">Layihələr</div><div class="nv"><span style="width:7px;height:7px;border-radius:50%;background:#7C3AED;display:inline-block"></span> Veb Dizayn</div><div class="nv"><span style="width:7px;height:7px;border-radius:50%;background:#EC4899;display:inline-block"></span> Mobil App</div><div class="dv"></div><div class="lb">İdarəetmə</div><div class="nv"><span>👥</span> İşçilər</div><div class="nv"><span>💰</span> Maliyyə</div></div>
+    <div class="ct d6"><h2>Bugün</h2><div class="st">22 Mart 2026, Bazar — 8 tapşırıq</div><div class="stats"><div class="stat"><div class="n" style="color:#7C3AED">12</div><div class="l">Aktiv</div></div><div class="stat"><div class="n" style="color:#EC4899">3</div><div class="l">Gözləyir</div></div><div class="stat"><div class="n" style="color:#22D3EE">28</div><div class="l">Tamamlanan</div></div><div class="stat"><div class="n" style="color:#10B981">94%</div><div class="l">Produktivlik</div></div></div><div class="crd"><div class="ck" style="border-color:#EF4444"></div><div><div class="tt">Müştəri təqdimatını hazırla</div><div class="mt">📎 2 fayl · 👤 Nigar · Gecikmiş</div></div><div class="pd" style="background:#EF4444"></div></div><div class="crd"><div class="ck" style="border-color:#7C3AED"></div><div><div class="tt">Aylıq satış hesabatı</div><div class="mt">📊 Maliyyə · ⏰ 15:00</div></div><span class="tg" style="background:rgba(124,58,237,.1);color:#7C3AED">GÖREV</span></div><div class="crd"><div class="ck" style="border-color:#A78BFA"></div><div><div class="tt">Dizayn review görüşü</div><div class="mt">🔗 Zoom · 11:00</div></div><span class="tg" style="background:rgba(236,72,153,.1);color:#EC4899">TODO</span></div><div class="crd"><div class="ck" style="border-color:#10B981"></div><div><div class="tt">Server yeniləmə planı</div><div class="mt">💻 İT şöbəsi</div></div></div></div></div></div>
+</div>
+
+<!-- ═══ DESIGN 7: CHARCOAL ═══ -->
+<div class="proposal" id="p6">
+  <div class="desc"><h3 style="color:#F97316">🖤 Charcoal — Mat Qaranlıq</h3><p>Minimal qaranlıq, narıncı aksentlər, sol kənar xətti. Developer alətləri hissi. Texniki komandalar, devops, mühəndislik üçün ideal.</p><div class="tags"><span class="tag" style="background:rgba(249,115,22,.12);color:#F97316">Dev Tools</span><span class="tag" style="background:rgba(229,229,229,.08);color:#888">Matte Dark</span><span class="tag" style="background:rgba(16,185,129,.12);color:#10B981">Minimal</span></div></div>
+  <div class="frame d7"><div class="tbar d7"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div><span style="margin-left:8px;font-size:11px;color:#444">WorkFlow Pro</span></div>
+    <div class="mbody"><div class="sb d7"><div class="prof"><div class="av">LH</div><div><div class="nm">Leyla Hüseynova</div><div class="rl">Bakı Müdürü</div></div></div><div class="nv a"><span>▪</span> Bugün <span class="b">8</span></div><div class="nv"><span>▪</span> Gələnlər</div><div class="nv"><span>▪</span> Gələcək</div><div class="dv"></div><div class="nv"><span>▪</span> Tapşırıqlar</div><div class="nv"><span>▪</span> Todo</div><div class="dv"></div><div class="lb">İdarəetmə</div><div class="nv"><span>▪</span> İşçilər</div><div class="nv"><span>▪</span> Maliyyə</div></div>
+    <div class="ct d7"><h2>Bugün</h2><div class="st">22 Mart · 8 tapşırıq</div><div class="stats"><div class="stat"><div class="n">12</div><div class="l">Aktiv</div><div class="bar"><div class="bf" style="width:60%;background:#F97316"></div></div></div><div class="stat"><div class="n">3</div><div class="l">Gözləyir</div><div class="bar"><div class="bf" style="width:25%;background:#FBBF24"></div></div></div><div class="stat"><div class="n">28</div><div class="l">Tamamlanan</div><div class="bar"><div class="bf" style="width:85%;background:#10B981"></div></div></div><div class="stat"><div class="n">94%</div><div class="l">Perf.</div><div class="bar"><div class="bf" style="width:94%;background:#6366F1"></div></div></div></div><div class="crd"><div class="ck" style="border-color:#EF4444"></div><div><div class="tt">Müştəri təqdimatını hazırla</div><div class="mt">2 fayl · Nigar · Gecikmiş</div></div><div class="pd" style="background:#EF4444"></div></div><div class="crd"><div class="ck" style="border-color:#F97316"></div><div><div class="tt">Aylıq satış hesabatı</div><div class="mt">Maliyyə · 15:00</div></div><span class="tg" style="background:rgba(249,115,22,.1);color:#F97316">GÖREV</span></div><div class="crd"><div class="ck" style="border-color:#10B981"></div><div><div class="tt">Server yeniləmə planı</div><div class="mt">İT · Sabah</div></div></div></div></div></div>
+</div>
+
+<!-- ═══ DESIGN 8: CANDY ═══ -->
+<div class="proposal" id="p7">
+  <div class="desc"><h3 style="color:#E91E8C">🍬 Candy — Pastel Şirin</h3><p>Çəhrayı pastel, yuvarlaq formalar, böyük border-radius. Qeyri-texniki istifadəçilər üçün qorxusuz UX. HR, təhsil, yaradıcı sektorlar üçün.</p><div class="tags"><span class="tag" style="background:rgba(233,30,140,.1);color:#E91E8C">Pastel</span><span class="tag" style="background:rgba(255,107,181,.1);color:#FF6BB5">Friendly</span><span class="tag" style="background:rgba(155,93,229,.1);color:#9B5DE5">Rounded</span></div></div>
+  <div class="frame d8" style="border-radius:24px"><div class="tbar d8" style="border-radius:24px 24px 0 0"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div><span style="margin-left:8px;font-size:11px;color:#B88BA8">WorkFlow Pro</span></div>
+    <div class="mbody"><div class="sb d8"><div class="prof"><div class="av">LH</div><div><div class="nm">Leyla Hüseynova</div><div class="rl">Bakı Müdürü</div></div></div><div class="nv a"><span>📅</span> Bugün <span class="b">8</span></div><div class="nv"><span>📥</span> Gələnlər</div><div class="nv"><span>📆</span> Gələcək</div><div class="dv"></div><div class="nv"><span>📋</span> Tapşırıqlar</div><div class="nv"><span>✅</span> Todo</div><div class="dv"></div><div class="lb">İdarəetmə</div><div class="nv"><span>👥</span> İşçilər</div><div class="nv"><span>💰</span> Maliyyə</div></div>
+    <div class="ct d8"><h2>💖 Bugün</h2><div class="st">22 Mart 2026</div><div class="stats"><div class="stat"><div class="n" style="color:#E91E8C">12</div><div class="l">Aktiv</div></div><div class="stat"><div class="n" style="color:#FF6BB5">3</div><div class="l">Gözləyir</div></div><div class="stat"><div class="n" style="color:#9B5DE5">28</div><div class="l">Tamamlanan</div></div><div class="stat"><div class="n" style="color:#38A169">94%</div><div class="l">Perf.</div></div></div><div class="crd"><div class="ck" style="border-color:#FF6BB5"></div><div><div class="tt">Müştəri təqdimatını hazırla</div><div class="mt">📎 2 fayl · Gecikmiş</div></div><div class="pd" style="background:#FF6BB5"></div></div><div class="crd"><div class="ck" style="border-color:#E91E8C"></div><div><div class="tt">Satış hesabatı</div><div class="mt">📊 Maliyyə · ⏰ 15:00</div></div><span class="tg" style="background:rgba(233,30,140,.08);color:#E91E8C">GÖREV</span></div><div class="crd"><div class="ck" style="border-color:#9B5DE5"></div><div><div class="tt">Dizayn review</div><div class="mt">🔗 Zoom · 11:00</div></div><span class="tg" style="background:rgba(155,93,229,.08);color:#9B5DE5">TODO</span></div></div></div></div>
+</div>
+
+<!-- ═══ DESIGN 9: SLATE (Notion/Linear) ═══ -->
+<div class="proposal" id="p8">
+  <div class="desc"><h3 style="color:#171717">📐 Slate — Notion/Linear Minimal</h3><p>Ultra minimal, heç bir əlavə dekorasiya. Məzmun birinci. Notion + Linear + Things 3 ilhamı. Fokus istəyən peşəkar komandalar üçün.</p><div class="tags"><span class="tag" style="background:rgba(0,0,0,.06);color:#333">Ultra Minimal</span><span class="tag" style="background:rgba(37,99,235,.08);color:#2563EB">Content First</span><span class="tag" style="background:rgba(0,0,0,.04);color:#666">No Decoration</span></div></div>
+  <div class="frame d9"><div class="tbar d9"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div><span style="margin-left:8px;font-size:11px;color:#999">WorkFlow Pro</span></div>
+    <div class="mbody"><div class="sb d9"><div class="prof" style="display:flex;align-items:center;gap:9px"><div class="av">LH</div><div><div class="nm">Leyla Hüseynova</div><div class="rl">Bakı Müdürü</div></div></div><div class="nv a"><span>📅</span> Bugün <span class="b">8</span></div><div class="nv"><span>📥</span> Gələnlər</div><div class="nv"><span>📆</span> Gələcək</div><div class="dv"></div><div class="nv"><span>📋</span> Tapşırıqlar</div><div class="nv"><span>✅</span> Todo</div><div class="dv"></div><div class="lb">İdarəetmə</div><div class="nv"><span>👥</span> İşçilər</div><div class="nv"><span>💰</span> Maliyyə</div></div>
+    <div class="ct d9"><h2>Bugün</h2><div class="st">Bazar, 22 Mart</div><div class="stats"><div class="stat"><div class="n">12</div><div class="l">Aktiv</div></div><div class="stat"><div class="n">3</div><div class="l">Gözləyir</div></div><div class="stat"><div class="n">28</div><div class="l">Tamamlanan</div></div><div class="stat"><div class="n">94%</div><div class="l">Perf.</div></div></div><div class="crd"><div class="ck" style="border-color:#EF4444"></div><div><div class="tt">Müştəri təqdimatını hazırla</div><div class="mt">2 fayl · Nigar</div></div><span style="font-size:10px;color:#EF4444">Gecikmiş</span></div><div class="crd"><div class="ck" style="border-color:#2563EB"></div><div><div class="tt">Aylıq satış hesabatı</div><div class="mt">Maliyyə · 15:00</div></div><span class="tg" style="background:rgba(37,99,235,.06);color:#2563EB">GÖREV</span></div><div class="crd"><div class="ck" style="border-color:#999"></div><div><div class="tt">Server yeniləmə planı</div><div class="mt">İT şöbəsi</div></div></div></div></div></div>
+</div>
+
+<!-- ═══ DESIGN 10: COPPER ═══ -->
+<div class="proposal" id="p9">
+  <div class="desc"><h3 style="color:#D4A574">🥃 Copper — Lüks Qızıl</h3><p>Qaranlıq fon, mis/qızıl aksentlər. Premium və ekskluziv hiss. Maliyyə, otelçilik, lüks brendlər üçün ideal.</p><div class="tags"><span class="tag" style="background:rgba(212,165,116,.12);color:#D4A574">Luxury</span><span class="tag" style="background:rgba(184,137,90,.12);color:#B8895A">Premium Dark</span><span class="tag" style="background:rgba(232,221,208,.08);color:#999">Exclusive</span></div></div>
+  <div class="frame d10"><div class="tbar d10"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div><span style="margin-left:8px;font-size:11px;color:#555">WorkFlow Pro</span></div>
+    <div class="mbody"><div class="sb d10"><div class="prof"><div class="av">LH</div><div><div class="nm">Leyla Hüseynova</div><div class="rl">Bakı Müdürü</div></div></div><div class="nv a"><span>◆</span> Bugün <span class="b">8</span></div><div class="nv"><span>◆</span> Gələnlər</div><div class="nv"><span>◆</span> Gələcək</div><div class="dv"></div><div class="nv"><span>◆</span> Tapşırıqlar</div><div class="nv"><span>◆</span> Todo</div><div class="dv"></div><div class="lb">İdarəetmə</div><div class="nv"><span>◆</span> İşçilər</div><div class="nv"><span>◆</span> Maliyyə</div></div>
+    <div class="ct d10"><h2>Bugün</h2><div class="st">22 Mart 2026</div><div class="stats"><div class="stat"><div class="n">12</div><div class="l">Aktiv</div></div><div class="stat"><div class="n">3</div><div class="l">Gözləyir</div></div><div class="stat"><div class="n">28</div><div class="l">Tamamlanan</div></div><div class="stat"><div class="n">94%</div><div class="l">Perf.</div></div></div><div class="crd"><div class="ck" style="border-color:#EF4444"></div><div><div class="tt">Müştəri təqdimatını hazırla</div><div class="mt">2 fayl · Gecikmiş</div></div><div class="pd" style="background:#EF4444"></div></div><div class="crd"><div class="ck" style="border-color:#D4A574"></div><div><div class="tt">Satış hesabatı</div><div class="mt">Maliyyə · 15:00</div></div><span class="tg" style="background:rgba(212,165,116,.1);color:#D4A574">GÖREV</span></div></div></div></div>
+</div>
+
+<!-- ═══ DESIGN 11: MONO ═══ -->
+<div class="proposal" id="p10">
+  <div class="desc"><h3 style="color:#E5E5E5">⬛ Mono — Qara & Ağ Tipografiya</h3><p>Heç bir rəng — yalnız qara və ağ. Güclü tipografiya. Editorial, jurnalizm, yazı alətləri hissi. Minimalist peşəkarlar üçün.</p><div class="tags"><span class="tag" style="background:rgba(255,255,255,.08);color:#ccc">B&W</span><span class="tag" style="background:rgba(255,255,255,.06);color:#999">Typography</span><span class="tag" style="background:rgba(255,255,255,.04);color:#666">Editorial</span></div></div>
+  <div class="frame d11"><div class="tbar d11"><div class="dot" style="background:#555"></div><div class="dot" style="background:#555"></div><div class="dot" style="background:#555"></div><span style="margin-left:8px;font-size:11px;color:#555">WORKFLOW PRO</span></div>
+    <div class="mbody"><div class="sb d11"><div class="prof" style="display:flex;align-items:center;gap:9px;padding:10px"><div class="av">LH</div><div><div class="nm">Leyla Hüseynova</div><div class="rl">Müdür</div></div></div><div class="nv a"><span></span>Bugün <span class="b">8</span></div><div class="nv">Gələnlər</div><div class="nv">Gələcək</div><div class="dv"></div><div class="nv">Tapşırıqlar</div><div class="nv">Todo</div><div class="dv"></div><div class="lb">İdarəetmə</div><div class="nv">İşçilər</div><div class="nv">Maliyyə</div></div>
+    <div class="ct d11"><h2>Bugün</h2><div class="st">22 Mart 2026</div><div class="stats"><div class="stat"><div class="n">12</div><div class="l">AKTİV</div></div><div class="stat"><div class="n">3</div><div class="l">GÖZLƏYİR</div></div><div class="stat"><div class="n">28</div><div class="l">TAMAMLANAN</div></div></div><div class="crd"><div class="ck" style="border-color:#000"></div><div><div class="tt">Müştəri təqdimatını hazırla</div><div class="mt">2 fayl · Nigar · Gecikmiş</div></div></div><div class="crd"><div class="ck" style="border-color:#000"></div><div><div class="tt">Aylıq satış hesabatı</div><div class="mt">Maliyyə · 15:00</div></div><span class="tg" style="background:#000;color:#fff">GÖREV</span></div><div class="crd"><div class="ck" style="border-color:#CCC"></div><div><div class="tt">Dizayn review görüşü</div><div class="mt">Zoom · 11:00</div></div><span class="tg" style="background:#F5F5F5;color:#666">TODO</span></div></div></div></div>
+</div>
+
+<!-- ═══ DESIGN 12: CORAL ═══ -->
+<div class="proposal" id="p11">
+  <div class="desc"><h3 style="color:#FF6B6B">🔥 Coral — Gradient Sidebar</h3><p>Canlı gradient sidebar, ağ content. 2026 SaaS trendi — sol panel rəngli, sağ panel təmiz. Marketinq, e-ticarət, startup-lar üçün.</p><div class="tags"><span class="tag" style="background:rgba(255,107,107,.12);color:#FF6B6B">Gradient Sidebar</span><span class="tag" style="background:rgba(255,142,83,.12);color:#FF8E53">2026 SaaS</span><span class="tag" style="background:rgba(255,255,255,.06);color:#999">Clean Right</span></div></div>
+  <div class="frame d12" style="border-radius:20px"><div class="tbar d12" style="border-radius:20px 20px 0 0"><div class="dot" style="background:rgba(255,255,255,.3)"></div><div class="dot" style="background:rgba(255,255,255,.3)"></div><div class="dot" style="background:rgba(255,255,255,.3)"></div><span style="margin-left:8px;font-size:11px;color:rgba(255,255,255,.6)">WorkFlow Pro</span></div>
+    <div class="mbody"><div class="sb d12"><div class="prof" style="display:flex;align-items:center;gap:9px;padding:10px"><div class="av">LH</div><div><div class="nm">Leyla Hüseynova</div><div class="rl">Bakı Müdürü</div></div></div><div class="nv a"><span>📅</span> Bugün <span class="b">8</span></div><div class="nv"><span>📥</span> Gələnlər</div><div class="nv"><span>📆</span> Gələcək</div><div class="dv"></div><div class="nv"><span>📋</span> Tapşırıqlar</div><div class="nv"><span>✅</span> Todo</div><div class="dv"></div><div class="lb">İdarəetmə</div><div class="nv"><span>👥</span> İşçilər</div><div class="nv"><span>💰</span> Maliyyə</div></div>
+    <div class="ct d12"><h2>Bugün</h2><div class="st">22 Mart 2026</div><div class="stats"><div class="stat"><div class="n">12</div><div class="l">Aktiv</div></div><div class="stat"><div class="n">3</div><div class="l">Gözləyir</div></div><div class="stat"><div class="n">28</div><div class="l">Tamamlanan</div></div><div class="stat"><div class="n">94%</div><div class="l">Perf.</div></div></div><div class="crd"><div class="ck" style="border-color:#FF6B6B"></div><div><div class="tt">Müştəri təqdimatını hazırla</div><div class="mt">2 fayl · Gecikmiş</div></div><div class="pd" style="background:#FF6B6B"></div></div><div class="crd"><div class="ck" style="border-color:#FF8E53"></div><div><div class="tt">Satış hesabatı</div><div class="mt">Maliyyə · 15:00</div></div><span class="tg" style="background:rgba(255,107,107,.08);color:#FF6B6B">GÖREV</span></div></div></div></div>
+</div>
+
+<!-- ═══ DESIGN 13: ICE ═══ -->
+<div class="proposal" id="p12">
+  <div class="desc"><h3 style="color:#1D4ED8">❄️ Ice — Soyuq Mavi</h3><p>Açıq mavi tonlar, buz kimi təmiz. Güvən və sabitlik hissi. Dövlət, təhsil, sağlamlıq sektoru üçün ideal.</p><div class="tags"><span class="tag" style="background:rgba(29,78,216,.08);color:#1D4ED8">Trust</span><span class="tag" style="background:rgba(107,130,168,.08);color:#6B82A8">Cool Blue</span><span class="tag" style="background:rgba(208,224,245,.15);color:#6B82A8">Clean</span></div></div>
+  <div class="frame d13"><div class="tbar d13"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div><span style="margin-left:8px;font-size:11px;color:#6B82A8">WorkFlow Pro</span></div>
+    <div class="mbody"><div class="sb d13"><div class="prof"><div class="av">LH</div><div><div class="nm">Leyla Hüseynova</div><div class="rl">Bakı Müdürü</div></div></div><div class="nv a"><span>📅</span> Bugün <span class="b" style="color:#fff">8</span></div><div class="nv"><span>📥</span> Gələnlər</div><div class="nv"><span>📆</span> Gələcək</div><div class="dv"></div><div class="nv"><span>📋</span> Tapşırıqlar</div><div class="nv"><span>✅</span> Todo</div><div class="dv"></div><div class="lb">İdarəetmə</div><div class="nv"><span>👥</span> İşçilər</div><div class="nv"><span>💰</span> Maliyyə</div></div>
+    <div class="ct d13"><h2>Bugün</h2><div class="st">22 Mart 2026</div><div class="stats"><div class="stat"><div class="n">12</div><div class="l">Aktiv</div></div><div class="stat"><div class="n">3</div><div class="l">Gözləyir</div></div><div class="stat"><div class="n">28</div><div class="l">Tamamlanan</div></div><div class="stat"><div class="n">94%</div><div class="l">Perf.</div></div></div><div class="crd"><div class="ck" style="border-color:#EF4444"></div><div><div class="tt">Müştəri təqdimatını hazırla</div><div class="mt">2 fayl · Gecikmiş</div></div><div class="pd" style="background:#EF4444"></div></div><div class="crd"><div class="ck" style="border-color:#1D4ED8"></div><div><div class="tt">Satış hesabatı</div><div class="mt">Maliyyə · 15:00</div></div><span class="tg" style="background:rgba(29,78,216,.06);color:#1D4ED8">GÖREV</span></div></div></div></div>
+</div>
+
+<!-- ═══ DESIGN 14: TERRA ═══ -->
+<div class="proposal" id="p13">
+  <div class="desc"><h3 style="color:#8B5E3C">🏔️ Terra — Torpaq Qəhvəyi</h3><p>Torpaq tonları, natural hiss. Qəhvə, kənd təsərrüfatı, turizm, handcraft brendlər üçün. Sakit və etibarlı.</p><div class="tags"><span class="tag" style="background:rgba(139,94,60,.1);color:#8B5E3C">Earth</span><span class="tag" style="background:rgba(160,136,120,.08);color:#A08878">Natural</span><span class="tag" style="background:rgba(221,208,197,.1);color:#A08878">Warm</span></div></div>
+  <div class="frame d14" style="border-radius:20px"><div class="tbar d14" style="border-radius:20px 20px 0 0"><div class="dot" style="background:rgba(255,255,255,.2)"></div><div class="dot" style="background:rgba(255,255,255,.2)"></div><div class="dot" style="background:rgba(255,255,255,.2)"></div><span style="margin-left:8px;font-size:11px;color:rgba(255,255,255,.3)">WorkFlow Pro</span></div>
+    <div class="mbody"><div class="sb d14"><div class="prof" style="display:flex;align-items:center;gap:9px"><div class="av">LH</div><div><div class="nm">Leyla Hüseynova</div><div class="rl">Bakı Müdürü</div></div></div><div class="nv a"><span>📅</span> Bugün <span class="b" style="color:#fff">8</span></div><div class="nv"><span>📥</span> Gələnlər</div><div class="nv"><span>📆</span> Gələcək</div><div class="dv"></div><div class="nv"><span>📋</span> Tapşırıqlar</div><div class="nv"><span>✅</span> Todo</div><div class="dv"></div><div class="lb">İdarəetmə</div><div class="nv"><span>👥</span> İşçilər</div></div>
+    <div class="ct d14"><h2>Bugün</h2><div class="st">22 Mart 2026</div><div class="stats"><div class="stat"><div class="n">28</div><div class="l">Tamamlanan</div></div><div class="stat"><div class="n">12</div><div class="l">Aktiv</div></div><div class="stat"><div class="n">3</div><div class="l">Gecikmiş</div></div></div><div class="crd"><div class="ck" style="border-color:#E8614D"></div><div><div class="tt">Müştəri təqdimatını hazırla</div><div class="mt">2 fayl · Gecikmiş</div></div><div class="pd" style="background:#E8614D"></div></div><div class="crd"><div class="ck" style="border-color:#8B5E3C"></div><div><div class="tt">Satış hesabatı</div><div class="mt">Maliyyə · 15:00</div></div><span class="tg" style="background:rgba(139,94,60,.08);color:#8B5E3C">GÖREV</span></div></div></div></div>
+</div>
+
+<!-- ═══ DESIGN 15: INDIGO ═══ -->
+<div class="proposal" id="p14">
+  <div class="desc"><h3 style="color:#4F46E5">💎 Indigo — Gradient Header</h3><p>Ağ sidebar, gradient header, indigo aksentlər. Modern SaaS standartı (Vercel, Linear, Raycast ilhamı). Texnologiya şirkətləri üçün ideal.</p><div class="tags"><span class="tag" style="background:rgba(79,70,229,.08);color:#4F46E5">SaaS 2026</span><span class="tag" style="background:rgba(124,58,237,.08);color:#7C3AED">Gradient Header</span><span class="tag" style="background:rgba(148,163,184,.08);color:#64748B">Modern</span></div></div>
+  <div class="frame d15"><div class="tbar d15"><div class="dot" style="background:rgba(255,255,255,.3)"></div><div class="dot" style="background:rgba(255,255,255,.3)"></div><div class="dot" style="background:rgba(255,255,255,.3)"></div><span style="margin-left:8px;font-size:11px;color:rgba(255,255,255,.6)">WorkFlow Pro</span></div>
+    <div class="mbody"><div class="sb d15"><div class="prof" style="display:flex;align-items:center;gap:9px;padding:10px"><div class="av">LH</div><div><div class="nm">Leyla Hüseynova</div><div class="rl">Bakı Müdürü</div></div></div><div class="nv a"><span>📅</span> Bugün <span class="b">8</span></div><div class="nv"><span>📥</span> Gələnlər</div><div class="nv"><span>📆</span> Gələcək</div><div class="dv"></div><div class="nv"><span>📋</span> Tapşırıqlar</div><div class="nv"><span>✅</span> Todo</div><div class="nv"><span>🔁</span> Şablonlar</div><div class="dv"></div><div class="lb">Layihələr</div><div class="nv"><span style="width:7px;height:7px;border-radius:50%;background:#4F46E5;display:inline-block"></span> Veb Dizayn</div><div class="nv"><span style="width:7px;height:7px;border-radius:50%;background:#7C3AED;display:inline-block"></span> Mobil App</div><div class="dv"></div><div class="lb">İdarəetmə</div><div class="nv"><span>👥</span> İşçilər</div><div class="nv"><span>💰</span> Maliyyə</div></div>
+    <div class="ct d15"><h2>Bugün</h2><div class="st">22 Mart 2026 — 8 tapşırıq</div><div class="stats"><div class="stat"><div class="n">12</div><div class="l">Aktiv</div></div><div class="stat"><div class="n">3</div><div class="l">Gözləyir</div></div><div class="stat"><div class="n">28</div><div class="l">Tamamlanan</div></div><div class="stat"><div class="n">94%</div><div class="l">Produktivlik</div></div></div><div class="crd"><div class="ck" style="border-color:#EF4444"></div><div><div class="tt">Müştəri təqdimatını hazırla</div><div class="mt">📎 2 fayl · Nigar · Gecikmiş</div></div><div class="pd" style="background:#EF4444"></div></div><div class="crd"><div class="ck" style="border-color:#4F46E5"></div><div><div class="tt">Aylıq satış hesabatı</div><div class="mt">📊 Maliyyə · ⏰ 15:00</div></div><span class="tg" style="background:rgba(79,70,229,.06);color:#4F46E5">GÖREV</span></div><div class="crd"><div class="ck" style="border-color:#7C3AED"></div><div><div class="tt">Dizayn review görüşü</div><div class="mt">🔗 Zoom · 11:00</div></div><span class="tg" style="background:rgba(124,58,237,.06);color:#7C3AED">TODO</span></div><div class="crd"><div class="ck" style="border-color:#10B981"></div><div><div class="tt">Server yeniləmə planı</div><div class="mt">💻 İT · Sabah</div></div></div></div></div></div>
+</div>
+
+</div>
+
+<script>
+function show(i){
+  document.querySelectorAll('.proposal').forEach(p=>p.classList.remove('active'))
+  document.querySelectorAll('.tab-bar button').forEach(b=>b.classList.remove('active'))
+  document.getElementById('p'+i).classList.add('active')
+  document.querySelectorAll('.tab-bar button')[i].classList.add('active')
+}
+</script>
+</body>
+</html>

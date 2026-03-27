@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WorkFlow Pro — 5 Unikal Dizayn Konsepti</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0F0F12; color: #fff; }
+
+  .page-header { padding: 32px 40px 12px; }
+  .page-header h1 { font-size: 28px; font-weight: 800; background: linear-gradient(135deg, #FF6B6B, #4ECDC4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .page-header p { font-size: 13px; color: #888; margin-top: 4px; }
+
+  .tab-bar { display: flex; gap: 8px; padding: 16px 40px 24px; flex-wrap: wrap; }
+  .tab-bar button { padding: 12px 20px; border: 2px solid #2A2A35; border-radius: 14px; background: #1A1A24; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s; color: #888; }
+  .tab-bar button.active { border-color: var(--accent); background: var(--accent-bg); color: var(--accent); box-shadow: 0 0 20px var(--accent-glow); }
+  .tab-bar button:hover:not(.active) { border-color: #444; color: #ccc; }
+
+  .proposals { padding: 0 40px 60px; }
+  .proposal { display: none; }
+  .proposal.active { display: block; animation: fadeUp 0.4s ease; }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+  .desc { background: #1A1A24; border: 1px solid #2A2A35; border-radius: 16px; padding: 20px 24px; margin-bottom: 24px; }
+  .desc h3 { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+  .desc p { font-size: 13px; color: #888; line-height: 1.7; }
+  .desc .tags { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+  .desc .tag { padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 600; }
+
+  /* ═══ MOCKUP FRAME ═══ */
+  .frame { border-radius: 20px; overflow: hidden; max-width: 1150px; margin: 0 auto; box-shadow: 0 8px 40px rgba(0,0,0,0.4); }
+  .title-bar { display: flex; align-items: center; gap: 8px; padding: 12px 16px; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-r { background: #FF5F57; } .dot-y { background: #FFBD2E; } .dot-g { background: #28C840; }
+  .mock-body { display: flex; min-height: 620px; }
+  .sb { width: 250px; padding: 16px 12px; display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; overflow-y: auto; }
+  .ct { flex: 1; overflow-y: auto; padding: 24px 28px; }
+
+  /* ═══════════════════════════════════════ */
+  /* DESIGN 1: AURORA — Gradient Glass      */
+  /* ═══════════════════════════════════════ */
+  .d1-frame { background: #0D0D14; border: 1px solid rgba(255,255,255,0.06); }
+  .d1-tbar { background: linear-gradient(90deg, #0D0D14, #141420); border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .d1-sb { background: linear-gradient(180deg, #0D0D14, #12121C); border-right: 1px solid rgba(255,255,255,0.05); }
+  .d1-ct { background: #0F0F18; }
+
+  .d1-profile { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 12px; margin-bottom: 12px; background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(236,72,153,0.1)); border: 1px solid rgba(99,102,241,0.2); }
+  .d1-avatar { width: 36px; height: 36px; border-radius: 12px; background: linear-gradient(135deg, #6366F1, #EC4899); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; }
+  .d1-name { font-size: 13px; font-weight: 600; color: #E5E5F0; }
+  .d1-role { font-size: 10px; color: #6366F1; font-weight: 500; }
+
+  .d1-nav { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 10px; font-size: 13px; font-weight: 500; color: #888; cursor: pointer; transition: all 0.2s; }
+  .d1-nav:hover { background: rgba(99,102,241,0.08); color: #C5C5E0; }
+  .d1-nav.active { background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(236,72,153,0.1)); color: #fff; font-weight: 600; border: 1px solid rgba(99,102,241,0.3); }
+  .d1-nav .icon { width: 20px; text-align: center; }
+  .d1-nav .badge { margin-left: auto; background: linear-gradient(135deg, #6366F1, #EC4899); color: #fff; font-size: 10px; padding: 2px 7px; border-radius: 10px; font-weight: 700; }
+  .d1-divider { height: 1px; background: linear-gradient(90deg, transparent, rgba(99,102,241,0.2), transparent); margin: 10px 0; }
+  .d1-label { font-size: 9px; font-weight: 700; color: #555; text-transform: uppercase; letter-spacing: 1px; padding: 8px 12px 4px; }
+
+  .d1-h2 { font-size: 22px; font-weight: 800; background: linear-gradient(135deg, #E5E5F0, #6366F1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 4px; }
+  .d1-sub { font-size: 12px; color: #666; margin-bottom: 20px; }
+
+  .d1-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+  .d1-stat { padding: 16px; border-radius: 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); backdrop-filter: blur(10px); }
+  .d1-stat .num { font-size: 28px; font-weight: 800; }
+  .d1-stat .lbl { font-size: 11px; color: #888; margin-top: 2px; }
+  .d1-stat.purple .num { color: #6366F1; }
+  .d1-stat.pink .num { color: #EC4899; }
+  .d1-stat.cyan .num { color: #22D3EE; }
+  .d1-stat.green .num { color: #10B981; }
+
+  .d1-card { padding: 14px 16px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); margin-bottom: 8px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: all 0.2s; }
+  .d1-card:hover { background: rgba(99,102,241,0.06); border-color: rgba(99,102,241,0.2); transform: translateX(4px); }
+  .d1-check { width: 20px; height: 20px; border-radius: 6px; border: 2px solid; flex-shrink: 0; }
+  .d1-card-title { font-size: 13px; font-weight: 500; color: #E5E5F0; flex: 1; }
+  .d1-card-meta { font-size: 10px; color: #666; }
+  .d1-prio { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ═══════════════════════════════════════ */
+  /* DESIGN 2: SUNSET — Warm Orange         */
+  /* ═══════════════════════════════════════ */
+  .d2-frame { background: #FFFBF5; border: 1px solid #F0E6D6; }
+  .d2-tbar { background: #FFF8EF; border-bottom: 1px solid #F0E6D6; }
+  .d2-sb { background: #FEF7ED; border-right: 1px solid #F0E6D6; }
+  .d2-ct { background: #FFFBF5; }
+
+  .d2-profile { display: flex; align-items: center; gap: 10px; padding: 12px; border-radius: 16px; margin-bottom: 12px; background: linear-gradient(135deg, #FF8C42, #FF6B6B); }
+  .d2-avatar { width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #fff; }
+  .d2-name { font-size: 14px; font-weight: 700; color: #fff; }
+  .d2-role { font-size: 10px; color: rgba(255,255,255,0.8); }
+
+  .d2-nav { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; font-size: 13px; font-weight: 500; color: #8B7355; cursor: pointer; transition: all 0.2s; }
+  .d2-nav:hover { background: #FFF0DB; color: #5C4A2E; }
+  .d2-nav.active { background: #FF8C42; color: #fff; font-weight: 600; box-shadow: 0 4px 12px rgba(255,140,66,0.3); }
+  .d2-nav .badge { margin-left: auto; background: #FF6B6B; color: #fff; font-size: 10px; padding: 2px 7px; border-radius: 10px; font-weight: 700; }
+  .d2-divider { height: 1px; background: #F0E6D6; margin: 10px 0; }
+  .d2-label { font-size: 9px; font-weight: 700; color: #C4A882; text-transform: uppercase; letter-spacing: 1px; padding: 8px 12px 4px; }
+
+  .d2-h2 { font-size: 22px; font-weight: 800; color: #3D2E1C; margin-bottom: 4px; }
+  .d2-sub { font-size: 12px; color: #B39B7D; margin-bottom: 20px; }
+
+  .d2-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+  .d2-stat { padding: 16px; border-radius: 16px; border: 1px solid #F0E6D6; text-align: center; }
+  .d2-stat .num { font-size: 28px; font-weight: 800; }
+  .d2-stat .lbl { font-size: 11px; color: #B39B7D; margin-top: 2px; }
+  .d2-stat.orange { background: linear-gradient(135deg, #FFF0DB, #FFE0C2); }
+  .d2-stat.orange .num { color: #FF8C42; }
+  .d2-stat.red { background: linear-gradient(135deg, #FFE5E5, #FFD5D5); }
+  .d2-stat.red .num { color: #FF6B6B; }
+  .d2-stat.green { background: linear-gradient(135deg, #E5F5EC, #D5EFE0); }
+  .d2-stat.green .num { color: #38A169; }
+  .d2-stat.blue { background: linear-gradient(135deg, #E5EFFF, #D5E5FF); }
+  .d2-stat.blue .num { color: #4A90D9; }
+
+  .d2-card { padding: 14px 16px; border-radius: 14px; background: #fff; border: 1px solid #F0E6D6; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: all 0.2s; }
+  .d2-card:hover { border-color: #FF8C42; box-shadow: 0 4px 16px rgba(255,140,66,0.1); transform: translateY(-2px); }
+
+  /* ═══════════════════════════════════════ */
+  /* DESIGN 3: OCEAN — Deep Blue Pro        */
+  /* ═══════════════════════════════════════ */
+  .d3-frame { background: #F7F9FC; border: 1px solid #E2E8F0; }
+  .d3-tbar { background: #1E3A5F; border-bottom: none; }
+  .d3-tbar .dot-r { background: rgba(255,255,255,0.3); } .d3-tbar .dot-y { background: rgba(255,255,255,0.3); } .d3-tbar .dot-g { background: rgba(255,255,255,0.3); }
+  .d3-sb { background: #1E3A5F; }
+  .d3-ct { background: #F7F9FC; }
+
+  .d3-profile { display: flex; align-items: center; gap: 10px; padding: 12px; border-radius: 12px; margin-bottom: 16px; background: rgba(255,255,255,0.08); }
+  .d3-avatar { width: 36px; height: 36px; border-radius: 10px; background: #0EA5E9; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; }
+  .d3-name { font-size: 13px; font-weight: 600; color: #fff; }
+  .d3-role { font-size: 10px; color: #7DBCE8; }
+
+  .d3-nav { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.6); cursor: pointer; transition: all 0.2s; }
+  .d3-nav:hover { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.9); }
+  .d3-nav.active { background: #0EA5E9; color: #fff; font-weight: 600; }
+  .d3-nav .badge { margin-left: auto; background: rgba(255,255,255,0.15); color: #fff; font-size: 10px; padding: 2px 7px; border-radius: 10px; font-weight: 700; }
+  .d3-divider { height: 1px; background: rgba(255,255,255,0.08); margin: 10px 0; }
+  .d3-label { font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 1px; padding: 8px 12px 4px; }
+
+  .d3-h2 { font-size: 22px; font-weight: 800; color: #1E3A5F; margin-bottom: 4px; }
+  .d3-sub { font-size: 12px; color: #94A3B8; margin-bottom: 20px; }
+
+  .d3-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+  .d3-stat { padding: 16px; border-radius: 12px; background: #fff; border: 1px solid #E2E8F0; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+  .d3-stat .num { font-size: 28px; font-weight: 800; color: #1E3A5F; }
+  .d3-stat .lbl { font-size: 11px; color: #94A3B8; margin-top: 2px; }
+  .d3-stat .bar { height: 4px; border-radius: 2px; background: #E2E8F0; margin-top: 8px; overflow: hidden; }
+  .d3-stat .bar-fill { height: 100%; border-radius: 2px; }
+
+  .d3-card { padding: 14px 16px; border-radius: 10px; background: #fff; border: 1px solid #E2E8F0; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: all 0.15s; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+  .d3-card:hover { border-color: #0EA5E9; box-shadow: 0 2px 8px rgba(14,165,233,0.12); }
+
+  /* ═══════════════════════════════════════ */
+  /* DESIGN 4: FOREST — Green Organic       */
+  /* ═══════════════════════════════════════ */
+  .d4-frame { background: #F5F7F3; border: 1px solid #D8E0D0; border-radius: 24px; }
+  .d4-tbar { background: #2D3B28; border-bottom: none; border-radius: 24px 24px 0 0; }
+  .d4-tbar .dot-r { background: #E8614D; } .d4-tbar .dot-y { background: #F0C75E; } .d4-tbar .dot-g { background: #62C554; }
+  .d4-sb { background: #2D3B28; border-radius: 0 0 0 24px; }
+  .d4-ct { background: #F5F7F3; border-radius: 0 0 24px 0; }
+
+  .d4-profile { display: flex; align-items: center; gap: 10px; padding: 12px; border-radius: 14px; margin-bottom: 16px; background: rgba(255,255,255,0.06); }
+  .d4-avatar { width: 36px; height: 36px; border-radius: 50%; background: #62C554; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; }
+  .d4-name { font-size: 13px; font-weight: 600; color: #E5ECDF; }
+  .d4-role { font-size: 10px; color: #8CA882; }
+
+  .d4-nav { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 10px; font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.55); cursor: pointer; transition: all 0.2s; }
+  .d4-nav:hover { background: rgba(98,197,84,0.1); color: rgba(255,255,255,0.85); }
+  .d4-nav.active { background: rgba(98,197,84,0.2); color: #62C554; font-weight: 600; border-left: 3px solid #62C554; }
+  .d4-nav .badge { margin-left: auto; background: #62C554; color: #fff; font-size: 10px; padding: 2px 7px; border-radius: 10px; font-weight: 700; }
+  .d4-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 10px 0; }
+  .d4-label { font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.25); text-transform: uppercase; letter-spacing: 1px; padding: 8px 12px 4px; }
+
+  .d4-h2 { font-size: 22px; font-weight: 800; color: #2D3B28; margin-bottom: 4px; }
+  .d4-sub { font-size: 12px; color: #8CA882; margin-bottom: 20px; }
+
+  .d4-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
+  .d4-stat { padding: 20px; border-radius: 16px; background: #fff; border: 1px solid #D8E0D0; position: relative; overflow: hidden; }
+  .d4-stat::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; }
+  .d4-stat.g::before { background: linear-gradient(90deg, #62C554, #A3E635); }
+  .d4-stat.y::before { background: linear-gradient(90deg, #F0C75E, #FBBF24); }
+  .d4-stat.r::before { background: linear-gradient(90deg, #E8614D, #F87171); }
+  .d4-stat .num { font-size: 32px; font-weight: 800; color: #2D3B28; }
+  .d4-stat .lbl { font-size: 11px; color: #8CA882; margin-top: 2px; }
+
+  .d4-card { padding: 14px 16px; border-radius: 12px; background: #fff; border: 1px solid #D8E0D0; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: all 0.2s; }
+  .d4-card:hover { border-color: #62C554; background: #F0F7EE; }
+
+  /* ═══════════════════════════════════════ */
+  /* DESIGN 5: NEON — Cyberpunk Dark        */
+  /* ═══════════════════════════════════════ */
+  .d5-frame { background: #0A0A0F; border: 1px solid #1A1A2E; }
+  .d5-tbar { background: #0A0A0F; border-bottom: 1px solid #1A1A2E; }
+  .d5-sb { background: #0D0D15; border-right: 1px solid #1A1A2E; }
+  .d5-ct { background: #0A0A0F; }
+
+  .d5-profile { display: flex; align-items: center; gap: 10px; padding: 12px; border-radius: 12px; margin-bottom: 16px; background: #0F0F1A; border: 1px solid #00F5D4; box-shadow: 0 0 15px rgba(0,245,212,0.1); }
+  .d5-avatar { width: 36px; height: 36px; border-radius: 8px; background: #00F5D4; color: #0A0A0F; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; }
+  .d5-name { font-size: 13px; font-weight: 600; color: #E0E0FF; }
+  .d5-role { font-size: 10px; color: #00F5D4; font-weight: 600; }
+
+  .d5-nav { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; color: #555; cursor: pointer; transition: all 0.2s; position: relative; }
+  .d5-nav:hover { color: #00F5D4; background: rgba(0,245,212,0.05); }
+  .d5-nav.active { color: #00F5D4; background: rgba(0,245,212,0.08); font-weight: 600; border: 1px solid rgba(0,245,212,0.3); box-shadow: 0 0 12px rgba(0,245,212,0.08); }
+  .d5-nav .badge { margin-left: auto; background: #FF006E; color: #fff; font-size: 10px; padding: 2px 7px; border-radius: 10px; font-weight: 700; box-shadow: 0 0 10px rgba(255,0,110,0.3); }
+  .d5-divider { height: 1px; background: #1A1A2E; margin: 10px 0; }
+  .d5-label { font-size: 9px; font-weight: 700; color: #333; text-transform: uppercase; letter-spacing: 1.5px; padding: 8px 12px 4px; }
+
+  .d5-h2 { font-size: 22px; font-weight: 800; color: #E0E0FF; margin-bottom: 4px; }
+  .d5-sub { font-size: 12px; color: #444; margin-bottom: 20px; }
+
+  .d5-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+  .d5-stat { padding: 16px; border-radius: 12px; background: #0F0F1A; border: 1px solid #1A1A2E; position: relative; }
+  .d5-stat .num { font-size: 28px; font-weight: 800; font-family: 'Courier New', monospace; }
+  .d5-stat .lbl { font-size: 10px; color: #555; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .d5-stat.cyan .num { color: #00F5D4; text-shadow: 0 0 10px rgba(0,245,212,0.3); }
+  .d5-stat.pink .num { color: #FF006E; text-shadow: 0 0 10px rgba(255,0,110,0.3); }
+  .d5-stat.yellow .num { color: #FFD60A; text-shadow: 0 0 10px rgba(255,214,10,0.3); }
+  .d5-stat.purple .num { color: #9B5DE5; text-shadow: 0 0 10px rgba(155,93,229,0.3); }
+
+  .d5-card { padding: 14px 16px; border-radius: 8px; background: #0F0F1A; border: 1px solid #1A1A2E; margin-bottom: 6px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: all 0.2s; }
+  .d5-card:hover { border-color: #00F5D4; box-shadow: 0 0 15px rgba(0,245,212,0.08); }
+
+  /* Common task elements */
+  .task-title { font-size: 13px; font-weight: 500; flex: 1; }
+  .task-meta { font-size: 10px; opacity: 0.5; }
+  .check { width: 18px; height: 18px; border-radius: 50%; border: 2px solid; flex-shrink: 0; }
+  .prio-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .tag-sm { font-size: 9px; font-weight: 600; padding: 2px 6px; border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>WorkFlow Pro — 5 Unikal Dizayn</h1>
+  <p>Bazarda fərqlənmək üçün 5 fərqli vizual dil. Hər biri eyni funksionallıq, fərqli hiss.</p>
+</div>
+
+<div class="tab-bar" style="--accent:#6366F1;--accent-bg:rgba(99,102,241,0.1);--accent-glow:rgba(99,102,241,0.2)">
+  <button class="active" onclick="show(0)" style="--accent:#6366F1;--accent-bg:rgba(99,102,241,0.1);--accent-glow:rgba(99,102,241,0.15)">🌌 1. Aurora</button>
+  <button onclick="show(1)" style="--accent:#FF8C42;--accent-bg:rgba(255,140,66,0.1);--accent-glow:rgba(255,140,66,0.15)">🌅 2. Sunset</button>
+  <button onclick="show(2)" style="--accent:#0EA5E9;--accent-bg:rgba(14,165,233,0.1);--accent-glow:rgba(14,165,233,0.15)">🌊 3. Ocean</button>
+  <button onclick="show(3)" style="--accent:#62C554;--accent-bg:rgba(98,197,84,0.1);--accent-glow:rgba(98,197,84,0.15)">🌿 4. Forest</button>
+  <button onclick="show(4)" style="--accent:#00F5D4;--accent-bg:rgba(0,245,212,0.08);--accent-glow:rgba(0,245,212,0.12)">⚡ 5. Neon</button>
+</div>
+
+<div class="proposals">
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- DESIGN 1: AURORA — Gradient Glass Dark     -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="proposal active" id="p0">
+  <div class="desc">
+    <h3 style="color:#6366F1">🌌 Aurora — Gradient Glass</h3>
+    <p>Qaranlıq fon üzərində şüşə effektli kartlar, gradient rənglər. Premium və müasir hiss. Texnologiya şirkətləri və startuplar üçün ideal.</p>
+    <div class="tags">
+      <span class="tag" style="background:rgba(99,102,241,0.15);color:#6366F1">Dark Mode</span>
+      <span class="tag" style="background:rgba(236,72,153,0.15);color:#EC4899">Glassmorphism</span>
+      <span class="tag" style="background:rgba(34,211,238,0.15);color:#22D3EE">Gradient</span>
+      <span class="tag" style="background:rgba(16,185,129,0.15);color:#10B981">Premium</span>
+    </div>
+  </div>
+  <div class="frame d1-frame">
+    <div class="title-bar d1-tbar"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><span style="margin-left:8px;font-size:11px;color:#444">WorkFlow Pro — Aurora</span></div>
+    <div class="mock-body">
+      <div class="sb d1-sb">
+        <div class="d1-profile"><div class="d1-avatar">LH</div><div><div class="d1-name">Leyla Hüseynova</div><div class="d1-role">Bakı Filialı Müdürü</div></div></div>
+        <div class="d1-nav active"><span class="icon">📅</span> Bugün <span class="badge">8</span></div>
+        <div class="d1-nav"><span class="icon">📥</span> Gələnlər <span style="margin-left:auto;font-size:10px;color:#555">3</span></div>
+        <div class="d1-nav"><span class="icon">📆</span> Gələcək</div>
+        <div class="d1-divider"></div>
+        <div class="d1-nav"><span class="icon">📋</span> Tapşırıqlar</div>
+        <div class="d1-nav"><span class="icon">✅</span> Todo</div>
+        <div class="d1-nav"><span class="icon">🔁</span> Şablonlar</div>
+        <div class="d1-divider"></div>
+        <div class="d1-label">Layihələr</div>
+        <div class="d1-nav"><span style="width:8px;height:8px;border-radius:50%;background:#6366F1;display:inline-block"></span> Veb Dizayn</div>
+        <div class="d1-nav"><span style="width:8px;height:8px;border-radius:50%;background:#EC4899;display:inline-block"></span> Mobil App</div>
+        <div class="d1-divider"></div>
+        <div class="d1-label">İdarəetmə</div>
+        <div class="d1-nav"><span class="icon">👥</span> İşçilər</div>
+        <div class="d1-nav"><span class="icon">💰</span> Maliyyə</div>
+      </div>
+      <div class="ct d1-ct">
+        <div class="d1-h2">Bugün</div>
+        <div class="d1-sub">22 Mart 2026, Bazar — 8 tapşırıq</div>
+        <div class="d1-stats">
+          <div class="d1-stat purple"><div class="num">12</div><div class="lbl">Aktiv görevlər</div></div>
+          <div class="d1-stat pink"><div class="num">3</div><div class="lbl">Onay gözləyir</div></div>
+          <div class="d1-stat cyan"><div class="num">28</div><div class="lbl">Bu ay tamamlanan</div></div>
+          <div class="d1-stat green"><div class="num">94%</div><div class="lbl">Produktivlik</div></div>
+        </div>
+        <div style="font-size:11px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Gecikmiş · 2</div>
+        <div class="d1-card"><div class="check" style="border-color:#FF6B6B"></div><div><div class="d1-card-title">Müştəri təqdimatını hazırla</div><div class="d1-card-meta">📎 2 fayl · 👤 Nigar</div></div><div class="prio-dot" style="background:#FF6B6B"></div><div style="font-size:10px;color:#FF6B6B">Dünən</div></div>
+        <div class="d1-card"><div class="check" style="border-color:#FF6B6B"></div><div><div class="d1-card-title">CRM datalarını yenilə</div><div class="d1-card-meta">🔁 Təkrarlanan · Həftəlik</div></div><div class="prio-dot" style="background:#FBBF24"></div><div style="font-size:10px;color:#FF6B6B">2 gün əvvəl</div></div>
+        <div style="font-size:11px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:1px;margin:16px 0 10px">Bugün · 6</div>
+        <div class="d1-card"><div class="check" style="border-color:#6366F1"></div><div><div class="d1-card-title">Aylıq satış hesabatı</div><div class="d1-card-meta">📊 Maliyyə · ⏰ 15:00</div></div><div class="prio-dot" style="background:#6366F1"></div><span class="tag-sm" style="background:rgba(99,102,241,0.15);color:#6366F1">GÖREV</span></div>
+        <div class="d1-card"><div class="check" style="border-color:#22D3EE"></div><div><div class="d1-card-title">Dizayn review görüşü</div><div class="d1-card-meta">🔗 Zoom · 11:00-12:00</div></div><div class="prio-dot" style="background:#22D3EE"></div><span class="tag-sm" style="background:rgba(34,211,238,0.15);color:#22D3EE">TODO</span></div>
+        <div class="d1-card"><div class="check" style="border-color:#10B981"></div><div><div class="d1-card-title">Server yeniləmə planı yaz</div><div class="d1-card-meta">💻 İT şöbəsi</div></div><div class="prio-dot" style="background:#10B981"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- DESIGN 2: SUNSET — Warm Orange             -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="proposal" id="p1">
+  <div class="desc">
+    <h3 style="color:#FF8C42">🌅 Sunset — İsti Narıncı</h3>
+    <p>İsti tonlar, yumşaq kölgələr, dairəvi formalar. Dostcanlı və rahat hiss. Xidmət sektoru, HR şirkətləri, yaradıcı agentliklər üçün ideal.</p>
+    <div class="tags">
+      <span class="tag" style="background:rgba(255,140,66,0.15);color:#FF8C42">Warm Tones</span>
+      <span class="tag" style="background:rgba(255,107,107,0.15);color:#FF6B6B">Friendly</span>
+      <span class="tag" style="background:rgba(56,161,105,0.15);color:#38A169">Rounded</span>
+    </div>
+  </div>
+  <div class="frame d2-frame" style="border-radius:24px">
+    <div class="title-bar d2-tbar" style="border-radius:24px 24px 0 0"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><span style="margin-left:8px;font-size:11px;color:#B39B7D">WorkFlow Pro — Sunset</span></div>
+    <div class="mock-body">
+      <div class="sb d2-sb">
+        <div class="d2-profile"><div class="d2-avatar">LH</div><div><div class="d2-name">Leyla Hüseynova</div><div class="d2-role">Bakı Müdürü</div></div></div>
+        <div class="d2-nav active"><span>📅</span> Bugün <span class="badge">8</span></div>
+        <div class="d2-nav"><span>📥</span> Gələnlər</div>
+        <div class="d2-nav"><span>📆</span> Gələcək</div>
+        <div class="d2-divider"></div>
+        <div class="d2-nav"><span>📋</span> Tapşırıqlar</div>
+        <div class="d2-nav"><span>✅</span> Todo</div>
+        <div class="d2-nav"><span>🔁</span> Şablonlar</div>
+        <div class="d2-divider"></div>
+        <div class="d2-label">Layihələr</div>
+        <div class="d2-nav"><span style="width:8px;height:8px;border-radius:50%;background:#FF8C42;display:inline-block"></span> Veb Dizayn</div>
+        <div class="d2-nav"><span style="width:8px;height:8px;border-radius:50%;background:#38A169;display:inline-block"></span> Mobil App</div>
+        <div class="d2-divider"></div>
+        <div class="d2-label">İdarəetmə</div>
+        <div class="d2-nav"><span>👥</span> İşçilər</div>
+        <div class="d2-nav"><span>💰</span> Maliyyə</div>
+      </div>
+      <div class="ct d2-ct">
+        <div class="d2-h2">☀️ Bugün</div>
+        <div class="d2-sub">22 Mart 2026, Bazar</div>
+        <div class="d2-stats">
+          <div class="d2-stat orange"><div class="num">12</div><div class="lbl">Aktiv</div></div>
+          <div class="d2-stat red"><div class="num">3</div><div class="lbl">Gecikmiş</div></div>
+          <div class="d2-stat green"><div class="num">28</div><div class="lbl">Tamamlanan</div></div>
+          <div class="d2-stat blue"><div class="num">94%</div><div class="lbl">Produktivlik</div></div>
+        </div>
+        <div class="d2-card"><div class="check" style="border-color:#FF6B6B"></div><div><div class="task-title" style="color:#3D2E1C">Müştəri təqdimatını hazırla</div><div class="task-meta" style="color:#B39B7D">📎 2 fayl · 👤 Nigar · <span style="color:#FF6B6B">Gecikmiş</span></div></div><div class="prio-dot" style="background:#FF6B6B"></div></div>
+        <div class="d2-card"><div class="check" style="border-color:#FF8C42"></div><div><div class="task-title" style="color:#3D2E1C">Aylıq satış hesabatı</div><div class="task-meta" style="color:#B39B7D">📊 Maliyyə · ⏰ 15:00</div></div><div class="prio-dot" style="background:#FF8C42"></div><span class="tag-sm" style="background:#FFF0DB;color:#FF8C42">GÖREV</span></div>
+        <div class="d2-card"><div class="check" style="border-color:#38A169"></div><div><div class="task-title" style="color:#3D2E1C">Dizayn review görüşü</div><div class="task-meta" style="color:#B39B7D">🔗 Zoom · 11:00</div></div><div class="prio-dot" style="background:#38A169"></div><span class="tag-sm" style="background:#E5F5EC;color:#38A169">TODO</span></div>
+        <div class="d2-card"><div class="check" style="border-color:#4A90D9"></div><div><div class="task-title" style="color:#3D2E1C">Server yeniləmə planı</div><div class="task-meta" style="color:#B39B7D">💻 İT · Son: Sabah</div></div><div class="prio-dot" style="background:#4A90D9"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- DESIGN 3: OCEAN — Deep Blue Professional   -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="proposal" id="p2">
+  <div class="desc">
+    <h3 style="color:#0EA5E9">🌊 Ocean — Dərin Mavi</h3>
+    <p>Klassik korporativ mavi, ağ kartlar, təmiz grid. Etibar və peşəkarlıq hissi. Bank, hüquq, konsaltinq şirkətləri üçün ideal.</p>
+    <div class="tags">
+      <span class="tag" style="background:rgba(14,165,233,0.15);color:#0EA5E9">Corporate</span>
+      <span class="tag" style="background:rgba(30,58,95,0.15);color:#1E3A5F">Trust</span>
+      <span class="tag" style="background:rgba(148,163,184,0.15);color:#64748B">Clean Grid</span>
+    </div>
+  </div>
+  <div class="frame d3-frame">
+    <div class="title-bar d3-tbar"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><span style="margin-left:8px;font-size:11px;color:rgba(255,255,255,0.4)">WorkFlow Pro — Ocean</span></div>
+    <div class="mock-body">
+      <div class="sb d3-sb">
+        <div class="d3-profile"><div class="d3-avatar">LH</div><div><div class="d3-name">Leyla Hüseynova</div><div class="d3-role">Bakı Filialı Müdürü</div></div></div>
+        <div class="d3-nav active"><span>📅</span> Bugün <span class="badge">8</span></div>
+        <div class="d3-nav"><span>📥</span> Gələnlər</div>
+        <div class="d3-nav"><span>📆</span> Gələcək</div>
+        <div class="d3-divider"></div>
+        <div class="d3-nav"><span>📋</span> Tapşırıqlar</div>
+        <div class="d3-nav"><span>✅</span> Todo</div>
+        <div class="d3-nav"><span>🔁</span> Şablonlar</div>
+        <div class="d3-divider"></div>
+        <div class="d3-label">İdarəetmə</div>
+        <div class="d3-nav"><span>👥</span> İşçilər</div>
+        <div class="d3-nav"><span>💰</span> Maliyyə</div>
+        <div class="d3-nav"><span>💵</span> Maaş/HR</div>
+      </div>
+      <div class="ct d3-ct">
+        <div class="d3-h2">Bugün</div>
+        <div class="d3-sub">22 Mart 2026, Bazar — 8 tapşırıq gözləyir</div>
+        <div class="d3-stats">
+          <div class="d3-stat"><div class="num">12</div><div class="lbl">Aktiv görevlər</div><div class="bar"><div class="bar-fill" style="width:60%;background:#0EA5E9"></div></div></div>
+          <div class="d3-stat"><div class="num">3</div><div class="lbl">Onay gözləyir</div><div class="bar"><div class="bar-fill" style="width:25%;background:#F59E0B"></div></div></div>
+          <div class="d3-stat"><div class="num">28</div><div class="lbl">Tamamlanan</div><div class="bar"><div class="bar-fill" style="width:85%;background:#10B981"></div></div></div>
+          <div class="d3-stat"><div class="num">94%</div><div class="lbl">Produktivlik</div><div class="bar"><div class="bar-fill" style="width:94%;background:#6366F1"></div></div></div>
+        </div>
+        <div class="d3-card"><div class="check" style="border-color:#EF4444"></div><div><div class="task-title" style="color:#1E3A5F">Müştəri təqdimatını hazırla</div><div class="task-meta" style="color:#94A3B8">📎 2 fayl · 👤 Nigar · <span style="color:#EF4444">Gecikmiş</span></div></div><span class="tag-sm" style="background:#FEE2E2;color:#EF4444">Yüksək</span></div>
+        <div class="d3-card"><div class="check" style="border-color:#0EA5E9"></div><div><div class="task-title" style="color:#1E3A5F">Aylıq satış hesabatı</div><div class="task-meta" style="color:#94A3B8">📊 Maliyyə · ⏰ 15:00</div></div><span class="tag-sm" style="background:#E0F2FE;color:#0EA5E9">GÖREV</span></div>
+        <div class="d3-card"><div class="check" style="border-color:#10B981"></div><div><div class="task-title" style="color:#1E3A5F">Dizayn review görüşü</div><div class="task-meta" style="color:#94A3B8">🔗 Zoom · 11:00-12:00</div></div><span class="tag-sm" style="background:#D1FAE5;color:#10B981">TODO</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- DESIGN 4: FOREST — Green Organic           -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="proposal" id="p3">
+  <div class="desc">
+    <h3 style="color:#62C554">🌿 Forest — Yaşıl Organik</h3>
+    <p>Torpaq tonları, yaşıl aksentlər, geniş yuvarlaq küncler. Rahatlıq və fokus hissi. Ekoloji, kənd təsərrüfatı, wellness şirkətləri üçün ideal.</p>
+    <div class="tags">
+      <span class="tag" style="background:rgba(98,197,84,0.15);color:#62C554">Organic</span>
+      <span class="tag" style="background:rgba(45,59,40,0.15);color:#8CA882">Earth Tones</span>
+      <span class="tag" style="background:rgba(240,199,94,0.15);color:#C4A030">Calm</span>
+    </div>
+  </div>
+  <div class="frame d4-frame">
+    <div class="title-bar d4-tbar"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><span style="margin-left:8px;font-size:11px;color:rgba(255,255,255,0.35)">WorkFlow Pro — Forest</span></div>
+    <div class="mock-body">
+      <div class="sb d4-sb">
+        <div class="d4-profile"><div class="d4-avatar">LH</div><div><div class="d4-name">Leyla Hüseynova</div><div class="d4-role">Bakı Müdürü</div></div></div>
+        <div class="d4-nav active"><span>📅</span> Bugün <span class="badge">8</span></div>
+        <div class="d4-nav"><span>📥</span> Gələnlər</div>
+        <div class="d4-nav"><span>📆</span> Gələcək</div>
+        <div class="d4-divider"></div>
+        <div class="d4-nav"><span>📋</span> Tapşırıqlar</div>
+        <div class="d4-nav"><span>✅</span> Todo</div>
+        <div class="d4-nav"><span>🔁</span> Şablonlar</div>
+        <div class="d4-divider"></div>
+        <div class="d4-label">Layihələr</div>
+        <div class="d4-nav"><span style="width:8px;height:8px;border-radius:50%;background:#62C554;display:inline-block"></span> Veb Dizayn</div>
+        <div class="d4-nav"><span style="width:8px;height:8px;border-radius:50%;background:#F0C75E;display:inline-block"></span> Mobil App</div>
+        <div class="d4-divider"></div>
+        <div class="d4-label">İdarəetmə</div>
+        <div class="d4-nav"><span>👥</span> İşçilər</div>
+        <div class="d4-nav"><span>💰</span> Maliyyə</div>
+      </div>
+      <div class="ct d4-ct">
+        <div class="d4-h2">🌿 Bugün</div>
+        <div class="d4-sub">22 Mart 2026, Bazar</div>
+        <div class="d4-stats">
+          <div class="d4-stat g"><div class="num">28</div><div class="lbl">Tamamlanan görevlər</div></div>
+          <div class="d4-stat y"><div class="num">12</div><div class="lbl">Davam edən</div></div>
+          <div class="d4-stat r"><div class="num">3</div><div class="lbl">Gecikmiş</div></div>
+        </div>
+        <div class="d4-card"><div class="check" style="border-color:#E8614D"></div><div><div class="task-title" style="color:#2D3B28">Müştəri təqdimatını hazırla</div><div class="task-meta" style="color:#8CA882">📎 2 fayl · 👤 Nigar</div></div><div class="prio-dot" style="background:#E8614D"></div></div>
+        <div class="d4-card"><div class="check" style="border-color:#62C554"></div><div><div class="task-title" style="color:#2D3B28">Aylıq satış hesabatı</div><div class="task-meta" style="color:#8CA882">📊 Maliyyə · ⏰ 15:00</div></div><div class="prio-dot" style="background:#62C554"></div><span class="tag-sm" style="background:#E5F5EC;color:#38A169">GÖREV</span></div>
+        <div class="d4-card"><div class="check" style="border-color:#F0C75E"></div><div><div class="task-title" style="color:#2D3B28">Dizayn review görüşü</div><div class="task-meta" style="color:#8CA882">🔗 Zoom · 11:00</div></div><div class="prio-dot" style="background:#F0C75E"></div></div>
+        <div class="d4-card"><div class="check" style="border-color:#62C554"></div><div><div class="task-title" style="color:#2D3B28">Server yeniləmə planı</div><div class="task-meta" style="color:#8CA882">💻 İT şöbəsi</div></div><div class="prio-dot" style="background:#62C554"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- DESIGN 5: NEON — Cyberpunk Dark            -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="proposal" id="p4">
+  <div class="desc">
+    <h3 style="color:#00F5D4">⚡ Neon — Cyberpunk</h3>
+    <p>Ultra qaranlıq fon, neon parıltılar, monospace rəqəmlər. Texniki və futuristik hiss. Oyun studioları, İT şirkətləri, kripto platformaları üçün ideal.</p>
+    <div class="tags">
+      <span class="tag" style="background:rgba(0,245,212,0.1);color:#00F5D4">Cyberpunk</span>
+      <span class="tag" style="background:rgba(255,0,110,0.1);color:#FF006E">Neon Glow</span>
+      <span class="tag" style="background:rgba(155,93,229,0.1);color:#9B5DE5">Futuristic</span>
+      <span class="tag" style="background:rgba(255,214,10,0.1);color:#FFD60A">Monospace</span>
+    </div>
+  </div>
+  <div class="frame d5-frame">
+    <div class="title-bar d5-tbar"><div class="dot" style="background:#FF006E;box-shadow:0 0 6px #FF006E"></div><div class="dot" style="background:#FFD60A;box-shadow:0 0 6px #FFD60A"></div><div class="dot" style="background:#00F5D4;box-shadow:0 0 6px #00F5D4"></div><span style="margin-left:8px;font-size:11px;color:#333;font-family:monospace">WORKFLOW::PRO v2.0</span></div>
+    <div class="mock-body">
+      <div class="sb d5-sb">
+        <div class="d5-profile"><div class="d5-avatar">LH</div><div><div class="d5-name">Leyla Hüseynova</div><div class="d5-role">&gt; Bakı_Müdür</div></div></div>
+        <div class="d5-nav active"><span>▸</span> Bugün <span class="badge">8</span></div>
+        <div class="d5-nav"><span>▸</span> Gələnlər</div>
+        <div class="d5-nav"><span>▸</span> Gələcək</div>
+        <div class="d5-divider"></div>
+        <div class="d5-nav"><span>▸</span> Tapşırıqlar</div>
+        <div class="d5-nav"><span>▸</span> Todo</div>
+        <div class="d5-nav"><span>▸</span> Şablonlar</div>
+        <div class="d5-divider"></div>
+        <div class="d5-label">// Layihələr</div>
+        <div class="d5-nav"><span style="width:8px;height:8px;border-radius:2px;background:#00F5D4;display:inline-block"></span> Veb Dizayn</div>
+        <div class="d5-nav"><span style="width:8px;height:8px;border-radius:2px;background:#FF006E;display:inline-block"></span> Mobil App</div>
+        <div class="d5-divider"></div>
+        <div class="d5-label">// İdarəetmə</div>
+        <div class="d5-nav"><span>▸</span> İşçilər</div>
+        <div class="d5-nav"><span>▸</span> Maliyyə</div>
+      </div>
+      <div class="ct d5-ct">
+        <div class="d5-h2">⚡ Bugün</div>
+        <div class="d5-sub" style="font-family:monospace">// 22.03.2026 — status: active — tasks: 8</div>
+        <div class="d5-stats">
+          <div class="d5-stat cyan"><div class="num">012</div><div class="lbl">Aktiv</div></div>
+          <div class="d5-stat pink"><div class="num">003</div><div class="lbl">Onay</div></div>
+          <div class="d5-stat yellow"><div class="num">028</div><div class="lbl">Tamamlanan</div></div>
+          <div class="d5-stat purple"><div class="num">94%</div><div class="lbl">Perf.</div></div>
+        </div>
+        <div style="font-size:10px;font-weight:700;color:#00F5D4;font-family:monospace;margin-bottom:8px">// OVERDUE [2]</div>
+        <div class="d5-card"><div class="check" style="border-color:#FF006E;border-radius:4px"></div><div><div class="task-title" style="color:#E0E0FF">Müştəri təqdimatını hazırla</div><div class="task-meta" style="color:#444;font-family:monospace">files:2 | user:nigar | <span style="color:#FF006E">OVERDUE</span></div></div><div class="prio-dot" style="background:#FF006E;box-shadow:0 0 6px #FF006E"></div></div>
+        <div class="d5-card"><div class="check" style="border-color:#FF006E;border-radius:4px"></div><div><div class="task-title" style="color:#E0E0FF">CRM datalarını yenilə</div><div class="task-meta" style="color:#444;font-family:monospace">type:recurring | cycle:weekly</div></div><div class="prio-dot" style="background:#FFD60A;box-shadow:0 0 6px #FFD60A"></div></div>
+        <div style="font-size:10px;font-weight:700;color:#555;font-family:monospace;margin:14px 0 8px">// TODAY [6]</div>
+        <div class="d5-card"><div class="check" style="border-color:#00F5D4;border-radius:4px"></div><div><div class="task-title" style="color:#E0E0FF">Aylıq satış hesabatı</div><div class="task-meta" style="color:#444;font-family:monospace">dept:finance | due:15:00</div></div><span class="tag-sm" style="background:rgba(0,245,212,0.1);color:#00F5D4;border:1px solid rgba(0,245,212,0.2)">GÖREV</span></div>
+        <div class="d5-card"><div class="check" style="border-color:#9B5DE5;border-radius:4px"></div><div><div class="task-title" style="color:#E0E0FF">Dizayn review görüşü</div><div class="task-meta" style="color:#444;font-family:monospace">link:zoom | time:11:00-12:00</div></div><span class="tag-sm" style="background:rgba(155,93,229,0.1);color:#9B5DE5;border:1px solid rgba(155,93,229,0.2)">TODO</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+function show(idx) {
+  document.querySelectorAll('.proposal').forEach(p => p.classList.remove('active'))
+  document.querySelectorAll('.tab-bar button').forEach(b => b.classList.remove('active'))
+  document.getElementById('p' + idx).classList.add('active')
+  document.querySelectorAll('.tab-bar button')[idx].classList.add('active')
+}
+</script>
+
+</body>
+</html>

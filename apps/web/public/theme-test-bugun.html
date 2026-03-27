@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bugün Səhifəsi — 4 Tema Test (Tam İnteraktiv)</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#08080C;color:#fff;overflow-x:hidden}
+
+/* ═══ TOP BAR THEME SWITCHER ═══ */
+.top-bar{display:flex;align-items:center;gap:12px;padding:18px 32px 10px}
+.top-bar h1{font-size:20px;font-weight:800;color:#fff;margin-right:auto}
+.theme-btn{width:40px;height:40px;border-radius:12px;border:2.5px solid transparent;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;font-size:15px;position:relative}
+.theme-btn:hover{transform:scale(1.1)}
+.theme-btn.active{border-color:#fff;box-shadow:0 0 16px rgba(255,255,255,.25)}
+.theme-btn.active::after{content:'';position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);width:6px;height:6px;border-radius:50%;background:#fff}
+.top-sub{font-size:11px;color:#666;padding:0 32px 14px}
+
+/* ═══ FRAME ═══ */
+.frame-wrap{padding:0 32px 40px;max-width:1240px;margin:0 auto}
+.frame{border-radius:16px;overflow:hidden;box-shadow:0 4px 32px rgba(0,0,0,.4);animation:fadeUp .3s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.tbar{display:flex;align-items:center;gap:7px;padding:10px 14px}
+.dt{width:11px;height:11px;border-radius:50%}.dr{background:#FF5F57}.dy{background:#FFBD2E}.dg{background:#28C840}
+.app{display:flex;min-height:700px}
+
+/* ═══ SIDEBAR ═══ */
+.sb{width:240px;padding:12px 8px;flex-shrink:0;overflow-y:auto;display:flex;flex-direction:column;gap:1px;position:relative}
+.sb::-webkit-scrollbar{width:4px}.sb::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
+.sb .prof{display:flex;align-items:center;gap:8px;padding:8px;border-radius:10px;margin-bottom:8px}
+.sb .av{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.sb .nm{font-size:12px;font-weight:600}.sb .rl{font-size:9px}
+.sb .add-wrap{position:relative;margin-bottom:4px}
+.sb .add-btn{display:flex;align-items:center;gap:7px;padding:7px 8px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:none;width:100%;text-align:left;transition:.15s}
+.sb .add-btn:hover{opacity:.9}
+.sb .add-drop{position:absolute;top:100%;left:0;right:0;border-radius:8px;overflow:hidden;z-index:80;display:none;margin-top:2px}
+.sb .add-drop.show{display:block}
+.sb .add-drop-item{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;cursor:pointer;font-size:11px;transition:.1s}
+.sb .add-drop-item:hover{opacity:.85}
+.sb .add-drop-item .adi-icon{font-size:14px;flex-shrink:0}
+.sb .add-drop-item .adi-title{font-weight:600}.sb .add-drop-item .adi-sub{font-size:9px;opacity:.6;margin-top:1px}
+.sb .nv{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;font-size:12px;font-weight:400;cursor:pointer;transition:.12s}
+.sb .nv:hover{opacity:.85}
+.sb .nv.a{font-weight:600}
+.sb .nv .bd{margin-left:auto;font-size:10px;font-weight:700;padding:1px 6px;border-radius:8px}
+.sb .dv{height:1px;margin:6px 0}
+.sb .lb{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;padding:6px 8px 3px;display:flex;align-items:center;justify-content:space-between}
+.sb .lb .lb-btn{cursor:pointer;font-size:11px;opacity:.5;transition:.15s}.sb .lb .lb-btn:hover{opacity:1}
+.sb .pdot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0}
+.sb .karma{margin-top:auto;padding:10px 8px}
+.sb .karma-box{padding:10px;border-radius:10px}
+.sb .karma-title{font-size:10px;font-weight:700;display:flex;align-items:center;gap:4px}
+.sb .karma-info{font-size:9px;margin-top:2px;opacity:.7}
+.sb .karma-bar{height:4px;border-radius:2px;margin-top:6px;overflow:hidden}
+.sb .karma-fill{height:100%;border-radius:2px;transition:.3s}
+
+/* ═══ HEADER BAR ═══ */
+.hbar{display:flex;align-items:center;gap:8px;padding:10px 16px;position:relative}
+.search-wrap{flex:1;position:relative}
+.search{width:100%;padding:7px 12px 7px 32px;border-radius:8px;font-size:12px;border:1px solid;outline:none;font-family:inherit;transition:.15s}
+.search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:12px;pointer-events:none;opacity:.5}
+.search-drop{position:absolute;top:100%;left:0;right:0;border-radius:10px;margin-top:4px;z-index:90;display:none;overflow:hidden}
+.search-drop.show{display:block}
+.search-drop-item{display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;font-size:11px;transition:.1s}
+.search-drop-item:hover{opacity:.8}
+.search-drop-item .sdi-type{font-size:8px;font-weight:700;padding:2px 5px;border-radius:4px}
+.hbtn{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;border:none;font-size:14px;transition:.15s;font-family:inherit}
+.hbtn:hover{opacity:.8}
+.hbtn .dot-notif{position:absolute;top:4px;right:4px;width:7px;height:7px;border-radius:50%;background:#DC2626}
+
+/* ═══ NOTIFICATION POPUP ═══ */
+.notif-popup{position:absolute;top:44px;right:50px;width:340px;border-radius:14px;z-index:100;display:none;max-height:420px;overflow:hidden}
+.notif-popup.show{display:block;animation:fadeUp .2s ease}
+.notif-hdr{padding:12px 16px;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:space-between}
+.notif-hdr .mark-read{font-size:10px;font-weight:600;cursor:pointer;transition:.15s}
+.notif-hdr .mark-read:hover{opacity:.7}
+.notif-scroll{max-height:340px;overflow-y:auto}
+.notif-scroll::-webkit-scrollbar{width:4px}.notif-scroll::-webkit-scrollbar-thumb{background:rgba(0,0,0,.1);border-radius:2px}
+.notif-item{display:flex;gap:10px;padding:10px 16px;cursor:pointer;transition:.12s}
+.notif-item:hover{opacity:.8}
+.notif-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.notif-info{flex:1;min-width:0}
+.notif-title{font-size:11px;font-weight:600}
+.notif-msg{font-size:10px;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.notif-time{font-size:9px;margin-top:2px}
+
+/* ═══ PROFILE POPUP ═══ */
+.prof-popup{position:absolute;top:44px;right:12px;width:220px;border-radius:12px;padding:6px 0;z-index:100;display:none}
+.prof-popup.show{display:block;animation:fadeUp .2s ease}
+.pp-head{padding:10px 14px;display:flex;align-items:center;gap:8px}
+.pp-head .pp-av{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.pp-head .pp-name{font-size:12px;font-weight:600}.pp-head .pp-email{font-size:9px;opacity:.6}
+.pp-div{height:1px;margin:4px 0}
+.pp-item{display:flex;align-items:center;gap:8px;padding:8px 14px;font-size:12px;cursor:pointer;transition:.1s}
+.pp-item:hover{opacity:.8}
+.pp-themes{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:4px 14px 8px}
+.pp-theme-dot{width:22px;height:22px;border-radius:6px;cursor:pointer;transition:.15s;border:2px solid transparent}
+.pp-theme-dot:hover{transform:scale(1.15)}
+.pp-theme-dot.active{border-color:currentColor}
+
+/* ═══ CONTENT AREA ═══ */
+.ct{flex:1;overflow-y:auto;padding:20px 24px}
+.ct::-webkit-scrollbar{width:5px}.ct::-webkit-scrollbar-thumb{background:rgba(0,0,0,.08);border-radius:3px}
+.ct-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
+.ct h2{font-size:18px;font-weight:700;margin-bottom:2px}
+.ct .st{font-size:11px}
+.ct-add-btn{padding:6px 14px;border-radius:8px;border:none;font-size:11px;font-weight:600;cursor:pointer;transition:.15s;font-family:inherit;display:flex;align-items:center;gap:4px}
+.ct-add-btn:hover{opacity:.85}
+
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+.stat{padding:14px;border-radius:12px;transition:.15s}
+.stat:hover{transform:translateY(-1px)}
+.stat .n{font-size:24px;font-weight:800}.stat .l{font-size:9px;font-weight:600;margin-top:1px;text-transform:uppercase;letter-spacing:.5px}
+.stat .bar{height:3px;border-radius:2px;margin-top:6px;overflow:hidden}
+.stat .bf{height:100%;border-radius:2px;transition:.3s}
+
+/* Type filter tabs */
+.type-tabs{display:flex;gap:0;margin-bottom:14px;border-bottom:2px solid}
+.type-tab{padding:8px 16px;font-size:11px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:.15s;display:flex;align-items:center;gap:5px;user-select:none}
+.type-tab.a{border-bottom-color:currentColor}
+.type-tab .cnt{font-size:9px;padding:1px 6px;border-radius:8px;font-weight:700}
+
+/* ═══ TODO SECTION ═══ */
+.todo-section{margin-bottom:16px}
+.todo-sec-hdr{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.todo-sec-hdr .tsh-icon{font-size:13px}.todo-sec-hdr .tsh-title{font-size:12px;font-weight:700}
+.todo-sec-hdr .tsh-line{flex:1;height:1px}.todo-sec-hdr .tsh-cnt{font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px}
+
+.todo-item{display:flex;align-items:flex-start;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:.15s;margin-bottom:3px;border:1px solid transparent}
+.todo-item:hover{transform:translateX(2px)}
+.todo-cb{width:18px;height:18px;border-radius:50%;border:2px solid;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.2s;font-size:10px;color:transparent}
+.todo-cb:hover{opacity:.7}
+.todo-cb.checked{color:#fff}
+.todo-info{flex:1;min-width:0}
+.todo-title{font-size:12px;font-weight:500;transition:.2s}
+.todo-title.done{text-decoration:line-through;opacity:.5}
+.todo-meta{display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap}
+.todo-due{font-size:10px;display:flex;align-items:center;gap:3px}
+.todo-label{font-size:9px;font-weight:600;padding:1px 6px;border-radius:8px}
+.todo-subtask{font-size:9px;display:flex;align-items:center;gap:3px;opacity:.7}
+
+/* ═══ STATUS TABS (GÖREV) ═══ */
+.status-tabs{display:flex;gap:0;margin-bottom:10px;border-bottom:1.5px solid;overflow-x:auto}
+.status-tab{padding:6px 12px;font-size:10px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1.5px;transition:.15s;display:flex;align-items:center;gap:4px;white-space:nowrap;user-select:none}
+.status-tab.a{border-bottom-color:currentColor}
+.status-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.status-tab .cnt{font-size:8px;padding:1px 5px;border-radius:6px;font-weight:700}
+
+/* Chip filters */
+.chips-row{display:flex;gap:5px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.chip{padding:4px 10px;border-radius:14px;font-size:10px;font-weight:600;cursor:pointer;transition:.15s;border:1px solid;user-select:none}
+.chip.a{font-weight:700}
+.chip-sep{width:1px;height:18px;margin:0 4px;opacity:.3}
+.chip-reset{padding:4px 8px;border-radius:14px;font-size:10px;font-weight:600;cursor:pointer;transition:.15s;border:1px solid;display:none;align-items:center;gap:3px}
+.chip-reset.show{display:flex}
+.chip .pr-dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:3px;vertical-align:middle}
+.worker-chip{position:relative}
+.worker-drop{position:absolute;top:100%;left:0;width:180px;border-radius:8px;z-index:60;display:none;margin-top:4px;overflow:hidden}
+.worker-drop.show{display:block}
+.worker-drop-item{padding:6px 10px;font-size:10px;cursor:pointer;transition:.1s;display:flex;align-items:center;gap:6px}
+.worker-drop-item:hover{opacity:.8}
+
+/* Section headers */
+.sec-hdr{display:flex;align-items:center;gap:8px;padding:6px 0;margin-top:8px}
+.sec-hdr .sec-icon{font-size:12px}.sec-hdr .sec-title{font-size:11px;font-weight:700}
+.sec-hdr .sec-line{flex:1;height:1px}.sec-hdr .sec-cnt{font-size:9px;font-weight:700;padding:2px 6px;border-radius:8px}
+
+/* GÖREV cards */
+.gcard{padding:10px 12px;border-radius:10px;margin-bottom:5px;cursor:pointer;transition:.15s;border:1px solid}
+.gcard:hover{transform:translateX(2px)}
+.gcard-top{display:flex;align-items:flex-start;gap:10px}
+.gcard-pbar{width:4px;border-radius:2px;min-height:36px;flex-shrink:0}
+.gcard-info{flex:1;min-width:0}
+.gcard-title{font-size:12px;font-weight:600;margin-bottom:3px}
+.gcard-meta{display:flex;align-items:center;gap:6px;font-size:10px;flex-wrap:wrap}
+.gcard-meta .gm-avatars{display:flex;margin-right:2px}
+.gcard-meta .gm-av{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;margin-left:-4px;border:1.5px solid #fff}
+.gcard-meta .gm-av:first-child{margin-left:0}
+.gcard-badge{font-size:8px;font-weight:700;padding:2px 6px;border-radius:4px}
+.gcard-overdue{font-size:9px;font-weight:700;color:#DC2626;display:flex;align-items:center;gap:3px}
+.gcard-progress{display:flex;align-items:center;gap:6px;margin-top:5px}
+.gcard-progress .gpbar{flex:1;height:4px;border-radius:2px;overflow:hidden;max-width:120px}
+.gcard-progress .gpfill{height:100%;border-radius:2px}
+.gcard-progress .gppct{font-size:9px;font-weight:700}
+.gcard-remain{font-size:9px;opacity:.6}
+
+/* Quick add bar */
+.qadd{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1.5px dashed;border-radius:8px;font-size:11px;cursor:pointer;transition:.15s;margin-top:10px}
+.qadd:hover{opacity:.85}
+
+/* ═══ MODALS ═══ */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(2px)}
+.modal-overlay.show{display:flex}
+.modal{border-radius:14px;max-width:560px;width:90%;max-height:80vh;overflow-y:auto;position:relative;animation:modalIn .2s ease}
+.modal::-webkit-scrollbar{width:4px}.modal::-webkit-scrollbar-thumb{background:rgba(0,0,0,.1);border-radius:2px}
+@keyframes modalIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+.modal-close{position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:8px;border:none;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:.15s}
+.modal-close:hover{opacity:.7}
+.modal-body{padding:24px}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:4px;padding-right:32px}
+.modal-desc{font-size:12px;opacity:.6;margin-bottom:16px}
+.modal-section{margin-bottom:14px}
+.modal-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;opacity:.5}
+.modal-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.modal-pill{padding:4px 10px;border-radius:8px;font-size:10px;font-weight:600;cursor:pointer;transition:.15s}
+.modal-pill.a{font-weight:700}
+.modal-pill:hover{opacity:.8}
+.modal-input{width:100%;padding:8px 12px;border-radius:8px;border:1px solid;font-size:12px;outline:none;font-family:inherit;transition:.15s}
+.modal-textarea{width:100%;padding:8px 12px;border-radius:8px;border:1px solid;font-size:12px;outline:none;font-family:inherit;min-height:60px;resize:vertical;transition:.15s}
+.modal-subtasks .ms-item{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:11px}
+.modal-subtasks .ms-cb{width:14px;height:14px;border-radius:50%;border:1.5px solid;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:8px}
+.modal-subtasks .ms-cb.done{color:#fff}
+.modal-comments{margin-top:16px}
+.modal-comment{display:flex;gap:8px;padding:8px 0}
+.modal-comment .mc-av{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0}
+.modal-comment .mc-info{flex:1}.modal-comment .mc-name{font-size:10px;font-weight:600}.modal-comment .mc-text{font-size:11px;margin-top:2px}.modal-comment .mc-time{font-size:9px;opacity:.5;margin-top:1px}
+.modal-actions{display:flex;gap:8px;margin-top:16px}
+.modal-btn{padding:8px 18px;border-radius:8px;border:none;font-size:12px;font-weight:600;cursor:pointer;transition:.15s;font-family:inherit}
+.modal-btn:hover{opacity:.85}
+.modal-btn.primary{color:#fff}
+
+/* Gorev detail modal extras */
+.gm-assignee-list{margin-top:8px}
+.gm-assignee{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:11px}
+.gm-assignee .gma-av{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;flex-shrink:0}
+.gm-assignee .gma-status{font-size:8px;font-weight:700;padding:2px 6px;border-radius:4px;margin-left:auto}
+
+/* Quick add modal */
+.qa-modal{max-width:480px}
+.qa-row{display:flex;gap:8px;margin-top:10px}
+.qa-select{padding:6px 10px;border-radius:8px;border:1px solid;font-size:11px;outline:none;font-family:inherit;flex:1}
+
+/* ═══════════════════════════════════ */
+/* THEME VARIABLES                     */
+/* ═══════════════════════════════════ */
+.t-forest{--bg:#F0FDF4;--sf:#fff;--tx:#14332A;--tx2:#6B8F80;--tx3:#A7C4B8;--bd:#D1FAE5;--pr:#059669;--pr2:#34D399;--prl:rgba(5,150,105,.08);--sbg:#064E3B;--stx:rgba(255,255,255,.6);--stxa:#fff;--shv:rgba(255,255,255,.08);--sac:rgba(52,211,153,.2);--sdv:rgba(255,255,255,.08);--slb:rgba(255,255,255,.3);--sbd:rgba(52,211,153,.25);--sbt:#34D399;--sav:rgba(52,211,153,.3);--red:#DC2626;--org:#F97316;--blue:#2563EB;--gray:#9CA3AF}
+.t-sunset{--bg:#FFFBF5;--sf:#fff;--tx:#431407;--tx2:#C2956B;--tx3:#DDB895;--bd:#FED7AA;--pr:#F97316;--pr2:#FBBF24;--prl:rgba(249,115,22,.08);--sbg:#7C2D12;--stx:rgba(255,255,255,.65);--stxa:#fff;--shv:rgba(255,255,255,.08);--sac:rgba(251,191,36,.25);--sdv:rgba(255,255,255,.1);--slb:rgba(255,255,255,.3);--sbd:rgba(251,191,36,.3);--sbt:#FBBF24;--sav:#F97316;--red:#DC2626;--org:#F97316;--blue:#2563EB;--gray:#9CA3AF}
+.t-slate{--bg:#FBFBFB;--sf:#fff;--tx:#171717;--tx2:#999;--tx3:#CCC;--bd:#EBEBEB;--pr:#2563EB;--pr2:#3B82F6;--prl:rgba(37,99,235,.06);--sbg:#F6F6F6;--stx:#999;--stxa:#171717;--shv:#F0F0F0;--sac:#EBEBEB;--sdv:#EBEBEB;--slb:#BBB;--sbd:transparent;--sbt:#999;--sav:#171717;--red:#DC2626;--org:#F97316;--blue:#2563EB;--gray:#9CA3AF}
+.t-ice{--bg:#F0F7FF;--sf:#fff;--tx:#0F1729;--tx2:#6B82A8;--tx3:#A3B8D4;--bd:#D0E0F5;--pr:#1D4ED8;--pr2:#3B82F6;--prl:rgba(29,78,216,.08);--sbg:#E5F0FF;--stx:#4A6A90;--stxa:#0F1729;--shv:#D5E5FF;--sac:#1D4ED8;--sdv:#D0E0F5;--slb:#6B82A8;--sbd:rgba(29,78,216,.12);--sbt:#1D4ED8;--sav:rgba(29,78,216,.15);--red:#DC2626;--org:#F97316;--blue:#1D4ED8;--gray:#9CA3AF}
+
+/* ═══ THEME-SPECIFIC STYLES ═══ */
+
+/* -- TBAR -- */
+.t-forest .tbar{background:#ECFDF5;border-bottom:1px solid #D1FAE5}
+.t-sunset .tbar{background:#FFF7ED;border-bottom:1px solid #FED7AA}
+.t-slate .tbar{background:#F6F6F6;border-bottom:1px solid #EBEBEB}
+.t-ice .tbar{background:#E5F0FF;border-bottom:1px solid #D0E0F5}
+
+/* -- SIDEBAR -- */
+.t-forest .sb{background:var(--sbg)}
+.t-sunset .sb{background:var(--sbg)}
+.t-slate .sb{background:var(--sbg);border-right:1px solid var(--bd)}
+.t-ice .sb{background:var(--sbg);border-right:1px solid var(--bd)}
+
+.t-forest .sb .prof{background:rgba(255,255,255,.06)}
+.t-sunset .sb .prof{background:rgba(255,255,255,.06)}
+.t-slate .sb .prof{background:transparent}
+.t-ice .sb .prof{background:var(--sac);border-radius:10px}
+
+.t-forest .sb .av{background:var(--sav);color:#fff}
+.t-sunset .sb .av{background:var(--sav);color:#fff}
+.t-slate .sb .av{background:var(--sav);color:#fff;border-radius:6px}
+.t-ice .sb .av{background:var(--sav);color:#fff}
+
+.t-forest .sb .nm{color:var(--stxa)} .t-forest .sb .rl{color:var(--stx)}
+.t-sunset .sb .nm{color:var(--stxa)} .t-sunset .sb .rl{color:var(--stx)}
+.t-slate .sb .nm{color:var(--stxa)} .t-slate .sb .rl{color:var(--stx)}
+.t-ice .sb .nm{color:#fff} .t-ice .sb .rl{color:rgba(255,255,255,.65)}
+.t-ice .sb .av{background:rgba(255,255,255,.25);color:#fff}
+
+.t-forest .sb .add-btn{background:var(--sac);color:var(--sbt)}
+.t-sunset .sb .add-btn{background:var(--sac);color:var(--sbt)}
+.t-slate .sb .add-btn{background:#EBEBEB;color:var(--stxa)}
+.t-ice .sb .add-btn{background:var(--prl);color:var(--pr)}
+
+.t-forest .sb .add-drop{background:#053D2E;box-shadow:0 4px 16px rgba(0,0,0,.3)}
+.t-sunset .sb .add-drop{background:#6B2510;box-shadow:0 4px 16px rgba(0,0,0,.3)}
+.t-slate .sb .add-drop{background:#fff;border:1px solid #EBEBEB;box-shadow:0 4px 16px rgba(0,0,0,.08)}
+.t-ice .sb .add-drop{background:#fff;border:1px solid #D0E0F5;box-shadow:0 4px 16px rgba(0,0,0,.08)}
+
+.t-forest .sb .add-drop-item{color:rgba(255,255,255,.8)}.t-forest .sb .add-drop-item:hover{background:rgba(255,255,255,.05)}
+.t-sunset .sb .add-drop-item{color:rgba(255,255,255,.8)}.t-sunset .sb .add-drop-item:hover{background:rgba(255,255,255,.05)}
+.t-slate .sb .add-drop-item{color:#333}.t-slate .sb .add-drop-item:hover{background:#F5F5F5}
+.t-ice .sb .add-drop-item{color:#333}.t-ice .sb .add-drop-item:hover{background:#F0F7FF}
+
+.t-forest .sb .nv{color:var(--stx)}.t-forest .sb .nv.a{color:var(--stxa);background:var(--sac)}
+.t-sunset .sb .nv{color:var(--stx)}.t-sunset .sb .nv.a{color:var(--stxa);background:var(--sac)}
+.t-slate .sb .nv{color:var(--stx)}.t-slate .sb .nv.a{color:var(--stxa);background:var(--sac);font-weight:600}
+.t-ice .sb .nv{color:var(--stx)}.t-ice .sb .nv.a{color:#fff;background:var(--sac)}
+
+.t-forest .sb .nv .bd{background:var(--sbd);color:var(--sbt)}
+.t-sunset .sb .nv .bd{background:var(--sbd);color:var(--sbt)}
+.t-slate .sb .nv .bd{color:var(--stx)}
+.t-ice .sb .nv .bd{background:var(--sbd);color:var(--sbt)}.t-ice .sb .nv.a .bd{background:rgba(255,255,255,.25);color:#fff}
+
+.t-forest .sb .dv{background:var(--sdv)} .t-forest .sb .lb{color:var(--slb)}
+.t-sunset .sb .dv{background:var(--sdv)} .t-sunset .sb .lb{color:var(--slb)}
+.t-slate .sb .dv{background:var(--sdv)} .t-slate .sb .lb{color:var(--slb)}
+.t-ice .sb .dv{background:var(--sdv)} .t-ice .sb .lb{color:var(--slb)}
+
+.t-forest .sb .karma-box{background:rgba(255,255,255,.06)}.t-forest .sb .karma-title{color:var(--sbt)}.t-forest .sb .karma-info{color:var(--stx)}.t-forest .sb .karma-bar{background:rgba(255,255,255,.1)}.t-forest .sb .karma-fill{background:var(--sbt)}
+.t-sunset .sb .karma-box{background:rgba(255,255,255,.06)}.t-sunset .sb .karma-title{color:var(--sbt)}.t-sunset .sb .karma-info{color:var(--stx)}.t-sunset .sb .karma-bar{background:rgba(255,255,255,.1)}.t-sunset .sb .karma-fill{background:var(--sbt)}
+.t-slate .sb .karma-box{background:#EBEBEB}.t-slate .sb .karma-title{color:var(--stxa)}.t-slate .sb .karma-info{color:var(--stx)}.t-slate .sb .karma-bar{background:#DDD}.t-slate .sb .karma-fill{background:var(--pr)}
+.t-ice .sb .karma-box{background:rgba(29,78,216,.06)}.t-ice .sb .karma-title{color:var(--pr)}.t-ice .sb .karma-info{color:var(--tx2)}.t-ice .sb .karma-bar{background:rgba(29,78,216,.1)}.t-ice .sb .karma-fill{background:var(--pr)}
+
+/* -- HEADER -- */
+.t-forest .hbar{background:var(--sf);border-bottom:1px solid var(--bd)}.t-forest .search{border-color:var(--bd);background:var(--bg);color:var(--tx)}.t-forest .hbtn{background:var(--bg);color:var(--tx2)}
+.t-sunset .hbar{background:var(--sf);border-bottom:1px solid var(--bd)}.t-sunset .search{border-color:var(--bd);background:var(--bg);color:var(--tx)}.t-sunset .hbtn{background:var(--bg);color:var(--tx2)}
+.t-slate .hbar{background:var(--sf);border-bottom:1px solid var(--bd)}.t-slate .search{border-color:var(--bd);background:#F6F6F6;color:var(--tx)}.t-slate .hbtn{background:#F6F6F6;color:var(--tx2)}
+.t-ice .hbar{background:var(--sf);border-bottom:1px solid var(--bd)}.t-ice .search{border-color:var(--bd);background:var(--bg);color:var(--tx)}.t-ice .hbtn{background:var(--bg);color:var(--tx2)}
+
+.t-forest .search-drop{background:var(--sf);border:1px solid var(--bd);box-shadow:0 8px 24px rgba(0,0,0,.1)}.t-forest .search-drop-item{color:var(--tx)}.t-forest .search-drop-item:hover{background:var(--prl)}
+.t-sunset .search-drop{background:var(--sf);border:1px solid var(--bd);box-shadow:0 8px 24px rgba(0,0,0,.1)}.t-sunset .search-drop-item{color:var(--tx)}.t-sunset .search-drop-item:hover{background:var(--prl)}
+.t-slate .search-drop{background:var(--sf);border:1px solid var(--bd);box-shadow:0 8px 24px rgba(0,0,0,.08)}.t-slate .search-drop-item{color:var(--tx)}.t-slate .search-drop-item:hover{background:#F5F5F5}
+.t-ice .search-drop{background:var(--sf);border:1px solid var(--bd);box-shadow:0 8px 24px rgba(0,0,0,.1)}.t-ice .search-drop-item{color:var(--tx)}.t-ice .search-drop-item:hover{background:var(--prl)}
+
+/* -- NOTIFICATIONS -- */
+.t-forest .notif-popup{background:var(--sf);border:1px solid var(--bd);box-shadow:0 8px 30px rgba(0,0,0,.12)}.t-forest .notif-hdr{color:var(--tx);border-bottom:1px solid var(--bd)}.t-forest .notif-hdr .mark-read{color:var(--pr)}.t-forest .notif-item{border-bottom:1px solid var(--bd)}.t-forest .notif-icon{background:var(--prl)}.t-forest .notif-title{color:var(--tx)}.t-forest .notif-msg{color:var(--tx2)}.t-forest .notif-time{color:var(--tx3)}
+.t-sunset .notif-popup{background:var(--sf);border:1px solid var(--bd);box-shadow:0 8px 30px rgba(0,0,0,.12)}.t-sunset .notif-hdr{color:var(--tx);border-bottom:1px solid var(--bd)}.t-sunset .notif-hdr .mark-read{color:var(--pr)}.t-sunset .notif-item{border-bottom:1px solid var(--bd)}.t-sunset .notif-icon{background:var(--prl)}.t-sunset .notif-title{color:var(--tx)}.t-sunset .notif-msg{color:var(--tx2)}.t-sunset .notif-time{color:var(--tx3)}
+.t-slate .notif-popup{background:var(--sf);border:1px solid var(--bd);box-shadow:0 8px 30px rgba(0,0,0,.08)}.t-slate .notif-hdr{color:var(--tx);border-bottom:1px solid var(--bd)}.t-slate .notif-hdr .mark-read{color:var(--pr)}.t-slate .notif-item{border-bottom:1px solid var(--bd)}.t-slate .notif-icon{background:#F5F5F5}.t-slate .notif-title{color:var(--tx)}.t-slate .notif-msg{color:var(--tx2)}.t-slate .notif-time{color:var(--tx3)}
+.t-ice .notif-popup{background:var(--sf);border:1px solid var(--bd);box-shadow:0 8px 30px rgba(0,0,0,.1)}.t-ice .notif-hdr{color:var(--tx);border-bottom:1px solid var(--bd)}.t-ice .notif-hdr .mark-read{color:var(--pr)}.t-ice .notif-item{border-bottom:1px solid var(--bd)}.t-ice .notif-icon{background:var(--prl)}.t-ice .notif-title{color:var(--tx)}.t-ice .notif-msg{color:var(--tx2)}.t-ice .notif-time{color:var(--tx3)}
+
+/* -- PROFILE POPUP -- */
+.t-forest .prof-popup{background:var(--sf);border:1px solid var(--bd);box-shadow:0 8px 30px rgba(0,0,0,.12)}.t-forest .pp-head .pp-av{background:var(--pr);color:#fff}.t-forest .pp-head .pp-name{color:var(--tx)}.t-forest .pp-head .pp-email{color:var(--tx2)}.t-forest .pp-div{background:var(--bd)}.t-forest .pp-item{color:var(--tx)}
+.t-sunset .prof-popup{background:var(--sf);border:1px solid var(--bd);box-shadow:0 8px 30px rgba(0,0,0,.12)}.t-sunset .pp-head .pp-av{background:var(--pr);color:#fff}.t-sunset .pp-head .pp-name{color:var(--tx)}.t-sunset .pp-head .pp-email{color:var(--tx2)}.t-sunset .pp-div{background:var(--bd)}.t-sunset .pp-item{color:var(--tx)}
+.t-slate .prof-popup{background:var(--sf);border:1px solid var(--bd);box-shadow:0 8px 30px rgba(0,0,0,.08)}.t-slate .pp-head .pp-av{background:var(--tx);color:#fff}.t-slate .pp-head .pp-name{color:var(--tx)}.t-slate .pp-head .pp-email{color:var(--tx2)}.t-slate .pp-div{background:var(--bd)}.t-slate .pp-item{color:var(--tx)}
+.t-ice .prof-popup{background:var(--sf);border:1px solid var(--bd);box-shadow:0 8px 30px rgba(0,0,0,.1)}.t-ice .pp-head .pp-av{background:var(--pr);color:#fff}.t-ice .pp-head .pp-name{color:var(--tx)}.t-ice .pp-head .pp-email{color:var(--tx2)}.t-ice .pp-div{background:var(--bd)}.t-ice .pp-item{color:var(--tx)}
+
+/* -- CONTENT -- */
+.t-forest .ct{background:var(--bg)} .t-forest .ct h2{color:var(--tx)} .t-forest .ct .st{color:var(--tx2)} .t-forest .ct-add-btn{background:var(--pr);color:#fff}
+.t-sunset .ct{background:var(--bg)} .t-sunset .ct h2{color:var(--tx)} .t-sunset .ct .st{color:var(--tx2)} .t-sunset .ct-add-btn{background:var(--pr);color:#fff}
+.t-slate .ct{background:var(--bg)} .t-slate .ct h2{color:var(--tx)} .t-slate .ct .st{color:var(--tx2)} .t-slate .ct-add-btn{background:var(--pr);color:#fff}
+.t-ice .ct{background:var(--bg)} .t-ice .ct h2{color:var(--tx)} .t-ice .ct .st{color:var(--tx2)} .t-ice .ct-add-btn{background:var(--pr);color:#fff}
+
+/* -- STATS -- */
+.t-forest .stat{background:var(--sf);border:1px solid var(--bd)}.t-forest .stat .n{color:var(--pr)}.t-forest .stat .l{color:var(--tx2)}.t-forest .stat .bar{background:#E5F5ED}.t-forest .stat .bf{background:var(--pr)}
+.t-sunset .stat{background:var(--sf);border:1px solid var(--bd)}.t-sunset .stat .n{color:var(--pr)}.t-sunset .stat .l{color:var(--tx2)}.t-sunset .stat .bar{background:#FFF0DD}.t-sunset .stat .bf{background:var(--pr)}
+.t-slate .stat{background:var(--sf);border:1px solid var(--bd)}.t-slate .stat .n{color:var(--tx)}.t-slate .stat .l{color:var(--tx2)}.t-slate .stat .bar{background:#F0F0F0}.t-slate .stat .bf{background:var(--pr)}
+.t-ice .stat{background:var(--sf);border:1px solid var(--bd)}.t-ice .stat .n{color:var(--pr)}.t-ice .stat .l{color:var(--tx2)}.t-ice .stat .bar{background:#E0ECFA}.t-ice .stat .bf{background:var(--pr)}
+
+/* -- TYPE TABS -- */
+.t-forest .type-tabs{border-color:var(--bd)}.t-forest .type-tab{color:var(--tx2)}.t-forest .type-tab.a{color:var(--pr)}.t-forest .type-tab .cnt{background:var(--prl);color:var(--pr)}
+.t-sunset .type-tabs{border-color:var(--bd)}.t-sunset .type-tab{color:var(--tx2)}.t-sunset .type-tab.a{color:var(--pr)}.t-sunset .type-tab .cnt{background:var(--prl);color:var(--pr)}
+.t-slate .type-tabs{border-color:var(--bd)}.t-slate .type-tab{color:var(--tx2)}.t-slate .type-tab.a{color:var(--tx)}.t-slate .type-tab .cnt{background:#F5F5F5;color:var(--tx2)}
+.t-ice .type-tabs{border-color:var(--bd)}.t-ice .type-tab{color:var(--tx2)}.t-ice .type-tab.a{color:var(--pr)}.t-ice .type-tab .cnt{background:var(--prl);color:var(--pr)}
+
+/* -- TODO SECTION -- */
+.t-forest .todo-sec-hdr .tsh-title{color:var(--pr)}.t-forest .todo-sec-hdr .tsh-line{background:var(--bd)}.t-forest .todo-sec-hdr .tsh-cnt{background:var(--prl);color:var(--pr)}
+.t-sunset .todo-sec-hdr .tsh-title{color:var(--pr)}.t-sunset .todo-sec-hdr .tsh-line{background:var(--bd)}.t-sunset .todo-sec-hdr .tsh-cnt{background:var(--prl);color:var(--pr)}
+.t-slate .todo-sec-hdr .tsh-title{color:var(--tx2)}.t-slate .todo-sec-hdr .tsh-line{background:var(--bd)}.t-slate .todo-sec-hdr .tsh-cnt{background:#F5F5F5;color:var(--tx2)}
+.t-ice .todo-sec-hdr .tsh-title{color:var(--pr)}.t-ice .todo-sec-hdr .tsh-line{background:var(--bd)}.t-ice .todo-sec-hdr .tsh-cnt{background:var(--prl);color:var(--pr)}
+
+.t-forest .todo-item{background:var(--sf)}.t-forest .todo-item:hover{border-color:var(--bd)}.t-forest .todo-title{color:var(--tx)}.t-forest .todo-meta{color:var(--tx2)}.t-forest .todo-label{background:var(--prl);color:var(--pr)}
+.t-sunset .todo-item{background:var(--sf)}.t-sunset .todo-item:hover{border-color:var(--bd)}.t-sunset .todo-title{color:var(--tx)}.t-sunset .todo-meta{color:var(--tx2)}.t-sunset .todo-label{background:var(--prl);color:var(--pr)}
+.t-slate .todo-item{background:var(--sf);border-bottom:1px solid var(--bd);border-radius:0}.t-slate .todo-item:hover{background:#FAFAFA}.t-slate .todo-title{color:var(--tx)}.t-slate .todo-meta{color:var(--tx2)}.t-slate .todo-label{background:#F5F5F5;color:#666}
+.t-ice .todo-item{background:var(--sf)}.t-ice .todo-item:hover{border-color:var(--bd)}.t-ice .todo-title{color:var(--tx)}.t-ice .todo-meta{color:var(--tx2)}.t-ice .todo-label{background:var(--prl);color:var(--pr)}
+
+/* -- STATUS TABS -- */
+.t-forest .status-tabs{border-color:var(--bd)}.t-forest .status-tab{color:var(--tx2)}.t-forest .status-tab.a{color:var(--pr)}.t-forest .status-tab .cnt{background:var(--prl);color:var(--pr)}
+.t-sunset .status-tabs{border-color:var(--bd)}.t-sunset .status-tab{color:var(--tx2)}.t-sunset .status-tab.a{color:var(--pr)}.t-sunset .status-tab .cnt{background:var(--prl);color:var(--pr)}
+.t-slate .status-tabs{border-color:var(--bd)}.t-slate .status-tab{color:var(--tx2)}.t-slate .status-tab.a{color:var(--tx)}.t-slate .status-tab .cnt{background:#F5F5F5;color:var(--tx2)}
+.t-ice .status-tabs{border-color:var(--bd)}.t-ice .status-tab{color:var(--tx2)}.t-ice .status-tab.a{color:var(--pr)}.t-ice .status-tab .cnt{background:var(--prl);color:var(--pr)}
+
+/* -- CHIPS -- */
+.t-forest .chip{border-color:var(--bd);color:var(--tx2);background:var(--sf)}.t-forest .chip.a{border-color:var(--pr);background:var(--prl);color:var(--pr)}.t-forest .chip-sep{background:var(--bd)}.t-forest .chip-reset{border-color:var(--red);color:var(--red);background:rgba(220,38,38,.05)}
+.t-sunset .chip{border-color:var(--bd);color:var(--tx2);background:var(--sf)}.t-sunset .chip.a{border-color:var(--pr);background:var(--prl);color:var(--pr)}.t-sunset .chip-sep{background:var(--bd)}.t-sunset .chip-reset{border-color:var(--red);color:var(--red);background:rgba(220,38,38,.05)}
+.t-slate .chip{border-color:var(--bd);color:var(--tx2);background:var(--sf)}.t-slate .chip.a{border-color:var(--tx);background:#F5F5F5;color:var(--tx)}.t-slate .chip-sep{background:var(--bd)}.t-slate .chip-reset{border-color:var(--red);color:var(--red);background:rgba(220,38,38,.03)}
+.t-ice .chip{border-color:var(--bd);color:var(--tx2);background:var(--sf)}.t-ice .chip.a{border-color:var(--pr);background:var(--prl);color:var(--pr)}.t-ice .chip-sep{background:var(--bd)}.t-ice .chip-reset{border-color:var(--red);color:var(--red);background:rgba(220,38,38,.05)}
+
+.t-forest .worker-drop{background:var(--sf);border:1px solid var(--bd);box-shadow:0 4px 16px rgba(0,0,0,.08)}.t-forest .worker-drop-item{color:var(--tx)}.t-forest .worker-drop-item:hover{background:var(--prl)}
+.t-sunset .worker-drop{background:var(--sf);border:1px solid var(--bd);box-shadow:0 4px 16px rgba(0,0,0,.08)}.t-sunset .worker-drop-item{color:var(--tx)}.t-sunset .worker-drop-item:hover{background:var(--prl)}
+.t-slate .worker-drop{background:var(--sf);border:1px solid var(--bd);box-shadow:0 4px 16px rgba(0,0,0,.06)}.t-slate .worker-drop-item{color:var(--tx)}.t-slate .worker-drop-item:hover{background:#F5F5F5}
+.t-ice .worker-drop{background:var(--sf);border:1px solid var(--bd);box-shadow:0 4px 16px rgba(0,0,0,.08)}.t-ice .worker-drop-item{color:var(--tx)}.t-ice .worker-drop-item:hover{background:var(--prl)}
+
+/* -- SECTION HEADERS -- */
+.t-forest .sec-hdr .sec-title{color:var(--pr)}.t-forest .sec-hdr .sec-line{background:var(--bd)}.t-forest .sec-hdr .sec-cnt{background:var(--prl);color:var(--pr)}.t-forest .sec-hdr.red .sec-title{color:var(--red)}.t-forest .sec-hdr.red .sec-cnt{background:#FEF2F2;color:var(--red)}
+.t-sunset .sec-hdr .sec-title{color:var(--pr)}.t-sunset .sec-hdr .sec-line{background:var(--bd)}.t-sunset .sec-hdr .sec-cnt{background:var(--prl);color:var(--pr)}.t-sunset .sec-hdr.red .sec-title{color:var(--red)}.t-sunset .sec-hdr.red .sec-cnt{background:#FEF2F2;color:var(--red)}
+.t-slate .sec-hdr .sec-title{color:var(--tx2)}.t-slate .sec-hdr .sec-line{background:var(--bd)}.t-slate .sec-hdr .sec-cnt{background:#F5F5F5;color:var(--tx2)}.t-slate .sec-hdr.red .sec-title{color:var(--red)}.t-slate .sec-hdr.red .sec-cnt{background:#FEF2F2;color:var(--red)}
+.t-ice .sec-hdr .sec-title{color:var(--pr)}.t-ice .sec-hdr .sec-line{background:var(--bd)}.t-ice .sec-hdr .sec-cnt{background:var(--prl);color:var(--pr)}.t-ice .sec-hdr.red .sec-title{color:var(--red)}.t-ice .sec-hdr.red .sec-cnt{background:#FEF2F2;color:var(--red)}
+
+/* -- GÖREV CARDS -- */
+.t-forest .gcard{background:var(--sf);border-color:var(--bd)}.t-forest .gcard:hover{border-color:var(--pr)}.t-forest .gcard-title{color:var(--tx)}.t-forest .gcard-meta{color:var(--tx2)}.t-forest .gcard-badge.gorev{background:var(--prl);color:var(--pr)}.t-forest .gcard-progress .gpbar{background:#E5F5ED}.t-forest .gcard-progress .gpfill{background:var(--pr)}.t-forest .gcard-progress .gppct{color:var(--pr)}.t-forest .gcard-remain{color:var(--tx3)}
+.t-sunset .gcard{background:var(--sf);border-color:var(--bd)}.t-sunset .gcard:hover{border-color:var(--pr)}.t-sunset .gcard-title{color:var(--tx)}.t-sunset .gcard-meta{color:var(--tx2)}.t-sunset .gcard-badge.gorev{background:var(--prl);color:var(--pr)}.t-sunset .gcard-progress .gpbar{background:#FFF0DD}.t-sunset .gcard-progress .gpfill{background:var(--pr)}.t-sunset .gcard-progress .gppct{color:var(--pr)}.t-sunset .gcard-remain{color:var(--tx3)}
+.t-slate .gcard{background:var(--sf);border-color:transparent;border-bottom:1px solid var(--bd);border-radius:0}.t-slate .gcard:hover{background:#FAFAFA}.t-slate .gcard-title{color:var(--tx)}.t-slate .gcard-meta{color:var(--tx2)}.t-slate .gcard-badge.gorev{background:var(--prl);color:var(--pr)}.t-slate .gcard-progress .gpbar{background:#F0F0F0}.t-slate .gcard-progress .gpfill{background:var(--pr)}.t-slate .gcard-progress .gppct{color:var(--tx)}.t-slate .gcard-remain{color:var(--tx3)}
+.t-ice .gcard{background:var(--sf);border-color:var(--bd)}.t-ice .gcard:hover{border-color:var(--pr)}.t-ice .gcard-title{color:var(--tx)}.t-ice .gcard-meta{color:var(--tx2)}.t-ice .gcard-badge.gorev{background:var(--prl);color:var(--pr)}.t-ice .gcard-progress .gpbar{background:#E0ECFA}.t-ice .gcard-progress .gpfill{background:var(--pr)}.t-ice .gcard-progress .gppct{color:var(--pr)}.t-ice .gcard-remain{color:var(--tx3)}
+
+/* Status badges on cards */
+[class*="t-"] .gcard-badge.status-created{background:#F0FDF4;color:#059669}
+[class*="t-"] .gcard-badge.status-progress{background:#EFF6FF;color:#2563EB}
+[class*="t-"] .gcard-badge.status-pending{background:#FFFBEB;color:#B45309}
+[class*="t-"] .gcard-badge.status-completed{background:#ECFDF5;color:#059669}
+[class*="t-"] .gcard-badge.status-rejected{background:#FEF2F2;color:#DC2626}
+
+/* -- QUICK ADD -- */
+.t-forest .qadd{border-color:var(--bd);color:var(--tx3)}.t-forest .qadd:hover{border-color:var(--pr);color:var(--pr)}
+.t-sunset .qadd{border-color:var(--bd);color:var(--tx3)}.t-sunset .qadd:hover{border-color:var(--pr);color:var(--pr)}
+.t-slate .qadd{border-color:var(--bd);color:var(--tx3)}.t-slate .qadd:hover{border-color:var(--tx2);color:var(--tx2)}
+.t-ice .qadd{border-color:var(--bd);color:var(--tx3)}.t-ice .qadd:hover{border-color:var(--pr);color:var(--pr)}
+
+/* -- MODALS -- */
+.t-forest .modal{background:var(--sf);border:1px solid var(--bd)}.t-forest .modal-close{background:var(--bg);color:var(--tx2)}.t-forest .modal-title{color:var(--tx)}.t-forest .modal-desc{color:var(--tx2)}.t-forest .modal-label{color:var(--tx2)}.t-forest .modal-input{border-color:var(--bd);background:var(--bg);color:var(--tx)}.t-forest .modal-textarea{border-color:var(--bd);background:var(--bg);color:var(--tx)}.t-forest .modal-pill{background:var(--bg);border:1px solid var(--bd);color:var(--tx2)}.t-forest .modal-pill.a{background:var(--prl);border-color:var(--pr);color:var(--pr)}.t-forest .modal-btn{background:var(--bg);color:var(--tx2)}.t-forest .modal-btn.primary{background:var(--pr)}.t-forest .modal-comment .mc-av{background:var(--prl);color:var(--pr)}.t-forest .modal-comment .mc-name{color:var(--tx)}.t-forest .modal-comment .mc-text{color:var(--tx2)}.t-forest .modal-subtasks .ms-cb{border-color:var(--bd)}.t-forest .modal-subtasks .ms-cb.done{background:var(--pr);border-color:var(--pr)}.t-forest .modal-subtasks{color:var(--tx)}.t-forest .gm-assignee{color:var(--tx)}.t-forest .gm-assignee .gma-av{background:var(--prl);color:var(--pr)}.t-forest .qa-select{border-color:var(--bd);background:var(--bg);color:var(--tx)}
+.t-sunset .modal{background:var(--sf);border:1px solid var(--bd)}.t-sunset .modal-close{background:var(--bg);color:var(--tx2)}.t-sunset .modal-title{color:var(--tx)}.t-sunset .modal-desc{color:var(--tx2)}.t-sunset .modal-label{color:var(--tx2)}.t-sunset .modal-input{border-color:var(--bd);background:var(--bg);color:var(--tx)}.t-sunset .modal-textarea{border-color:var(--bd);background:var(--bg);color:var(--tx)}.t-sunset .modal-pill{background:var(--bg);border:1px solid var(--bd);color:var(--tx2)}.t-sunset .modal-pill.a{background:var(--prl);border-color:var(--pr);color:var(--pr)}.t-sunset .modal-btn{background:var(--bg);color:var(--tx2)}.t-sunset .modal-btn.primary{background:var(--pr)}.t-sunset .modal-comment .mc-av{background:var(--prl);color:var(--pr)}.t-sunset .modal-comment .mc-name{color:var(--tx)}.t-sunset .modal-comment .mc-text{color:var(--tx2)}.t-sunset .modal-subtasks .ms-cb{border-color:var(--bd)}.t-sunset .modal-subtasks .ms-cb.done{background:var(--pr);border-color:var(--pr)}.t-sunset .modal-subtasks{color:var(--tx)}.t-sunset .gm-assignee{color:var(--tx)}.t-sunset .gm-assignee .gma-av{background:var(--prl);color:var(--pr)}.t-sunset .qa-select{border-color:var(--bd);background:var(--bg);color:var(--tx)}
+.t-slate .modal{background:var(--sf);border:1px solid var(--bd)}.t-slate .modal-close{background:#F5F5F5;color:var(--tx2)}.t-slate .modal-title{color:var(--tx)}.t-slate .modal-desc{color:var(--tx2)}.t-slate .modal-label{color:var(--tx2)}.t-slate .modal-input{border-color:var(--bd);background:#F6F6F6;color:var(--tx)}.t-slate .modal-textarea{border-color:var(--bd);background:#F6F6F6;color:var(--tx)}.t-slate .modal-pill{background:#F5F5F5;border:1px solid var(--bd);color:var(--tx2)}.t-slate .modal-pill.a{background:var(--prl);border-color:var(--pr);color:var(--pr)}.t-slate .modal-btn{background:#F5F5F5;color:var(--tx2)}.t-slate .modal-btn.primary{background:var(--pr)}.t-slate .modal-comment .mc-av{background:#F5F5F5;color:var(--tx)}.t-slate .modal-comment .mc-name{color:var(--tx)}.t-slate .modal-comment .mc-text{color:var(--tx2)}.t-slate .modal-subtasks .ms-cb{border-color:var(--bd)}.t-slate .modal-subtasks .ms-cb.done{background:var(--pr);border-color:var(--pr)}.t-slate .modal-subtasks{color:var(--tx)}.t-slate .gm-assignee{color:var(--tx)}.t-slate .gm-assignee .gma-av{background:#F5F5F5;color:var(--tx)}.t-slate .qa-select{border-color:var(--bd);background:#F6F6F6;color:var(--tx)}
+.t-ice .modal{background:var(--sf);border:1px solid var(--bd)}.t-ice .modal-close{background:var(--bg);color:var(--tx2)}.t-ice .modal-title{color:var(--tx)}.t-ice .modal-desc{color:var(--tx2)}.t-ice .modal-label{color:var(--tx2)}.t-ice .modal-input{border-color:var(--bd);background:var(--bg);color:var(--tx)}.t-ice .modal-textarea{border-color:var(--bd);background:var(--bg);color:var(--tx)}.t-ice .modal-pill{background:var(--bg);border:1px solid var(--bd);color:var(--tx2)}.t-ice .modal-pill.a{background:var(--prl);border-color:var(--pr);color:var(--pr)}.t-ice .modal-btn{background:var(--bg);color:var(--tx2)}.t-ice .modal-btn.primary{background:var(--pr)}.t-ice .modal-comment .mc-av{background:var(--prl);color:var(--pr)}.t-ice .modal-comment .mc-name{color:var(--tx)}.t-ice .modal-comment .mc-text{color:var(--tx2)}.t-ice .modal-subtasks .ms-cb{border-color:var(--bd)}.t-ice .modal-subtasks .ms-cb.done{background:var(--pr);border-color:var(--pr)}.t-ice .modal-subtasks{color:var(--tx)}.t-ice .gm-assignee{color:var(--tx)}.t-ice .gm-assignee .gma-av{background:var(--prl);color:var(--pr)}.t-ice .qa-select{border-color:var(--bd);background:var(--bg);color:var(--tx)}
+
+/* Avatar colors for gorev cards */
+.av-1{background:#059669;color:#fff}.av-2{background:#7C3AED;color:#fff}.av-3{background:#DC2626;color:#fff}
+.av-4{background:#2563EB;color:#fff}.av-5{background:#F97316;color:#fff}.av-6{background:#EC4899;color:#fff}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="top-bar">
+  <h1>WorkFlow Pro — Bugün Səhifəsi</h1>
+  <div class="theme-btn active" style="background:#064E3B" onclick="switchTheme('forest',this)" title="Forest">🌿</div>
+  <div class="theme-btn" style="background:#7C2D12" onclick="switchTheme('sunset',this)" title="Sunset">🌅</div>
+  <div class="theme-btn" style="background:#E0E0E0" onclick="switchTheme('slate',this)" title="Slate">📐</div>
+  <div class="theme-btn" style="background:#B0CEFF" onclick="switchTheme('ice',this)" title="Ice">❄️</div>
+</div>
+<div class="top-sub">4 tema | Tam interaktiv Bugün dashboard | Sidebar + Header + TODO + GOREV + Filtrlər + Modallar + Popuplar</div>
+
+<!-- MAIN FRAME -->
+<div class="frame-wrap">
+<div class="frame t-forest" id="mainFrame">
+  <!-- Title bar -->
+  <div class="tbar">
+    <div class="dt dr"></div><div class="dt dy"></div><div class="dt dg"></div>
+    <span style="margin-left:8px;font-size:11px;opacity:.5" id="tbarLabel">WorkFlow Pro — 🌿 Forest</span>
+  </div>
+
+  <div class="app">
+    <!-- ═══ SIDEBAR ═══ -->
+    <div class="sb">
+      <div class="prof">
+        <div class="av">HƏ</div>
+        <div><div class="nm">Həsən Əliyev</div><div class="rl">Şirkət Sahibi</div></div>
+      </div>
+
+      <div class="add-wrap">
+        <div class="add-btn" onclick="event.stopPropagation();toggleAddDrop()">＋ Tapşırıq əlavə et ▾</div>
+        <div class="add-drop" id="addDrop">
+          <div class="add-drop-item" onclick="event.stopPropagation();openGorevModal()">
+            <span class="adi-icon">📋</span>
+            <div><div class="adi-title">GÖREV yarat</div><div class="adi-sub">Şirkət tapşırığı — işçilərə təyin et</div></div>
+          </div>
+          <div class="add-drop-item" onclick="event.stopPropagation();openQuickAddModal()">
+            <span class="adi-icon">✅</span>
+            <div><div class="adi-title">TODO yarat</div><div class="adi-sub">Şəxsi tapşırıq — yalnız sənin üçün</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nv a" onclick="setNav(this)">📅 Bugün <span class="bd">14</span></div>
+      <div class="nv" onclick="setNav(this)">📥 Gələnlər <span class="bd">3</span></div>
+      <div class="nv" onclick="setNav(this)">📆 Gələcək</div>
+      <div class="dv"></div>
+      <div class="nv" onclick="setNav(this)">📋 Tapşırıqlar</div>
+      <div class="nv" onclick="setNav(this)">✅ Todo</div>
+      <div class="nv" onclick="setNav(this)">📑 Şablonlar</div>
+      <div class="dv"></div>
+      <div class="lb">Layihələr</div>
+      <div class="nv" onclick="setNav(this)"><span class="pdot" style="background:#7C3AED"></span> Veb Dizayn <span class="bd">15</span></div>
+      <div class="nv" onclick="setNav(this)"><span class="pdot" style="background:#059669"></span> Mobil Tətbiq <span class="bd">8</span></div>
+      <div class="nv" onclick="setNav(this)"><span class="pdot" style="background:#F97316"></span> Marketinq Planı <span class="bd">5</span></div>
+      <div class="nv" onclick="setNav(this)"><span class="pdot" style="background:#EC4899"></span> Şəxsi <span class="bd">4</span></div>
+      <div class="dv"></div>
+      <div class="lb">Etiketlər <span class="lb-btn" title="Etiket idarəsi">⚙</span></div>
+      <div class="nv" onclick="setNav(this)"><span class="pdot" style="background:#DC4C3E"></span> təcili</div>
+      <div class="nv" onclick="setNav(this)"><span class="pdot" style="background:#246FE0"></span> iş</div>
+      <div class="nv" onclick="setNav(this)"><span class="pdot" style="background:#9333EA"></span> görüş</div>
+      <div class="nv" onclick="setNav(this)"><span class="pdot" style="background:#059669"></span> dizayn</div>
+      <div class="nv" onclick="setNav(this)"><span class="pdot" style="background:#DC4C3E"></span> bug</div>
+      <div class="dv"></div>
+      <div class="lb">İdarəetmə</div>
+      <div class="nv" onclick="setNav(this)">👥 İşçilər</div>
+      <div class="nv" onclick="setNav(this)">🛡️ Rollar</div>
+      <div class="nv" onclick="setNav(this)">💰 Maliyyə</div>
+      <div class="nv" onclick="setNav(this)">💳 Maaş/HR</div>
+
+      <!-- Karma widget -->
+      <div class="karma">
+        <div class="karma-box">
+          <div class="karma-title">🔥 Karma — Level 3</div>
+          <div class="karma-info">720 xal · 72% növbəti levelə</div>
+          <div class="karma-bar"><div class="karma-fill" style="width:72%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ MAIN CONTENT ═══ -->
+    <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+      <!-- Header bar -->
+      <div class="hbar">
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input class="search" placeholder="Tapşırıq axtar..." onfocus="showSearchDrop()" oninput="showSearchDrop()" onblur="setTimeout(()=>hideSearchDrop(),200)">
+          <div class="search-drop" id="searchDrop">
+            <div class="search-drop-item" onclick="openGorevDetailModal(0)">
+              <span class="sdi-type" style="background:rgba(5,150,105,.08);color:#059669">GÖREV</span>
+              <span>CRM Miqrasiyası Q1 2026</span>
+            </div>
+            <div class="search-drop-item" onclick="openTodoDetailModal(0)">
+              <span class="sdi-type" style="background:rgba(37,99,235,.06);color:#2563EB">TODO</span>
+              <span>Auth sistemi (JWT + Refresh)</span>
+            </div>
+            <div class="search-drop-item" onclick="openGorevDetailModal(1)">
+              <span class="sdi-type" style="background:rgba(5,150,105,.08);color:#059669">GÖREV</span>
+              <span>Veb Sayt Yenilənməsi</span>
+            </div>
+          </div>
+        </div>
+        <button class="hbtn" onclick="event.stopPropagation();toggleNotif()">🔔<span class="dot-notif"></span></button>
+        <button class="hbtn" onclick="event.stopPropagation();toggleProf()" style="font-size:12px;font-weight:700">HƏ</button>
+
+        <!-- Notification popup -->
+        <div class="notif-popup" id="notifPopup">
+          <div class="notif-hdr">🔔 Bildirişlər (6) <span class="mark-read" onclick="event.stopPropagation()">Hamısını oxu</span></div>
+          <div class="notif-scroll">
+            <div class="notif-item"><div class="notif-icon">🔔</div><div class="notif-info"><div class="notif-title">Sistem yeniləməsi</div><div class="notif-msg">WorkFlow Pro v2.1 — yeni tema sistemi əlavə edildi</div><div class="notif-time">2 saat əvvəl</div></div></div>
+            <div class="notif-item"><div class="notif-icon">✅</div><div class="notif-info"><div class="notif-title">2/5 alt görev tamamlandı</div><div class="notif-msg">CRM Miqrasiyası — CSV export və data təmizləmə bitdi</div><div class="notif-time">3 saat əvvəl</div></div></div>
+            <div class="notif-item"><div class="notif-icon">💬</div><div class="notif-info"><div class="notif-title">Şərh əlavə edildi</div><div class="notif-msg">Nigar "Satış hesabatı" tapşırığına şərh yazdı</div><div class="notif-time">5 saat əvvəl</div></div></div>
+            <div class="notif-item"><div class="notif-icon">⏰</div><div class="notif-info"><div class="notif-title">Tapşırıq vaxtı yaxınlaşır</div><div class="notif-msg">"Auth sistemi" sabah deadline-dır</div><div class="notif-time">6 saat əvvəl</div></div></div>
+            <div class="notif-item"><div class="notif-icon">💬</div><div class="notif-info"><div class="notif-title">Yeni şərh</div><div class="notif-msg">Tural "İşçi təlimi" tapşırığına şərh yazdı</div><div class="notif-time">8 saat əvvəl</div></div></div>
+            <div class="notif-item"><div class="notif-icon">✅</div><div class="notif-info"><div class="notif-title">Tapşırıq tamamlandı</div><div class="notif-msg">"Ofis avadanlıq inventarı" tamamlanıb</div><div class="notif-time">1 gün əvvəl</div></div></div>
+          </div>
+        </div>
+
+        <!-- Profile popup -->
+        <div class="prof-popup" id="profPopup">
+          <div class="pp-head">
+            <div class="pp-av" style="background:var(--pr);color:#fff">HƏ</div>
+            <div><div class="pp-name">Həsən Əliyev</div><div class="pp-email">hasan@techflow.az</div></div>
+          </div>
+          <div class="pp-div"></div>
+          <div class="pp-item">⚙️ Tənzimləmələr</div>
+          <div class="pp-item">🎨 Tema</div>
+          <div class="pp-themes">
+            <div class="pp-theme-dot active" style="background:#064E3B;color:#064E3B" onclick="event.stopPropagation();switchTheme('forest')"></div>
+            <div class="pp-theme-dot" style="background:#7C2D12;color:#7C2D12" onclick="event.stopPropagation();switchTheme('sunset')"></div>
+            <div class="pp-theme-dot" style="background:#DDDDDD;color:#DDDDDD" onclick="event.stopPropagation();switchTheme('slate')"></div>
+            <div class="pp-theme-dot" style="background:#1D4ED8;color:#1D4ED8" onclick="event.stopPropagation();switchTheme('ice')"></div>
+          </div>
+          <div class="pp-div"></div>
+          <div class="pp-item" style="color:#DC2626">🚪 Çıxış</div>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="ct">
+        <!-- Title row -->
+        <div class="ct-top">
+          <div>
+            <h2>Bugün</h2>
+            <div class="st">22 Mart 2026, Bazar — 14 tapşırıq</div>
+          </div>
+          <button class="ct-add-btn" onclick="openQuickAddModal()">+ Tapşırıq əlavə et</button>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats">
+          <div class="stat"><div class="n">20</div><div class="l">Aktiv tapşırıq</div><div class="bar"><div class="bf" style="width:60%"></div></div></div>
+          <div class="stat"><div class="n" style="color:#10B981">4</div><div class="l">Tamamlanan</div><div class="bar"><div class="bf" style="width:25%;background:#10B981"></div></div></div>
+          <div class="stat"><div class="n" style="color:#DC2626">2</div><div class="l">Gecikmiş</div><div class="bar"><div class="bf" style="width:15%;background:#DC2626"></div></div></div>
+          <div class="stat"><div class="n">76.2K<span style="font-size:12px;font-weight:600">₼</span></div><div class="l">Gəlir</div><div class="bar"><div class="bf" style="width:78%"></div></div></div>
+        </div>
+
+        <!-- Type filter tabs -->
+        <div class="type-tabs">
+          <div class="type-tab a" onclick="setTypeTab(this,'all')">Hamısı <span class="cnt">14</span></div>
+          <div class="type-tab" onclick="setTypeTab(this,'gorev')">GÖREV <span class="cnt">8</span></div>
+          <div class="type-tab" onclick="setTypeTab(this,'todo')">TODO <span class="cnt">6</span></div>
+        </div>
+
+        <!-- ═══ TODO SECTION ═══ -->
+        <div id="todoSection">
+          <div class="todo-sec-hdr">
+            <span class="tsh-icon">✅</span>
+            <span class="tsh-title">Şəxsi tapşırıqlar</span>
+            <span class="tsh-line"></span>
+            <span class="tsh-cnt">6</span>
+          </div>
+          <div id="todoList">
+            <div class="todo-item" onclick="openTodoDetailModal(0)">
+              <div class="todo-cb" style="border-color:#DC2626" onclick="event.stopPropagation();toggleTodo(this)"></div>
+              <div class="todo-info">
+                <div class="todo-title">Auth sistemi (JWT + Refresh)</div>
+                <div class="todo-meta">
+                  <span class="todo-due" style="color:#DC2626">📅 Bugün</span>
+                  <span class="todo-label">@iş</span>
+                  <span class="todo-label">@təcili</span>
+                </div>
+              </div>
+            </div>
+            <div class="todo-item" onclick="openTodoDetailModal(1)">
+              <div class="todo-cb" style="border-color:#F97316" onclick="event.stopPropagation();toggleTodo(this)"></div>
+              <div class="todo-info">
+                <div class="todo-title">Rəng paleti və tipografiya</div>
+                <div class="todo-meta">
+                  <span class="todo-due">📅 Bugün</span>
+                  <span class="todo-label">@dizayn</span>
+                </div>
+              </div>
+            </div>
+            <div class="todo-item" onclick="openTodoDetailModal(2)">
+              <div class="todo-cb" style="border-color:#DC2626" onclick="event.stopPropagation();toggleTodo(this)"></div>
+              <div class="todo-info">
+                <div class="todo-title">Google Analytics 4 quraşdır</div>
+                <div class="todo-meta">
+                  <span class="todo-due" style="color:#DC2626">📅 Bugün</span>
+                  <span class="todo-label">@iş</span>
+                </div>
+              </div>
+            </div>
+            <div class="todo-item" onclick="openTodoDetailModal(3)">
+              <div class="todo-cb" style="border-color:#F97316" onclick="event.stopPropagation();toggleTodo(this)"></div>
+              <div class="todo-info">
+                <div class="todo-title">Komponent kitabxanası</div>
+                <div class="todo-meta">
+                  <span class="todo-due">📅 Sabah</span>
+                  <span class="todo-label">@dizayn</span>
+                  <span class="todo-label">@iş</span>
+                  <span class="todo-subtask">📦 1/5</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ GÖREV SECTION ═══ -->
+        <div id="gorevSection">
+          <!-- Status tabs -->
+          <div class="status-tabs">
+            <div class="status-tab a" onclick="setStatusTab(this)">Hamısı <span class="cnt">8</span></div>
+            <div class="status-tab" onclick="setStatusTab(this)"><span class="status-dot" style="background:#9CA3AF"></span> Gözləyir <span class="cnt">3</span></div>
+            <div class="status-tab" onclick="setStatusTab(this)"><span class="status-dot" style="background:#2563EB"></span> Davam edir <span class="cnt">4</span></div>
+            <div class="status-tab" onclick="setStatusTab(this)"><span class="status-dot" style="background:#F97316"></span> Onay gözləyir <span class="cnt">1</span></div>
+            <div class="status-tab" onclick="setStatusTab(this)"><span class="status-dot" style="background:#10B981"></span> Tamamlandı <span class="cnt">0</span></div>
+            <div class="status-tab" onclick="setStatusTab(this)"><span class="status-dot" style="background:#DC2626"></span> Rədd <span class="cnt">0</span></div>
+          </div>
+
+          <!-- Chip filters -->
+          <div class="chips-row">
+            <div class="chip a" data-group="filial" onclick="toggleChip(this,'filial')">Bütün filiallar</div>
+            <div class="chip" data-group="filial" data-val="baku" onclick="toggleChip(this,'filial')">Bakı</div>
+            <div class="chip" data-group="filial" data-val="gence" onclick="toggleChip(this,'filial')">Gəncə</div>
+            <div class="chip-sep"></div>
+            <div class="chip a" data-group="priority" onclick="toggleChip(this,'priority')">Hamısı</div>
+            <div class="chip" data-group="priority" data-val="critical" onclick="toggleChip(this,'priority')"><span class="pr-dot" style="background:#DC2626"></span>Kritik</div>
+            <div class="chip" data-group="priority" data-val="high" onclick="toggleChip(this,'priority')"><span class="pr-dot" style="background:#F97316"></span>Yüksək</div>
+            <div class="chip" data-group="priority" data-val="medium" onclick="toggleChip(this,'priority')"><span class="pr-dot" style="background:#2563EB"></span>Orta</div>
+            <div class="chip" data-group="priority" data-val="low" onclick="toggleChip(this,'priority')"><span class="pr-dot" style="background:#9CA3AF"></span>Aşağı</div>
+            <div class="chip-sep"></div>
+            <div class="chip worker-chip" onclick="event.stopPropagation();toggleWorkerDrop()">👤 Bütün işçilər ▾
+              <div class="worker-drop" id="workerDrop">
+                <div class="worker-drop-item" onclick="event.stopPropagation();selectWorker('all',this)">👤 Bütün işçilər</div>
+                <div class="worker-drop-item" onclick="event.stopPropagation();selectWorker('orxan',this)">👤 Orxan Əliyev</div>
+                <div class="worker-drop-item" onclick="event.stopPropagation();selectWorker('sebine',this)">👤 Səbinə Quliyeva</div>
+                <div class="worker-drop-item" onclick="event.stopPropagation();selectWorker('nigar',this)">👤 Nigar Məmmədova</div>
+                <div class="worker-drop-item" onclick="event.stopPropagation();selectWorker('tural',this)">👤 Tural Həsənov</div>
+              </div>
+            </div>
+            <div class="chip-reset" id="chipReset" onclick="resetChips()">✕ Sıfırla</div>
+          </div>
+
+          <!-- Task sections -->
+          <div id="gorevList">
+            <!-- Gecikmiş -->
+            <div class="sec-hdr red"><span class="sec-icon">⚠️</span><span class="sec-title">Gecikmiş</span><span class="sec-line"></span><span class="sec-cnt">2</span></div>
+            <div class="gcard" data-biz="baku" data-priority="critical" data-status="progress" data-workers="orxan,sebine" onclick="openGorevDetailModal(0)">
+              <div class="gcard-top">
+                <div class="gcard-pbar" style="background:#DC2626"></div>
+                <div class="gcard-info">
+                  <div class="gcard-title">ISO 9001 Sertifikasiya Sənədləri</div>
+                  <div class="gcard-meta">
+                    <div class="gm-avatars"><div class="gm-av av-1">OƏ</div><div class="gm-av av-2">SQ</div></div>
+                    <span>Bakı · HR</span>
+                    <span class="gcard-badge status-progress">Davam edir</span>
+                    <span class="gcard-overdue">⚠️ 7 gün gecikmiş</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="gcard" data-biz="baku" data-priority="high" data-status="pending" data-workers="sebine" onclick="openGorevDetailModal(1)">
+              <div class="gcard-top">
+                <div class="gcard-pbar" style="background:#F97316"></div>
+                <div class="gcard-info">
+                  <div class="gcard-title">Aylıq Maliyyə Hesabatı — Fevral</div>
+                  <div class="gcard-meta">
+                    <div class="gm-avatars"><div class="gm-av av-2">SQ</div></div>
+                    <span>Bakı · Maliyyə</span>
+                    <span class="gcard-badge status-pending">Onay gözləyir</span>
+                    <span class="gcard-overdue">⚠️ 12 gün gecikmiş</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Davam edən -->
+            <div class="sec-hdr"><span class="sec-icon">🔄</span><span class="sec-title">Davam edən</span><span class="sec-line"></span><span class="sec-cnt">4</span></div>
+            <div class="gcard" data-biz="baku" data-priority="critical" data-status="progress" data-workers="orxan,sebine,nigar" onclick="openGorevDetailModal(2)">
+              <div class="gcard-top">
+                <div class="gcard-pbar" style="background:#DC2626"></div>
+                <div class="gcard-info">
+                  <div class="gcard-title">CRM Miqrasiyası Q1 2026</div>
+                  <div class="gcard-meta">
+                    <div class="gm-avatars"><div class="gm-av av-1">OƏ</div><div class="gm-av av-2">SQ</div><div class="gm-av av-4">NM</div></div>
+                    <span>Bakı · İT</span>
+                    <span class="gcard-badge status-progress">Davam edir</span>
+                  </div>
+                  <div class="gcard-progress"><div class="gpbar"><div class="gpfill" style="width:40%"></div></div><span class="gppct">2/5</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="gcard" data-biz="baku" data-priority="high" data-status="progress" data-workers="orxan,sebine,nigar,tural" onclick="openGorevDetailModal(3)">
+              <div class="gcard-top">
+                <div class="gcard-pbar" style="background:#F97316"></div>
+                <div class="gcard-info">
+                  <div class="gcard-title">Korporativ Veb Sayt Yenilənməsi</div>
+                  <div class="gcard-meta">
+                    <div class="gm-avatars"><div class="gm-av av-1">OƏ</div><div class="gm-av av-2">SQ</div><div class="gm-av av-4">NM</div><div class="gm-av av-5">TH</div></div>
+                    <span>Bakı · İT</span>
+                    <span class="gcard-badge status-progress">Davam edir</span>
+                  </div>
+                  <div class="gcard-progress"><div class="gpbar"><div class="gpfill" style="width:17%"></div></div><span class="gppct">1/6</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="gcard" data-biz="baku" data-priority="high" data-status="progress" data-workers="nigar" onclick="openGorevDetailModal(4)">
+              <div class="gcard-top">
+                <div class="gcard-pbar" style="background:#F97316"></div>
+                <div class="gcard-info">
+                  <div class="gcard-title">Aylıq satış hesabatı hazırla</div>
+                  <div class="gcard-meta">
+                    <div class="gm-avatars"><div class="gm-av av-4">NM</div></div>
+                    <span>Bakı · Satış</span>
+                    <span class="gcard-badge status-progress">Davam edir</span>
+                    <span class="gcard-remain">3 gün qalıb</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="gcard" data-biz="baku" data-priority="medium" data-status="progress" data-workers="tural" onclick="openGorevDetailModal(5)">
+              <div class="gcard-top">
+                <div class="gcard-pbar" style="background:#2563EB"></div>
+                <div class="gcard-info">
+                  <div class="gcard-title">İşçi təlim proqramı</div>
+                  <div class="gcard-meta">
+                    <div class="gm-avatars"><div class="gm-av av-5">TH</div></div>
+                    <span>Bakı · HR</span>
+                    <span class="gcard-badge status-progress">Davam edir</span>
+                    <span class="gcard-remain">8 gün qalıb</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Gözləyən -->
+            <div class="sec-hdr"><span class="sec-icon">📋</span><span class="sec-title">Gözləyən</span><span class="sec-line"></span><span class="sec-cnt">3</span></div>
+            <div class="gcard" data-biz="gence" data-priority="high" data-status="created" data-workers="orxan,nigar,tural" onclick="openGorevDetailModal(6)">
+              <div class="gcard-top">
+                <div class="gcard-pbar" style="background:#F97316"></div>
+                <div class="gcard-info">
+                  <div class="gcard-title">Gəncə Marketinq Strategiyası 2026</div>
+                  <div class="gcard-meta">
+                    <div class="gm-avatars"><div class="gm-av av-1">OƏ</div><div class="gm-av av-4">NM</div><div class="gm-av av-5">TH</div></div>
+                    <span>Gəncə · Satış</span>
+                    <span class="gcard-badge status-created">Yaradılıb</span>
+                    <span class="gcard-remain">4 alt görev</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="gcard" data-biz="baku" data-priority="medium" data-status="created" data-workers="sebine,nigar" onclick="openGorevDetailModal(7)">
+              <div class="gcard-top">
+                <div class="gcard-pbar" style="background:#2563EB"></div>
+                <div class="gcard-info">
+                  <div class="gcard-title">Müştəri məmnuniyyət sorğusu</div>
+                  <div class="gcard-meta">
+                    <div class="gm-avatars"><div class="gm-av av-2">SQ</div><div class="gm-av av-4">NM</div></div>
+                    <span>Bakı · Marketinq</span>
+                    <span class="gcard-badge status-created">Yaradılıb</span>
+                    <span class="gcard-remain">6 gün qalıb</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="gcard" data-biz="gence" data-priority="critical" data-status="created" data-workers="orxan,tural" onclick="openGorevDetailModal(8)">
+              <div class="gcard-top">
+                <div class="gcard-pbar" style="background:#DC2626"></div>
+                <div class="gcard-info">
+                  <div class="gcard-title">Gəncə açılış tədbiri planlaması</div>
+                  <div class="gcard-meta">
+                    <div class="gm-avatars"><div class="gm-av av-1">OƏ</div><div class="gm-av av-5">TH</div></div>
+                    <span>Gəncə</span>
+                    <span class="gcard-badge status-created">Yaradılıb</span>
+                    <span class="gcard-remain">10 gün qalıb</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick add bar -->
+        <div class="qadd" onclick="openQuickAddModal()">＋ Tapşırıq əlavə et...</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ TODO DETAIL MODAL ═══ -->
+<div class="modal-overlay" id="todoDetailModal" onclick="closeAllModals()">
+  <div class="modal" onclick="event.stopPropagation()" id="todoDetailContent">
+    <button class="modal-close" onclick="closeAllModals()">✕</button>
+    <div class="modal-body">
+      <div class="modal-title" id="tdmTitle">Auth sistemi (JWT + Refresh)</div>
+      <div class="modal-desc" id="tdmDesc">JWT token yaratma, refresh token mexanizmi, login/logout API endpointləri</div>
+
+      <div class="modal-section">
+        <div class="modal-label">Prioritet</div>
+        <div class="modal-row">
+          <div class="modal-pill a" style="color:#DC2626;border-color:#DC2626;background:rgba(220,38,38,.06)">🔴 P1</div>
+          <div class="modal-pill">🟠 P2</div>
+          <div class="modal-pill">🔵 P3</div>
+          <div class="modal-pill">⚪ P4</div>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-label">Tarix</div>
+        <div class="modal-row">
+          <div class="modal-pill a">📅 Bugün</div>
+          <div class="modal-pill">Sabah</div>
+          <div class="modal-pill">Gələn həftə</div>
+          <div class="modal-pill">Tarix seç...</div>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-label">Müddət & Xatırlatma</div>
+        <div class="modal-row">
+          <div class="modal-pill">⏱ 60 dəq</div>
+          <div class="modal-pill">🔔 14:00</div>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-label">Alt tapşırıqlar</div>
+        <div class="modal-subtasks" id="tdmSubtasks">
+          <div class="ms-item"><div class="ms-cb done" style="background:var(--pr);border-color:var(--pr)">✓</div> <span style="text-decoration:line-through;opacity:.5">JWT token generator yaz</span></div>
+          <div class="ms-item"><div class="ms-cb">✓</div> Refresh token mexanizmi</div>
+          <div class="ms-item"><div class="ms-cb">✓</div> Login endpoint</div>
+          <div class="ms-item"><div class="ms-cb">✓</div> Logout endpoint</div>
+          <div class="ms-item"><div class="ms-cb">✓</div> Token middleware</div>
+        </div>
+      </div>
+
+      <div class="modal-section modal-comments">
+        <div class="modal-label">Şərhlər</div>
+        <div class="modal-comment">
+          <div class="mc-av">HƏ</div>
+          <div class="mc-info"><div class="mc-name">Həsən Əliyev</div><div class="mc-text">JWT secret .env-ə əlavə edilməlidir. RS256 istifadə edək?</div><div class="mc-time">2 saat əvvəl</div></div>
+        </div>
+        <div class="modal-comment">
+          <div class="mc-av" style="background:rgba(124,58,237,.1);color:#7C3AED">HƏ</div>
+          <div class="mc-info"><div class="mc-name">Həsən</div><div class="mc-text">Bəli, RS256 daha təhlükəsizdir. Access token 15 dəq, refresh 7 gün olsun.</div><div class="mc-time">1 saat əvvəl</div></div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="modal-btn primary" style="background:var(--pr)">Yadda saxla</button>
+        <button class="modal-btn">Ləğv et</button>
+        <button class="modal-btn" style="color:#DC2626;margin-left:auto">🗑 Sil</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ GÖREV DETAIL MODAL ═══ -->
+<div class="modal-overlay" id="gorevDetailModal" onclick="closeAllModals()">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:600px">
+    <button class="modal-close" onclick="closeAllModals()">✕</button>
+    <div class="modal-body">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        <div style="width:6px;height:24px;border-radius:3px" id="gdmPbar"></div>
+        <div class="modal-title" id="gdmTitle" style="margin:0">CRM Miqrasiyası Q1 2026</div>
+      </div>
+      <div class="modal-desc" id="gdmDesc">Mövcud müştəri bazasının yeni CRM sisteminə köçürülməsi. Data təmizləmə, mapping və test daxildir.</div>
+
+      <div class="modal-section">
+        <div class="modal-label">Status & Prioritet</div>
+        <div class="modal-row">
+          <span class="gcard-badge status-progress" id="gdmStatus" style="font-size:10px;padding:3px 8px">Davam edir</span>
+          <span class="gcard-badge" id="gdmPriority" style="font-size:10px;padding:3px 8px;background:rgba(220,38,38,.08);color:#DC2626">CRITICAL</span>
+          <span style="font-size:10px;opacity:.6" id="gdmDept">Bakı · İT</span>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-label">İştirakçılar</div>
+        <div class="gm-assignee-list" id="gdmAssignees">
+          <div class="gm-assignee"><div class="gma-av av-1">OƏ</div> Orxan Əliyev <span class="gma-status" style="background:#EFF6FF;color:#2563EB">Davam edir</span></div>
+          <div class="gm-assignee"><div class="gma-av av-2">SQ</div> Səbinə Quliyeva <span class="gma-status" style="background:#ECFDF5;color:#059669">Tamamladı</span></div>
+          <div class="gm-assignee"><div class="gma-av av-4">NM</div> Nigar Məmmədova <span class="gma-status" style="background:#FFF7ED;color:#F97316">Gözləyir</span></div>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-label">Alt görevlər</div>
+        <div class="modal-subtasks">
+          <div class="ms-item"><div class="ms-cb done" style="background:#059669;border-color:#059669">✓</div> <span style="text-decoration:line-through;opacity:.5">CSV data export</span></div>
+          <div class="ms-item"><div class="ms-cb done" style="background:#059669;border-color:#059669">✓</div> <span style="text-decoration:line-through;opacity:.5">Data təmizləmə skripti</span></div>
+          <div class="ms-item"><div class="ms-cb">✓</div> Field mapping konfiqurasiyası</div>
+          <div class="ms-item"><div class="ms-cb">✓</div> Test mühitində import</div>
+          <div class="ms-item"><div class="ms-cb">✓</div> Produksiya miqrasiyası</div>
+        </div>
+        <div class="gcard-progress" style="margin-top:8px"><div class="gpbar" style="max-width:200px"><div class="gpfill" style="width:40%"></div></div><span class="gppct">2/5 tamamlanıb</span></div>
+      </div>
+
+      <div class="modal-section modal-comments">
+        <div class="modal-label">Şərhlər</div>
+        <div class="modal-comment">
+          <div class="mc-av av-2">SQ</div>
+          <div class="mc-info"><div class="mc-name">Səbinə Quliyeva</div><div class="mc-text">Data təmizləmə tamamlandı. 2,847 dublikat silindi, 156 yanlış format düzəldildi.</div><div class="mc-time">3 saat əvvəl</div></div>
+        </div>
+        <div class="modal-comment">
+          <div class="mc-av av-1">OƏ</div>
+          <div class="mc-info"><div class="mc-name">Orxan Əliyev</div><div class="mc-text">Field mapping hazırdır. Cümə günü test import edəcəm.</div><div class="mc-time">5 saat əvvəl</div></div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="modal-btn primary" style="background:var(--pr)">Yadda saxla</button>
+        <button class="modal-btn">Bağla</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ QUICK ADD MODAL ═══ -->
+<div class="modal-overlay" id="quickAddModal" onclick="closeAllModals()">
+  <div class="modal qa-modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeAllModals()">✕</button>
+    <div class="modal-body">
+      <div class="modal-title">Yeni TODO yarat</div>
+      <div class="modal-desc">Şəxsi tapşırıq əlavə et</div>
+
+      <div class="modal-section">
+        <input class="modal-input" placeholder="Tapşırıq adı..." autofocus>
+      </div>
+      <div class="modal-section">
+        <textarea class="modal-textarea" placeholder="Təsvir (ixtiyari)..."></textarea>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-label">Prioritet</div>
+        <div class="modal-row">
+          <div class="modal-pill">🔴 P1</div>
+          <div class="modal-pill a">🟠 P2</div>
+          <div class="modal-pill">🔵 P3</div>
+          <div class="modal-pill">⚪ P4</div>
+        </div>
+      </div>
+
+      <div class="qa-row">
+        <select class="qa-select">
+          <option>📅 Bugün</option>
+          <option>Sabah</option>
+          <option>Gələn həftə</option>
+          <option>Tarix seç...</option>
+        </select>
+        <select class="qa-select">
+          <option>📁 Gələnlər (Inbox)</option>
+          <option>🟣 Veb Dizayn</option>
+          <option>🟢 Mobil Tətbiq</option>
+          <option>🟠 Marketinq Planı</option>
+          <option>🩷 Şəxsi</option>
+        </select>
+      </div>
+
+      <div class="modal-actions">
+        <button class="modal-btn primary" style="background:var(--pr)">Əlavə et</button>
+        <button class="modal-btn" onclick="closeAllModals()">Ləğv et</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ GÖREV CREATE MODAL ═══ -->
+<div class="modal-overlay" id="gorevCreateModal" onclick="closeAllModals()">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:560px">
+    <button class="modal-close" onclick="closeAllModals()">✕</button>
+    <div class="modal-body">
+      <div class="modal-title">Yeni GÖREV yarat</div>
+      <div class="modal-desc">Şirkət tapşırığı — işçilərə təyin et</div>
+
+      <div class="modal-section">
+        <input class="modal-input" placeholder="Görev başlığı...">
+      </div>
+      <div class="modal-section">
+        <textarea class="modal-textarea" placeholder="Təsvir..."></textarea>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-label">Filial & Şöbə</div>
+        <div class="qa-row" style="margin-top:0">
+          <select class="qa-select"><option>Bakı Filialı</option><option>Gəncə Filialı</option></select>
+          <select class="qa-select"><option>İT</option><option>HR</option><option>Satış</option><option>Maliyyə</option><option>Marketinq</option></select>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-label">Prioritet</div>
+        <div class="modal-row">
+          <div class="modal-pill" style="color:#DC2626;border-color:#DC2626;background:rgba(220,38,38,.06)">Kritik</div>
+          <div class="modal-pill a">Yüksək</div>
+          <div class="modal-pill">Orta</div>
+          <div class="modal-pill">Aşağı</div>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-label">Deadline</div>
+        <input class="modal-input" type="date" value="2026-04-01">
+      </div>
+
+      <div class="modal-actions">
+        <button class="modal-btn primary" style="background:var(--pr)">Görev yarat</button>
+        <button class="modal-btn" onclick="closeAllModals()">Ləğv et</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══ THEME SWITCHING ═══
+const themeLabels = {forest:'🌿 Forest',sunset:'🌅 Sunset',slate:'📐 Slate',ice:'❄️ Ice'};
+let currentTheme = 'forest';
+// Init: modal-lara default tema class-ı ver
+document.querySelectorAll('.modal-overlay').forEach(m => m.classList.add('t-forest'));
+
+function switchTheme(theme, btnEl) {
+  const frame = document.getElementById('mainFrame');
+  frame.className = 'frame t-' + theme;
+  currentTheme = theme;
+  document.getElementById('tbarLabel').textContent = 'WorkFlow Pro — ' + themeLabels[theme];
+
+  // Modal overlay-lara da tema class-ı əlavə et
+  document.querySelectorAll('.modal-overlay').forEach(m => {
+    m.className = m.className.replace(/\bt-\w+/g, '');
+    m.classList.add('t-' + theme);
+  });
+
+  // Update top bar buttons
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+  if (btnEl) {
+    btnEl.classList.add('active');
+  } else {
+    const idx = ['forest','sunset','slate','ice'].indexOf(theme);
+    document.querySelectorAll('.theme-btn')[idx].classList.add('active');
+  }
+
+  // Update profile popup theme dots
+  document.querySelectorAll('.pp-theme-dot').forEach((d,i) => {
+    d.classList.toggle('active', ['forest','sunset','slate','ice'][i] === theme);
+  });
+}
+
+// ═══ SIDEBAR NAV ═══
+function setNav(el) {
+  el.closest('.sb').querySelectorAll('.nv').forEach(n => n.classList.remove('a'));
+  el.classList.add('a');
+}
+
+// ═══ ADD DROPDOWN ═══
+function toggleAddDrop() {
+  const drop = document.getElementById('addDrop');
+  drop.classList.toggle('show');
+}
+
+// ═══ SEARCH ═══
+function showSearchDrop() {
+  const input = document.querySelector('.search');
+  if (input.value.length > 0 || document.activeElement === input) {
+    document.getElementById('searchDrop').classList.add('show');
+  }
+}
+function hideSearchDrop() {
+  document.getElementById('searchDrop').classList.remove('show');
+}
+
+// ═══ NOTIFICATIONS ═══
+function toggleNotif() {
+  closePopups('notif');
+  document.getElementById('notifPopup').classList.toggle('show');
+}
+
+// ═══ PROFILE ═══
+function toggleProf() {
+  closePopups('prof');
+  document.getElementById('profPopup').classList.toggle('show');
+}
+
+function closePopups(except) {
+  if (except !== 'notif') document.getElementById('notifPopup').classList.remove('show');
+  if (except !== 'prof') document.getElementById('profPopup').classList.remove('show');
+  document.getElementById('addDrop').classList.remove('show');
+  document.getElementById('workerDrop').classList.remove('show');
+}
+
+// ═══ TYPE TABS ═══
+let activeTypeTab = 'all';
+function setTypeTab(el, type) {
+  el.closest('.type-tabs').querySelectorAll('.type-tab').forEach(t => t.classList.remove('a'));
+  el.classList.add('a');
+  activeTypeTab = type;
+  document.getElementById('todoSection').style.display = (type === 'gorev') ? 'none' : '';
+  document.getElementById('gorevSection').style.display = (type === 'todo') ? 'none' : '';
+}
+
+// ═══ STATUS TABS ═══
+function setStatusTab(el) {
+  el.closest('.status-tabs').querySelectorAll('.status-tab').forEach(t => t.classList.remove('a'));
+  el.classList.add('a');
+  // Get status text for filtering
+  const text = el.textContent.trim();
+  filterGorevCards();
+}
+
+// ═══ CHIP FILTERS ═══
+let activeFilters = {filial: null, priority: null, worker: 'all'};
+
+function toggleChip(el, group) {
+  const val = el.dataset.val || null;
+  // Toggle within group
+  document.querySelectorAll(`.chip[data-group="${group}"]`).forEach(c => c.classList.remove('a'));
+  el.classList.add('a');
+  activeFilters[group] = val;
+  updateResetBtn();
+  filterGorevCards();
+}
+
+function toggleWorkerDrop() {
+  document.getElementById('workerDrop').classList.toggle('show');
+}
+
+function selectWorker(worker, el) {
+  activeFilters.worker = worker;
+  const chip = document.querySelector('.worker-chip');
+  const names = {all:'Bütün işçilər',orxan:'Orxan Əliyev',sebine:'Səbinə Quliyeva',nigar:'Nigar Məmmədova',tural:'Tural Həsənov'};
+  chip.childNodes[0].textContent = '👤 ' + names[worker] + ' ▾ ';
+  if (worker !== 'all') chip.classList.add('a');
+  else chip.classList.remove('a');
+  document.getElementById('workerDrop').classList.remove('show');
+  updateResetBtn();
+  filterGorevCards();
+}
+
+function updateResetBtn() {
+  const hasFilter = activeFilters.filial || activeFilters.priority || activeFilters.worker !== 'all';
+  document.getElementById('chipReset').classList.toggle('show', hasFilter);
+}
+
+function resetChips() {
+  activeFilters = {filial: null, priority: null, worker: 'all'};
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('a'));
+  document.querySelectorAll('.chip:not([data-val])').forEach(c => c.classList.add('a'));
+  document.querySelector('.worker-chip').classList.remove('a');
+  document.querySelector('.worker-chip').childNodes[0].textContent = '👤 Bütün işçilər ▾ ';
+  updateResetBtn();
+  filterGorevCards();
+}
+
+function filterGorevCards() {
+  const cards = document.querySelectorAll('.gcard');
+  cards.forEach(card => {
+    let show = true;
+    if (activeFilters.filial) {
+      show = show && card.dataset.biz === activeFilters.filial;
+    }
+    if (activeFilters.priority) {
+      show = show && card.dataset.priority === activeFilters.priority;
+    }
+    if (activeFilters.worker && activeFilters.worker !== 'all') {
+      show = show && card.dataset.workers && card.dataset.workers.includes(activeFilters.worker);
+    }
+    card.style.display = show ? '' : 'none';
+  });
+}
+
+// ═══ TODO CHECKBOXES ═══
+function toggleTodo(cb) {
+  const isChecked = cb.classList.toggle('checked');
+  const titleEl = cb.parentElement.querySelector('.todo-title');
+  if (isChecked) {
+    cb.textContent = '✓';
+    cb.style.background = cb.style.borderColor;
+    titleEl.classList.add('done');
+  } else {
+    cb.textContent = '';
+    cb.style.background = 'transparent';
+    titleEl.classList.remove('done');
+  }
+}
+
+// ═══ MODALS ═══
+function closeAllModals() {
+  document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('show'));
+}
+
+// Todo detail data
+const todoDetails = [
+  {title:'Auth sistemi (JWT + Refresh)', desc:'JWT token yaratma, refresh token mexanizmi, login/logout API endpointləri', priority:'P1'},
+  {title:'Rəng paleti və tipografiya', desc:'Layihə üçün rəng sistemi, font seçimi, komponent stilləri', priority:'P2'},
+  {title:'Google Analytics 4 quraşdır', desc:'GA4 tag manager, event tracking, conversion goals', priority:'P1'},
+  {title:'Komponent kitabxanası', desc:'Storybook ilə reusable UI komponentlər — Button, Input, Modal, Card, Badge', priority:'P2'}
+];
+
+function openTodoDetailModal(idx) {
+  closePopups();
+  const d = todoDetails[idx] || todoDetails[0];
+  document.getElementById('tdmTitle').textContent = d.title;
+  document.getElementById('tdmDesc').textContent = d.desc;
+  document.getElementById('todoDetailModal').classList.add('show');
+}
+
+// Gorev detail data
+const gorevDetails = [
+  {title:'ISO 9001 Sertifikasiya Sənədləri', desc:'Sertifikasiya üçün lazımi sənədlərin hazırlanması və audit prosesi', pbar:'#DC2626', priority:'CRITICAL', dept:'Bakı · HR', status:'Davam edir', statusCls:'status-progress',
+    assignees:[{av:'av-1',init:'OƏ',name:'Orxan Əliyev',status:'Davam edir',scls:'#2563EB',sbg:'#EFF6FF'},{av:'av-2',init:'SQ',name:'Səbinə Quliyeva',status:'Gözləyir',scls:'#F97316',sbg:'#FFF7ED'}]},
+  {title:'Aylıq Maliyyə Hesabatı — Fevral', desc:'Fevral ayının gəlir-xərc hesabatı, balans və audit üçün sənədlər', pbar:'#F97316', priority:'HIGH', dept:'Bakı · Maliyyə', status:'Onay gözləyir', statusCls:'status-pending',
+    assignees:[{av:'av-2',init:'SQ',name:'Səbinə Quliyeva',status:'Tamamladı',scls:'#059669',sbg:'#ECFDF5'}]},
+  {title:'CRM Miqrasiyası Q1 2026', desc:'Mövcud müştəri bazasının yeni CRM sisteminə köçürülməsi', pbar:'#DC2626', priority:'CRITICAL', dept:'Bakı · İT', status:'Davam edir', statusCls:'status-progress',
+    assignees:[{av:'av-1',init:'OƏ',name:'Orxan Əliyev',status:'Davam edir',scls:'#2563EB',sbg:'#EFF6FF'},{av:'av-2',init:'SQ',name:'Səbinə Quliyeva',status:'Tamamladı',scls:'#059669',sbg:'#ECFDF5'},{av:'av-4',init:'NM',name:'Nigar Məmmədova',status:'Gözləyir',scls:'#F97316',sbg:'#FFF7ED'}]},
+  {title:'Korporativ Veb Sayt Yenilənməsi', desc:'Şirkət veb saytının yeni dizayn ilə yenidən qurulması', pbar:'#F97316', priority:'HIGH', dept:'Bakı · İT', status:'Davam edir', statusCls:'status-progress',
+    assignees:[{av:'av-1',init:'OƏ',name:'Orxan Əliyev',status:'Davam edir',scls:'#2563EB',sbg:'#EFF6FF'},{av:'av-2',init:'SQ',name:'Səbinə Quliyeva',status:'Gözləyir',scls:'#F97316',sbg:'#FFF7ED'},{av:'av-4',init:'NM',name:'Nigar Məmmədova',status:'Gözləyir',scls:'#F97316',sbg:'#FFF7ED'},{av:'av-5',init:'TH',name:'Tural Həsənov',status:'Gözləyir',scls:'#F97316',sbg:'#FFF7ED'}]},
+  {title:'Aylıq satış hesabatı hazırla', desc:'Mart ayı satış göstəricilərinin toplanması və hesabat hazırlanması', pbar:'#F97316', priority:'HIGH', dept:'Bakı · Satış', status:'Davam edir', statusCls:'status-progress',
+    assignees:[{av:'av-4',init:'NM',name:'Nigar Məmmədova',status:'Davam edir',scls:'#2563EB',sbg:'#EFF6FF'}]},
+  {title:'İşçi təlim proqramı', desc:'Yeni işçilər üçün onboarding və peşəkar inkişaf təlim planı', pbar:'#2563EB', priority:'MEDIUM', dept:'Bakı · HR', status:'Davam edir', statusCls:'status-progress',
+    assignees:[{av:'av-5',init:'TH',name:'Tural Həsənov',status:'Davam edir',scls:'#2563EB',sbg:'#EFF6FF'}]},
+  {title:'Gəncə Marketinq Strategiyası 2026', desc:'Gəncə filialının illik marketinq planı və büdcə təklifi', pbar:'#F97316', priority:'HIGH', dept:'Gəncə · Satış', status:'Yaradılıb', statusCls:'status-created',
+    assignees:[{av:'av-1',init:'OƏ',name:'Orxan Əliyev',status:'Gözləyir',scls:'#F97316',sbg:'#FFF7ED'},{av:'av-4',init:'NM',name:'Nigar Məmmədova',status:'Gözləyir',scls:'#F97316',sbg:'#FFF7ED'},{av:'av-5',init:'TH',name:'Tural Həsənov',status:'Gözləyir',scls:'#F97316',sbg:'#FFF7ED'}]},
+  {title:'Müştəri məmnuniyyət sorğusu', desc:'Onlayn sorğu forması hazırlama və müştərilərə göndərmə', pbar:'#2563EB', priority:'MEDIUM', dept:'Bakı · Marketinq', status:'Yaradılıb', statusCls:'status-created',
+    assignees:[{av:'av-2',init:'SQ',name:'Səbinə Quliyeva',status:'Gözləyir',scls:'#F97316',sbg:'#FFF7ED'},{av:'av-4',init:'NM',name:'Nigar Məmmədova',status:'Gözləyir',scls:'#F97316',sbg:'#FFF7ED'}]},
+  {title:'Gəncə açılış tədbiri planlaması', desc:'Yeni Gəncə ofisinin açılış tədbirinin planlanması və təşkili', pbar:'#DC2626', priority:'CRITICAL', dept:'Gəncə', status:'Yaradılıb', statusCls:'status-created',
+    assignees:[{av:'av-1',init:'OƏ',name:'Orxan Əliyev',status:'Gözləyir',scls:'#F97316',sbg:'#FFF7ED'},{av:'av-5',init:'TH',name:'Tural Həsənov',status:'Gözləyir',scls:'#F97316',sbg:'#FFF7ED'}]}
+];
+
+function openGorevDetailModal(idx) {
+  closePopups();
+  const d = gorevDetails[idx] || gorevDetails[0];
+  document.getElementById('gdmTitle').textContent = d.title;
+  document.getElementById('gdmDesc').textContent = d.desc;
+  document.getElementById('gdmPbar').style.background = d.pbar;
+  document.getElementById('gdmStatus').textContent = d.status;
+  document.getElementById('gdmStatus').className = 'gcard-badge ' + d.statusCls;
+  document.getElementById('gdmPriority').textContent = d.priority;
+  const prColors = {CRITICAL:{bg:'rgba(220,38,38,.08)',c:'#DC2626'},HIGH:{bg:'rgba(249,115,22,.08)',c:'#F97316'},MEDIUM:{bg:'rgba(37,99,235,.08)',c:'#2563EB'},LOW:{bg:'rgba(156,163,175,.08)',c:'#9CA3AF'}};
+  const pc = prColors[d.priority] || prColors.MEDIUM;
+  document.getElementById('gdmPriority').style.background = pc.bg;
+  document.getElementById('gdmPriority').style.color = pc.c;
+  document.getElementById('gdmDept').textContent = d.dept;
+
+  let ahtml = '';
+  d.assignees.forEach(a => {
+    ahtml += `<div class="gm-assignee"><div class="gma-av ${a.av}">${a.init}</div> ${a.name} <span class="gma-status" style="background:${a.sbg};color:${a.scls}">${a.status}</span></div>`;
+  });
+  document.getElementById('gdmAssignees').innerHTML = ahtml;
+
+  document.getElementById('gorevDetailModal').classList.add('show');
+}
+
+function openQuickAddModal() {
+  closePopups();
+  closeAllModals();
+  document.getElementById('quickAddModal').classList.add('show');
+}
+
+function openGorevModal() {
+  closePopups();
+  closeAllModals();
+  document.getElementById('gorevCreateModal').classList.add('show');
+}
+
+// ═══ GLOBAL CLICK HANDLER ═══
+document.addEventListener('click', function(e) {
+  // Close popups when clicking outside
+  if (!e.target.closest('.hbtn') && !e.target.closest('.notif-popup')) {
+    document.getElementById('notifPopup').classList.remove('show');
+  }
+  if (!e.target.closest('.hbtn') && !e.target.closest('.prof-popup')) {
+    document.getElementById('profPopup').classList.remove('show');
+  }
+  if (!e.target.closest('.add-wrap')) {
+    document.getElementById('addDrop').classList.remove('show');
+  }
+  if (!e.target.closest('.worker-chip')) {
+    document.getElementById('workerDrop').classList.remove('show');
+  }
+});
+
+// Keyboard: Escape closes modals
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeAllModals();
+});
+</script>
+</body>
+</html>

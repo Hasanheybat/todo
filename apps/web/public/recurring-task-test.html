@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Təkrarlanan Görev — Popup Dizayn</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #F5F3F0; color: #1F1F1F; }
+
+  .page-header { padding: 20px 32px 12px; background: #F5F3F0; }
+  .page-header h1 { font-size: 22px; font-weight: 800; margin-bottom: 2px; }
+  .page-header p { font-size: 12px; color: #808080; }
+
+  /* View Switch */
+  .view-sw { display: flex; gap: 0; margin: 12px 32px 16px; background: #fff; border-radius: 10px; border: 1.5px solid #EBEBEB; overflow: hidden; width: fit-content; }
+  .view-sw button { padding: 8px 20px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; background: #fff; color: #808080; transition: all 0.2s; }
+  .view-sw button.active { background: #DC4C3E; color: #fff; }
+
+  /* Main Layout — tam Tapşırıqlar səhifəsi */
+  .app-frame { max-width: 1100px; margin: 0 32px 40px; background: #fff; border-radius: 14px; border: 1px solid #EBEBEB; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; }
+  .app-body { display: flex; min-height: 800px; }
+
+  /* Sidebar */
+  .sb { width: 220px; background: #FCFAF8; border-right: 1px solid #EBEBEB; padding: 14px 10px; flex-shrink: 0; }
+  .sb-profile { display: flex; align-items: center; gap: 8px; padding: 6px 8px; margin-bottom: 8px; }
+  .sb-av { width: 26px; height: 26px; border-radius: 50%; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; }
+  .sb-name { font-size: 12px; font-weight: 600; }
+  .sb-role { font-size: 9px; color: #B3B3B3; }
+  .sb-div { height: 1px; background: #EBEBEB; margin: 6px 0; }
+  .sb-btn { display: flex; align-items: center; gap: 7px; padding: 6px 8px; border-radius: 6px; font-size: 12px; font-weight: 500; color: #1F1F1F; cursor: pointer; border: none; background: none; width: 100%; text-align: left; }
+  .sb-btn:hover { background: #F0EDE8; }
+  .sb-btn.active { background: #FFEFE5; color: #DC4C3E; font-weight: 600; }
+  .sb-badge { margin-left: auto; font-size: 10px; font-weight: 700; color: #DC4C3E; }
+
+  /* Content */
+  .ct { flex: 1; padding: 20px 24px; overflow-y: auto; background: #fff; }
+  .ct h2 { font-size: 18px; font-weight: 700; margin-bottom: 2px; }
+  .ct .sub { font-size: 11px; color: #B3B3B3; margin-bottom: 14px; }
+
+  /* Status tabs — mövcud dizayn */
+  .s-tabs { display: flex; gap: 0; border-bottom: 2px solid #EBEBEB; margin-bottom: 12px; }
+  .s-tab { padding: 8px 14px; font-size: 11px; font-weight: 600; color: #808080; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+  .s-tab.active { color: #DC4C3E; border-bottom-color: #DC4C3E; }
+  .s-tab .cnt { font-size: 9px; padding: 1px 5px; border-radius: 8px; font-weight: 700; background: #F0F0F0; color: #B3B3B3; }
+  .s-tab.active .cnt { background: #FEE2E0; color: #DC4C3E; }
+  .s-dot { width: 6px; height: 6px; border-radius: 50%; }
+
+  /* Chip filters */
+  .chips { display: flex; gap: 4px; margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
+  .chip { padding: 4px 10px; border-radius: 14px; font-size: 10px; font-weight: 600; border: 1.5px solid #EBEBEB; background: #fff; color: #1F1F1F; cursor: pointer; white-space: nowrap; }
+  .chip.active { background: #DC4C3E; color: #fff; border-color: #DC4C3E; }
+  .chip-sep { width: 1px; height: 16px; background: #EBEBEB; margin: 0 2px; }
+
+  /* Task Card — mövcud stilə uyğun */
+  .tk { padding: 10px 12px; border: 1px solid #EBEBEB; border-radius: 8px; cursor: pointer; transition: all 0.15s; margin-bottom: 6px; }
+  .tk:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.06); border-color: #D4E2FC; }
+  .tk-top { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+  .tk-status { font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: 600; }
+  .tk-priority { font-size: 9px; font-weight: 600; }
+  .tk-recurring { font-size: 9px; padding: 2px 6px; border-radius: 4px; background: #E8F0FE; color: #246FE0; font-weight: 600; display: flex; align-items: center; gap: 3px; }
+  .tk-title { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+  .tk-meta { font-size: 10px; color: #B3B3B3; display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* Recurring card — progress bar variant */
+  .tk-rec { border-color: #D4E2FC; background: #FAFBFF; }
+  .tk-rec:hover { border-color: #246FE0; }
+  .tk-users { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+  .tk-user { display: flex; align-items: center; gap: 4px; font-size: 10px; }
+  .tk-uav { width: 18px; height: 18px; border-radius: 50%; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 7px; font-weight: 700; }
+  .tk-pbar { width: 50px; height: 4px; background: #E8E8E8; border-radius: 2px; overflow: hidden; }
+  .tk-pfill { height: 100%; border-radius: 2px; }
+  .tk-pct { font-size: 10px; font-weight: 700; }
+  .tk-overall { display: flex; align-items: center; gap: 6px; margin-top: 6px; padding-top: 6px; border-top: 1px solid #F0F0F0; }
+  .tk-obar { flex: 1; height: 5px; background: #F0F0F0; border-radius: 3px; overflow: hidden; }
+  .tk-ofill { height: 100%; background: linear-gradient(90deg, #058527, #28C840); border-radius: 3px; }
+
+  /* ═══════════════════════════════════════ */
+  /* MODAL / POPUP                          */
+  /* ═══════════════════════════════════════ */
+  .overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.45); z-index: 100; display: none; align-items: center; justify-content: center; }
+  .overlay.show { display: flex; }
+  .modal { background: #fff; border-radius: 14px; width: 580px; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+  .modal-lg { width: 640px; }
+  .m-head { padding: 16px 20px; border-bottom: 1px solid #EBEBEB; display: flex; align-items: center; gap: 10px; }
+  .m-head h3 { font-size: 15px; font-weight: 700; flex: 1; }
+  .m-close { width: 28px; height: 28px; border-radius: 50%; background: #F5F3F0; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #808080; }
+  .m-close:hover { background: #EBEBEB; }
+  .m-body { padding: 16px 20px; }
+  .m-foot { padding: 12px 20px; border-top: 1px solid #EBEBEB; display: flex; gap: 8px; justify-content: flex-end; }
+
+  /* Form inside modal */
+  .fg { margin-bottom: 12px; }
+  .fl { font-size: 11px; font-weight: 600; color: #808080; margin-bottom: 4px; display: block; }
+  .fi { width: 100%; padding: 8px 10px; border: 1.5px solid #EBEBEB; border-radius: 6px; font-size: 12px; font-family: inherit; outline: none; }
+  .fi:focus { border-color: #DC4C3E; }
+  .fta { width: 100%; padding: 8px 10px; border: 1.5px solid #EBEBEB; border-radius: 6px; font-size: 12px; font-family: inherit; outline: none; resize: vertical; min-height: 50px; }
+
+  /* User pills small */
+  .up { display: flex; flex-wrap: wrap; gap: 4px; }
+  .upi { display: flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 14px; font-size: 10px; font-weight: 500; cursor: pointer; border: 1px solid #EBEBEB; background: #fff; }
+  .upi.sel { border-color: #246FE0; background: #E8F0FE; color: #246FE0; font-weight: 600; }
+  .upi .uav { width: 18px; height: 18px; border-radius: 50%; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 700; }
+  .upi.sel .uav { opacity: 1; }
+
+  /* Subtask rows */
+  .str { display: flex; align-items: center; gap: 6px; padding: 6px 8px; background: #FAFAFA; border-radius: 6px; border: 1px solid #EBEBEB; margin-bottom: 4px; }
+  .str-num { width: 18px; height: 18px; border-radius: 50%; background: #EBEBEB; color: #808080; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; flex-shrink: 0; }
+  .str-text { flex: 1; font-size: 12px; }
+  .str-add { padding: 6px 8px; border: 1.5px dashed #EBEBEB; border-radius: 6px; font-size: 11px; color: #B3B3B3; cursor: pointer; text-align: center; }
+  .str-add:hover { border-color: #DC4C3E; color: #DC4C3E; }
+
+  /* Schedule options */
+  .so { display: flex; gap: 6px; }
+  .soi { padding: 6px 12px; border: 1.5px solid #EBEBEB; border-radius: 6px; font-size: 11px; font-weight: 500; cursor: pointer; background: #fff; color: #808080; }
+  .soi.active { border-color: #246FE0; background: #E8F0FE; color: #246FE0; font-weight: 600; }
+
+  .rc { margin-top: 8px; padding: 8px 12px; background: #F8FAFF; border: 1px solid #D4E2FC; border-radius: 8px; display: flex; gap: 6px; align-items: center; font-size: 11px; color: #246FE0; font-weight: 600; }
+  .rc select, .rc input[type="number"] { padding: 4px 6px; border: 1px solid #D4E2FC; border-radius: 4px; font-size: 11px; font-family: inherit; background: #fff; outline: none; }
+  .rc input[type="number"] { width: 42px; text-align: center; }
+
+  /* Date boxes */
+  .drow { display: flex; gap: 8px; }
+  .dbox { flex: 1; padding: 8px 10px; border: 1.5px solid #EBEBEB; border-radius: 8px; }
+  .dbox .dl { font-size: 9px; font-weight: 600; color: #B3B3B3; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 3px; }
+  .dbox .dv { font-size: 12px; font-weight: 700; }
+  .dbox .dd { font-size: 9px; color: #808080; margin-top: 1px; }
+  .dbox.blue { border-color: #D4E2FC; background: #F8FAFF; }
+  .dbox.orange { border-color: #FFE0B2; background: #FFF8F0; }
+  .dbox.red { border-color: #FFCDD2; background: #FFF5F5; }
+
+  /* File */
+  .fatt { display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: #FAFAFA; border: 1px solid #EBEBEB; border-radius: 6px; font-size: 11px; }
+
+  /* Buttons */
+  .btn-primary { padding: 8px 20px; background: #DC4C3E; color: #fff; border: none; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; }
+  .btn-primary:hover { background: #C13B2E; }
+  .btn-blue { padding: 8px 20px; background: #246FE0; color: #fff; border: none; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; }
+  .btn-ghost { padding: 8px 16px; background: #fff; color: #808080; border: 1px solid #EBEBEB; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; }
+  .btn-danger { padding: 6px 10px; background: #FFF5F5; color: #DC4C3E; border: 1px solid #FFCDD2; border-radius: 6px; font-size: 10px; font-weight: 600; cursor: pointer; }
+  .btn-green { padding: 8px 16px; background: #058527; color: #fff; border: none; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: none; }
+  .btn-green.show { display: inline-flex; align-items: center; gap: 4px; }
+
+  /* Detail modal — user tabs */
+  .utabs { display: flex; gap: 4px; margin-bottom: 12px; flex-wrap: wrap; }
+  .utab { padding: 5px 10px; border-radius: 14px; font-size: 10px; font-weight: 600; cursor: pointer; border: 1px solid #EBEBEB; background: #fff; }
+  .utab.active { background: #DC4C3E; color: #fff; border-color: #DC4C3E; }
+
+  /* Subtask detail */
+  .sd { padding: 8px 10px; border-radius: 6px; border: 1px solid #EBEBEB; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+  .sd.done { background: #ECFDF5; border-color: #A7F3D0; }
+  .sd.prog { background: #FFF8F0; border-color: #FFE0B2; }
+  .sd-ck { width: 16px; height: 16px; border-radius: 50%; border: 2px solid; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 8px; }
+  .sd-ck.ck-done { border-color: #058527; background: #058527; color: #fff; }
+  .sd-ck.ck-prog { border-color: #EB8909; }
+  .sd-ck.ck-wait { border-color: #EBEBEB; }
+  .sd-tx { flex: 1; font-size: 12px; }
+  .sd-tx.lined { text-decoration: line-through; color: #B3B3B3; }
+  .sd-badge { font-size: 9px; font-weight: 600; padding: 2px 6px; border-radius: 10px; }
+
+  /* Worker subtask */
+  .wst { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 6px; cursor: pointer; margin-bottom: 4px; border: 1px solid #EBEBEB; }
+  .wst:hover { background: #FAFAFA; }
+  .wst-ck { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #EBEBEB; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 9px; transition: all 0.15s; }
+  .wst-ck.done { border-color: #058527; background: #058527; color: #fff; }
+  .wst-tx { flex: 1; font-size: 12px; }
+  .wst-tx.done { text-decoration: line-through; color: #B3B3B3; }
+
+  /* Progress */
+  .prog-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+  .prog-bar { flex: 1; height: 6px; background: #F0F0F0; border-radius: 3px; overflow: hidden; }
+  .prog-fill { height: 100%; border-radius: 3px; background: #058527; transition: width 0.3s; }
+
+  /* Toast */
+  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 10px 20px; background: #1F1F1F; color: #fff; border-radius: 8px; font-size: 12px; display: none; z-index: 200; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+  .toast.show { display: flex; align-items: center; gap: 6px; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+  .modal { animation: fadeIn 0.2s ease; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>🔁 Təkrarlanan Görev — Popup Dizayn</h1>
+  <p>Mövcud Tapşırıqlar səhifəsinə inteqrasiya olunan popup/modal əsaslı dizayn</p>
+</div>
+
+<div class="view-sw">
+  <button class="active" onclick="switchView('manager')">👔 Müdür (Leyla)</button>
+  <button onclick="switchView('worker')">👷 İşçi (Nigar)</button>
+</div>
+
+<!-- ═══════════════════════════════════ -->
+<!-- MÜDİR GÖRÜNÜŞÜ                     -->
+<!-- ═══════════════════════════════════ -->
+<div id="managerView">
+<div class="app-frame">
+  <div class="app-body">
+    <div class="sb">
+      <div class="sb-profile">
+        <div class="sb-av" style="background:#DC4C3E">LY</div>
+        <div><div class="sb-name">Leyla Həsənova</div><div class="sb-role">Bakı Filialı Müdürü</div></div>
+      </div>
+      <div class="sb-div"></div>
+      <button class="sb-btn">📅 Bugün <span class="sb-badge">5</span></button>
+      <button class="sb-btn">📥 Gələnlər</button>
+      <button class="sb-btn">📆 Gələcək</button>
+      <div class="sb-div"></div>
+      <button class="sb-btn active" onclick="showPage('tasks')">📋 Tapşırıqlar <span class="sb-badge">8</span></button>
+      <button class="sb-btn" onclick="showPage('templates')">📑 Şablonlar</button>
+      <button class="sb-btn">✅ Todo</button>
+      <div class="sb-div"></div>
+      <button class="sb-btn" style="font-size:11px;color:#B3B3B3">İDAREETMƏ</button>
+      <button class="sb-btn">👥 İşçilər</button>
+    </div>
+    <div class="ct">
+      <div id="tasksContent">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div>
+          <h2>Tapşırıqlar</h2>
+          <div class="sub">Bütün tapşırıqlar — 8 ədəd</div>
+        </div>
+        <button class="btn-primary" style="font-size:11px;padding:6px 12px">＋ Tapşırıq əlavə et</button>
+      </div>
+
+      <!-- Status tabs -->
+      <div class="s-tabs">
+        <div class="s-tab active">Hamısı <span class="cnt">8</span></div>
+        <div class="s-tab"><span class="s-dot" style="background:#808080"></span> Gözləyir <span class="cnt">2</span></div>
+        <div class="s-tab"><span class="s-dot" style="background:#246FE0"></span> Davam edir <span class="cnt">3</span></div>
+        <div class="s-tab"><span class="s-dot" style="background:#EB8909"></span> Onay gözləyir <span class="cnt">1</span></div>
+        <div class="s-tab"><span class="s-dot" style="background:#058527"></span> Tamamlandı <span class="cnt">2</span></div>
+      </div>
+
+      <!-- Chip filters -->
+      <div class="chips">
+        <div class="chip active">Bütün filiallar</div>
+        <div class="chip">Bakı Filialı</div>
+        <div class="chip">Gəncə Filialı</div>
+        <span class="chip-sep"></span>
+        <div class="chip">🔴 Kritik</div>
+        <div class="chip">🟠 Yüksək</div>
+        <div class="chip">🔵 Orta</div>
+      </div>
+
+      <!-- Task list -->
+      <!-- Təkrarlanan görev kartı -->
+      <div class="tk tk-rec" onclick="openModal('trackRecurring')">
+        <div class="tk-top">
+          <span class="tk-recurring">🔁 Təkrarlanan</span>
+          <span class="tk-status" style="background:#E8F0FE;color:#246FE0">Hər ayın 10-u</span>
+          <span class="tk-priority" style="color:#EB8909">🟠 Yüksək</span>
+          <span style="margin-left:auto;font-size:9px;color:#B3B3B3">Mart 2026</span>
+        </div>
+        <div class="tk-title">📊 Aylıq Satış Hesabatı</div>
+        <div class="tk-users">
+          <div class="tk-user">
+            <div class="tk-uav" style="background:#DC4C3E">HƏ</div>
+            <div class="tk-pbar"><div class="tk-pfill" style="width:100%;background:#058527"></div></div>
+            <span class="tk-pct" style="color:#058527">100%</span>
+          </div>
+          <div class="tk-user">
+            <div class="tk-uav" style="background:#246FE0">NG</div>
+            <div class="tk-pbar"><div class="tk-pfill" style="width:33%;background:#EB8909"></div></div>
+            <span class="tk-pct" style="color:#EB8909">33%</span>
+          </div>
+          <div class="tk-user">
+            <div class="tk-uav" style="background:#9333EA">RŞ</div>
+            <div class="tk-pbar"><div class="tk-pfill" style="width:66%;background:#EB8909"></div></div>
+            <span class="tk-pct" style="color:#EB8909">66%</span>
+          </div>
+        </div>
+        <div class="tk-overall">
+          <span style="font-size:10px;color:#808080;font-weight:600">Ümumi</span>
+          <div class="tk-obar"><div class="tk-ofill" style="width:66%"></div></div>
+          <span style="font-size:11px;font-weight:700;color:#058527">66%</span>
+        </div>
+      </div>
+
+      <!-- Başqa təkrarlanan -->
+      <div class="tk tk-rec">
+        <div class="tk-top">
+          <span class="tk-recurring">🔁 Təkrarlanan</span>
+          <span class="tk-status" style="background:#F3E8FF;color:#9333EA">Hər Bazar ertəsi</span>
+          <span class="tk-priority" style="color:#246FE0">🔵 Orta</span>
+        </div>
+        <div class="tk-title">📋 Həftəlik Görüş Notu</div>
+        <div class="tk-users">
+          <div class="tk-user">
+            <div class="tk-uav" style="background:#DC4C3E">HƏ</div>
+            <div class="tk-pbar"><div class="tk-pfill" style="width:100%;background:#058527"></div></div>
+            <span class="tk-pct" style="color:#058527">100%</span>
+          </div>
+          <div class="tk-user">
+            <div class="tk-uav" style="background:#246FE0">NG</div>
+            <div class="tk-pbar"><div class="tk-pfill" style="width:100%;background:#058527"></div></div>
+            <span class="tk-pct" style="color:#058527">100%</span>
+          </div>
+        </div>
+        <div class="tk-overall">
+          <span style="font-size:10px;color:#808080;font-weight:600">Ümumi</span>
+          <div class="tk-obar"><div class="tk-ofill" style="width:100%"></div></div>
+          <span style="font-size:11px;font-weight:700;color:#058527">100%</span>
+        </div>
+      </div>
+
+      <!-- Normal task cards -->
+      <div class="tk">
+        <div class="tk-top">
+          <span class="tk-status" style="background:#FFF3E0;color:#EB8909">Onay gözləyir</span>
+          <span class="tk-priority" style="color:#DC4C3E">🔴 Kritik</span>
+        </div>
+        <div class="tk-title">Müştəri təqdimatı hazırla</div>
+        <div class="tk-meta"><span>👤 Həsən</span><span>📅 Son: 25 Mart</span><span>🏢 Bakı Filialı</span></div>
+      </div>
+      <div class="tk">
+        <div class="tk-top">
+          <span class="tk-status" style="background:#E8F0FE;color:#246FE0">Davam edir</span>
+          <span class="tk-priority" style="color:#EB8909">🟠 Yüksək</span>
+        </div>
+        <div class="tk-title">Yeni əməkdaşların sənədlərini yoxla</div>
+        <div class="tk-meta"><span>👤 Nigar, Rəşad</span><span>📅 Son: 28 Mart</span></div>
+      </div>
+      <div class="tk">
+        <div class="tk-top">
+          <span class="tk-status" style="background:#E6F4EA;color:#058527">Tamamlandı</span>
+          <span class="tk-priority" style="color:#246FE0">🔵 Orta</span>
+        </div>
+        <div class="tk-title">Server yeniləmə planını hazırla</div>
+        <div class="tk-meta"><span>👤 Həsən</span><span>📅 20 Mart</span></div>
+      </div>
+      </div><!-- /tasksContent -->
+      <!-- ═══ ŞABLONLAR SƏHİFƏSİ (gizli, sidebar klik ilə açılır) ═══ -->
+      <div id="templatesPage" style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div>
+            <h2>📑 Şablonlar</h2>
+            <div class="sub">Görev şablonları və təkrarlanan görevlər</div>
+          </div>
+        </div>
+
+        <!-- 2 Tab -->
+        <div class="s-tabs" style="margin-bottom:16px">
+          <div class="s-tab" id="tplTab1" onclick="switchTplTab('gorev')">Görev Şablonları <span class="cnt">3</span></div>
+          <div class="s-tab active" id="tplTab2" onclick="switchTplTab('recurring')">🔁 Təkrarlanan Görevlər <span class="cnt">3</span></div>
+        </div>
+
+        <!-- Tab 1: Görev Şablonları (mövcud) -->
+        <div id="tplGorev" style="display:none">
+          <div class="tk" style="margin-bottom:6px">
+            <div class="tk-title">📋 Yeni işçi onboarding şablonu</div>
+            <div class="tk-meta"><span>5 alt görev</span><span>Yaradılıb: 5 Mart</span></div>
+          </div>
+          <div class="tk" style="margin-bottom:6px">
+            <div class="tk-title">📋 Müştəri görüşü hazırlıq şablonu</div>
+            <div class="tk-meta"><span>3 alt görev</span><span>Yaradılıb: 12 Mart</span></div>
+          </div>
+          <div class="tk" style="margin-bottom:6px">
+            <div class="tk-title">📋 Sprint planlaşdırma şablonu</div>
+            <div class="tk-meta"><span>4 alt görev</span><span>Yaradılıb: 18 Mart</span></div>
+          </div>
+        </div>
+
+        <!-- Tab 2: Təkrarlanan Görevlər -->
+        <div id="tplRecurring">
+          <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
+            <button class="btn-blue" onclick="openModal('createRecurring')" style="font-size:11px;padding:6px 14px">🔁 Yeni təkrarlanan görev</button>
+          </div>
+
+          <!-- Şablon 1 — Aktiv -->
+          <div style="padding:12px 14px;border:1.5px solid #D4E2FC;border-radius:10px;background:#FAFBFF;margin-bottom:8px" id="tpl1">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+              <span style="font-size:14px">📊</span>
+              <div style="flex:1">
+                <div style="font-size:13px;font-weight:600">Aylıq Satış Hesabatı</div>
+                <div style="font-size:10px;color:#808080">Bakı Filialı · Satış şöbəsi · 3 işçi</div>
+              </div>
+              <span style="font-size:9px;padding:3px 8px;border-radius:10px;background:#E8F0FE;color:#246FE0;font-weight:600">Hər ayın 10-u</span>
+              <!-- Toggle -->
+              <div style="display:flex;align-items:center;gap:5px">
+                <span style="font-size:9px;font-weight:600;color:#058527" id="tpl1Status">Aktiv</span>
+                <div onclick="toggleTpl(1)" style="width:36px;height:20px;border-radius:10px;background:#058527;cursor:pointer;position:relative;transition:all 0.2s" id="tpl1Toggle">
+                  <div style="width:16px;height:16px;border-radius:50%;background:#fff;position:absolute;top:2px;right:2px;transition:all 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2)" id="tpl1Knob"></div>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:10px;color:#808080;margin-bottom:6px">
+              <span>📅 Son göndərmə: 10 Mart</span>
+              <span>·</span>
+              <span>📅 Növbəti: 10 Aprel</span>
+              <span>·</span>
+              <span>🔔 Bildirim: ayın 13-ü</span>
+              <span>·</span>
+              <span>⏰ Deadline: ayın 15-i</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:4px;font-size:10px;margin-bottom:6px">
+              <span style="font-weight:600;color:#808080">Alt görevlər:</span>
+              <span style="padding:2px 6px;background:#F5F3F0;border-radius:4px">1. Satış məlumatlarını yüklə</span>
+              <span style="padding:2px 6px;background:#F5F3F0;border-radius:4px">2. Excel doldur</span>
+              <span style="padding:2px 6px;background:#F5F3F0;border-radius:4px">3. Müdürə göndər</span>
+            </div>
+            <div style="display:flex;gap:6px">
+              <button onclick="openModal('editRecurring')" style="padding:4px 10px;background:#E8F0FE;color:#246FE0;border:1px solid #D4E2FC;border-radius:6px;font-size:10px;font-weight:600;cursor:pointer">✏️ Düzənlə</button>
+              <button onclick="openModal('trackRecurring')" style="padding:4px 10px;background:#ECFDF5;color:#058527;border:1px solid #A7F3D0;border-radius:6px;font-size:10px;font-weight:600;cursor:pointer">📊 İzlə</button>
+              <button class="btn-danger" onclick="showToast('🗑 Şablon silindi!')" style="font-size:9px;padding:4px 8px">🗑 Sil</button>
+            </div>
+          </div>
+
+          <!-- Şablon 2 — Aktiv -->
+          <div style="padding:12px 14px;border:1.5px solid #E9D5FF;border-radius:10px;background:#FDFAFF;margin-bottom:8px" id="tpl2">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+              <span style="font-size:14px">📋</span>
+              <div style="flex:1">
+                <div style="font-size:13px;font-weight:600">Həftəlik Görüş Notu</div>
+                <div style="font-size:10px;color:#808080">Bakı Filialı · 2 işçi</div>
+              </div>
+              <span style="font-size:9px;padding:3px 8px;border-radius:10px;background:#F3E8FF;color:#9333EA;font-weight:600">Hər Bazar ertəsi</span>
+              <div style="display:flex;align-items:center;gap:5px">
+                <span style="font-size:9px;font-weight:600;color:#058527" id="tpl2Status">Aktiv</span>
+                <div onclick="toggleTpl(2)" style="width:36px;height:20px;border-radius:10px;background:#058527;cursor:pointer;position:relative;transition:all 0.2s" id="tpl2Toggle">
+                  <div style="width:16px;height:16px;border-radius:50%;background:#fff;position:absolute;top:2px;right:2px;transition:all 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2)" id="tpl2Knob"></div>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:10px;color:#808080">
+              <span>📅 Son: 22 Mart</span><span>·</span><span>📅 Növbəti: 29 Mart</span>
+            </div>
+            <div style="display:flex;gap:6px;margin-top:6px">
+              <button style="padding:4px 10px;background:#E8F0FE;color:#246FE0;border:1px solid #D4E2FC;border-radius:6px;font-size:10px;font-weight:600;cursor:pointer">✏️ Düzənlə</button>
+              <button style="padding:4px 10px;background:#ECFDF5;color:#058527;border:1px solid #A7F3D0;border-radius:6px;font-size:10px;font-weight:600;cursor:pointer">📊 İzlə</button>
+              <button class="btn-danger" onclick="showToast('🗑 Şablon silindi!')" style="font-size:9px;padding:4px 8px">🗑 Sil</button>
+            </div>
+          </div>
+
+          <!-- Şablon 3 — Dayandırılmış -->
+          <div style="padding:12px 14px;border:1.5px solid #EBEBEB;border-radius:10px;background:#FAFAFA;margin-bottom:8px;opacity:0.7" id="tpl3">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+              <span style="font-size:14px">📦</span>
+              <div style="flex:1">
+                <div style="display:flex;align-items:center;gap:6px">
+                  <span style="font-size:13px;font-weight:600;color:#808080">Aylıq Stok Sayımı</span>
+                  <span style="font-size:8px;padding:2px 6px;border-radius:8px;background:#FFF3E0;color:#EB8909;font-weight:600">⏸ Dayandırılıb</span>
+                </div>
+                <div style="font-size:10px;color:#B3B3B3">Gəncə Filialı · 4 işçi · Dayandırıldı: 15 Mart</div>
+              </div>
+              <span style="font-size:9px;padding:3px 8px;border-radius:10px;background:#F0F0F0;color:#808080;font-weight:600">Hər ayın 1-i</span>
+              <div style="display:flex;align-items:center;gap:5px">
+                <span style="font-size:9px;font-weight:600;color:#EB8909" id="tpl3Status">Dayandırılıb</span>
+                <div onclick="toggleTpl(3)" style="width:36px;height:20px;border-radius:10px;background:#EBEBEB;cursor:pointer;position:relative;transition:all 0.2s" id="tpl3Toggle">
+                  <div style="width:16px;height:16px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:all 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2)" id="tpl3Knob"></div>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;gap:6px;margin-top:6px">
+              <button style="padding:4px 10px;background:#E8F0FE;color:#246FE0;border:1px solid #D4E2FC;border-radius:6px;font-size:10px;font-weight:600;cursor:pointer">✏️ Düzənlə</button>
+              <button class="btn-danger" onclick="showToast('🗑 Şablon silindi!')" style="font-size:9px;padding:4px 8px">🗑 Sil</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════ -->
+<!-- MODAL: Şablon Düzənlə              -->
+<!-- ═══════════════════════════════════ -->
+<div class="overlay" id="modal-editRecurring">
+  <div class="modal modal-lg">
+    <div class="m-head">
+      <span style="font-size:16px">✏️</span>
+      <h3>Şablonu Düzənlə</h3>
+      <button class="m-close" onclick="closeAll()">✕</button>
+    </div>
+    <div class="m-body">
+      <div class="fg">
+        <label class="fl">Görev başlığı</label>
+        <input class="fi" value="Aylıq Satış Hesabatı" />
+      </div>
+      <div class="fg">
+        <label class="fl">Təsvir</label>
+        <textarea class="fta">Hər ay satış rəqəmlərini toplayıb hesabat şablonunu doldurun</textarea>
+      </div>
+      <div style="display:flex;gap:8px">
+        <div class="fg" style="flex:1">
+          <label class="fl">Filial</label>
+          <select class="fi"><option selected>🏢 Bakı Filialı</option><option>🏢 Gəncə Filialı</option></select>
+        </div>
+        <div class="fg" style="flex:1">
+          <label class="fl">Şöbə</label>
+          <select class="fi"><option selected>Satış şöbəsi</option><option>İnsan Resursları</option></select>
+        </div>
+      </div>
+      <div class="fg">
+        <label class="fl">İşçilər</label>
+        <div class="up">
+          <div class="upi sel" onclick="this.classList.toggle('sel')"><div class="uav" style="background:#DC4C3E">HƏ</div> Həsən</div>
+          <div class="upi sel" onclick="this.classList.toggle('sel')"><div class="uav" style="background:#246FE0">NG</div> Nigar</div>
+          <div class="upi sel" onclick="this.classList.toggle('sel')"><div class="uav" style="background:#9333EA">RŞ</div> Rəşad</div>
+          <div class="upi" onclick="this.classList.toggle('sel')"><div class="uav" style="background:#EB8909">VL</div> Vəli</div>
+        </div>
+      </div>
+      <div class="fg">
+        <label class="fl">Alt görevlər</label>
+        <div class="str"><span class="str-num">1</span><input class="fi" value="Satış məlumatlarını CRM-dən yüklə" style="border:none;background:transparent;padding:0;font-size:12px" /></div>
+        <div class="str"><span class="str-num">2</span><input class="fi" value="Excel şablonunu doldur" style="border:none;background:transparent;padding:0;font-size:12px" /></div>
+        <div class="str"><span class="str-num">3</span><input class="fi" value="Müdürə e-poçt ilə göndər" style="border:none;background:transparent;padding:0;font-size:12px" /></div>
+        <div class="str-add">＋ Alt görev əlavə et</div>
+      </div>
+      <div class="fg">
+        <label class="fl">🔁 Təkrarlama qaydası</label>
+        <div class="rc">
+          <span>Hər</span>
+          <select><option selected>ayın</option><option>həftənin</option></select>
+          <input type="number" value="10" min="1" max="31" style="width:42px;text-align:center" />
+          <span>-u/ı/si</span>
+        </div>
+      </div>
+      <div class="fg">
+        <label class="fl">Tarixlər</label>
+        <div class="drow">
+          <div class="dbox orange">
+            <div class="dl">🔔 BİLDİRİM</div>
+            <input type="number" value="13" min="1" max="31" class="fi" style="width:50px;padding:4px;font-size:12px;font-weight:700;text-align:center;border-color:#FFE0B2" />
+          </div>
+          <div class="dbox red">
+            <div class="dl">⏰ DEADLİNE</div>
+            <input type="number" value="15" min="1" max="31" class="fi" style="width:50px;padding:4px;font-size:12px;font-weight:700;text-align:center;border-color:#FFCDD2" />
+          </div>
+        </div>
+      </div>
+      <div style="padding:8px 10px;background:#FFF8F0;border:1px solid #FFE0B2;border-radius:6px;font-size:10px;color:#EB8909">
+        ⚠️ Dəyişikliklər yalnız <strong>gələcək dövrə</strong> tətbiq olunacaq. Mövcud atanmalar dəyişməz.
+      </div>
+    </div>
+    <div class="m-foot">
+      <button class="btn-ghost" onclick="closeAll()">Ləğv et</button>
+      <button class="btn-primary" onclick="showEditConfirm()">💾 Yadda saxla</button>
+    </div>
+  </div>
+</div>
+
+<!-- Düzənləmə Onay Modalı -->
+<div class="overlay" id="modal-editConfirm">
+  <div class="modal" style="width:420px">
+    <div class="m-head">
+      <span style="font-size:16px">⚠️</span>
+      <h3>Dəyişiklikləri təsdiqləyin</h3>
+      <button class="m-close" onclick="document.getElementById('modal-editConfirm').classList.remove('show')">✕</button>
+    </div>
+    <div class="m-body">
+      <div style="font-size:13px;color:#1F1F1F;margin-bottom:12px">
+        <strong>"Aylıq Satış Hesabatı"</strong> şablonunda dəyişikliklər yadda saxlanılsın?
+      </div>
+      <div style="padding:10px 12px;background:#FFF8F0;border:1px solid #FFE0B2;border-radius:8px;margin-bottom:10px">
+        <div style="font-size:11px;font-weight:600;color:#EB8909;margin-bottom:4px">⚠️ Diqqət</div>
+        <div style="font-size:11px;color:#808080">
+          Dəyişikliklər yalnız <strong>gələcək dövrlərə</strong> tətbiq olunacaq.<br/>
+          Artıq göndərilmiş (aktiv) atanmalar dəyişməyəcək.
+        </div>
+      </div>
+      <div style="font-size:10px;color:#808080">
+        Növbəti göndərmə: <strong>10 Aprel 2026</strong> — yeni parametrlərlə göndəriləcək.
+      </div>
+    </div>
+    <div class="m-foot">
+      <button class="btn-ghost" onclick="document.getElementById('modal-editConfirm').classList.remove('show')">Geri qayıt</button>
+      <button class="btn-primary" onclick="closeAll();showToast('✅ Şablon yeniləndi! Dəyişikliklər gələcək dövrdən tətbiq olunacaq.')">✅ Təsdiq et və saxla</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ -->
+<!-- İŞÇİ GÖRÜNÜŞÜ                      -->
+<!-- ═══════════════════════════════════ -->
+<div id="workerView" style="display:none">
+<div class="app-frame">
+  <div class="app-body">
+    <div class="sb">
+      <div class="sb-profile">
+        <div class="sb-av" style="background:#246FE0">NG</div>
+        <div><div class="sb-name">Nigar Məmmədova</div><div class="sb-role">Satış Mütəxəssisi</div></div>
+      </div>
+      <div class="sb-div"></div>
+      <button class="sb-btn">📅 Bugün <span class="sb-badge">3</span></button>
+      <button class="sb-btn active">📥 Gələnlər <span class="sb-badge">2</span></button>
+      <button class="sb-btn">📆 Gələcək</button>
+      <div class="sb-div"></div>
+      <button class="sb-btn">📋 Tapşırıqlar</button>
+      <button class="sb-btn">✅ Todo</button>
+    </div>
+    <div class="ct">
+      <h2>📥 Gələnlər</h2>
+      <div class="sub">Yeni tapşırıqlar</div>
+
+      <!-- Təkrarlanan görev — işçi kartı -->
+      <div class="tk tk-rec" onclick="openModal('workerTask')">
+        <div class="tk-top">
+          <span class="tk-recurring">🔁 Təkrarlanan</span>
+          <span class="tk-priority" style="color:#EB8909">🟠 Yüksək</span>
+          <span style="margin-left:auto;font-size:9px;color:#DC4C3E">⏰ Son: 15 Mart</span>
+        </div>
+        <div class="tk-title">📊 Aylıq Satış Hesabatı</div>
+        <div class="tk-meta"><span>👔 Leyla tərəfindən</span><span>📎 1 fayl</span><span>📋 0/3 alt görev</span></div>
+      </div>
+
+      <!-- Normal görev -->
+      <div class="tk">
+        <div class="tk-top">
+          <span class="tk-status" style="background:#F0F0F0;color:#808080">Gözləyir</span>
+          <span class="tk-priority" style="color:#DC4C3E">🔴 Kritik</span>
+        </div>
+        <div class="tk-title">Müştəri görüşü üçün təqdimat hazırla</div>
+        <div class="tk-meta"><span>👔 Leyla tərəfindən</span><span>📅 Son: 18 Mart</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════ -->
+<!-- MODAL 1: Təkrarlanan Görev Yarat   -->
+<!-- ═══════════════════════════════════ -->
+<div class="overlay" id="modal-createRecurring">
+  <div class="modal modal-lg">
+    <div class="m-head">
+      <span style="font-size:16px">🔁</span>
+      <h3>Təkrarlanan Görev Yarat</h3>
+      <button class="m-close" onclick="closeAll()">✕</button>
+    </div>
+    <div class="m-body">
+      <div class="fg">
+        <label class="fl">Görev başlığı</label>
+        <input class="fi" value="Aylıq Satış Hesabatı" />
+      </div>
+      <div class="fg">
+        <label class="fl">Təsvir</label>
+        <textarea class="fta">Hər ay satış rəqəmlərini toplayıb hesabat şablonunu doldurun</textarea>
+      </div>
+
+      <!-- ═══ FİLİAL + ŞÖBƏ SEÇİMİ ═══ -->
+      <div style="display:flex;gap:8px">
+        <div class="fg" style="flex:1">
+          <label class="fl">Filial</label>
+          <select class="fi" id="createBizSelect" onchange="onBizChange()">
+            <option value="">Filial seçin...</option>
+            <option value="baku" selected>🏢 Bakı Filialı</option>
+            <option value="ganja">🏢 Gəncə Filialı</option>
+          </select>
+        </div>
+        <div class="fg" style="flex:1">
+          <label class="fl">Şöbə</label>
+          <select class="fi" id="createDeptSelect">
+            <option value="">Şöbə seçin...</option>
+            <option value="sales" selected>Satış şöbəsi</option>
+            <option value="hr">İnsan Resursları</option>
+            <option value="it">İT şöbəsi</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- İşçilər — filial/şöbəyə görə filtrlənir -->
+      <div class="fg">
+        <label class="fl">İşçilər <span style="color:#B3B3B3;font-weight:400" id="bizLabel">(Bakı Filialı — Satış şöbəsi)</span></label>
+        <div class="up">
+          <div class="upi sel" onclick="this.classList.toggle('sel')"><div class="uav" style="background:#DC4C3E">HƏ</div> Həsən</div>
+          <div class="upi sel" onclick="this.classList.toggle('sel')"><div class="uav" style="background:#246FE0">NG</div> Nigar</div>
+          <div class="upi sel" onclick="this.classList.toggle('sel')"><div class="uav" style="background:#9333EA">RŞ</div> Rəşad</div>
+          <div class="upi" onclick="this.classList.toggle('sel')"><div class="uav" style="background:#EB8909">VL</div> Vəli</div>
+        </div>
+      </div>
+
+      <div class="fg">
+        <label class="fl">Alt görevlər</label>
+        <div class="str"><span class="str-num">1</span><span class="str-text">Satış məlumatlarını CRM-dən yüklə</span></div>
+        <div class="str"><span class="str-num">2</span><span class="str-text">Excel şablonunu doldur</span></div>
+        <div class="str"><span class="str-num">3</span><span class="str-text">Müdürə e-poçt ilə göndər</span></div>
+        <div class="str-add">＋ Alt görev əlavə et</div>
+      </div>
+      <div class="fg">
+        <label class="fl">Fayl</label>
+        <div class="fatt">📄 <span style="flex:1"><strong>hesabat_sablon_2026.xlsx</strong> · 245 KB</span></div>
+      </div>
+
+      <!-- ═══ ZAMANLAMA ═══ -->
+      <div class="fg">
+        <label class="fl">🔁 Təkrarlama qaydası</label>
+        <div style="margin-bottom:6px;padding:6px 10px;background:#F8FAFF;border-radius:6px;font-size:10px;color:#246FE0;border:1px solid #D4E2FC">
+          💡 Sistem hər dövrdə avtomatik bütün işçilərə görev göndərəcək. Siz bir dəfə qurursunuz, qalanını sistem edir.
+        </div>
+        <div class="rc">
+          <span>Hər</span>
+          <select onchange="updateRecLabel()">
+            <option value="ay" selected>ayın</option>
+            <option value="hefte">həftənin</option>
+          </select>
+          <input type="number" value="10" min="1" max="31" id="recDay" onchange="updateRecLabel()" />
+          <span>-u/ı/si</span>
+        </div>
+        <div style="margin-top:4px;font-size:10px;color:#808080" id="recExample">
+          Məsələn: <strong>Hər ayın 10-u</strong> — sistem avtomatik görev yaradıb işçilərə göndərəcək
+        </div>
+        <!-- Bitiş tarixi (opsional) -->
+        <div style="margin-top:8px;padding:8px 10px;background:#FAFAFA;border:1px solid #EBEBEB;border-radius:6px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <input type="checkbox" id="hasEndDate" onchange="toggleEndDate()" style="cursor:pointer" />
+            <label for="hasEndDate" style="font-size:11px;font-weight:600;color:#808080;cursor:pointer">Bitiş tarixi qoy <span style="font-weight:400">(opsional — nə vaxt dayansın?)</span></label>
+          </div>
+          <div id="endDateRow" style="display:none;margin-top:6px;display:none">
+            <input type="date" class="fi" value="2026-08-10" style="width:160px;font-size:11px" />
+            <div style="font-size:9px;color:#808080;margin-top:2px">Bu tarixdən sonra görev avtomatik dayanacaq</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ TARİXLƏR — Dəyişə bilən ═══ -->
+      <div class="fg">
+        <label class="fl">Tarixlər</label>
+        <div class="drow">
+          <div class="dbox blue">
+            <div class="dl">📅 ATANMA TARİXİ</div>
+            <div class="dd" style="margin-bottom:4px">Görev nə vaxt göndərilsin?</div>
+            <div style="font-size:12px;font-weight:700;color:#246FE0" id="assignLabel">Hər ayın 10-u</div>
+            <div style="font-size:9px;color:#808080;margin-top:2px">Avtomatik — yuxarıdakı qaydadan gəlir</div>
+          </div>
+          <div class="dbox orange">
+            <div class="dl">🔔 BİLDİRİM TARİXİ</div>
+            <div class="dd" style="margin-bottom:4px">Tamamlamayanlardan status istə</div>
+            <input type="number" value="13" min="1" max="31" class="fi" style="width:60px;padding:4px 6px;font-size:13px;font-weight:700;text-align:center;border-color:#FFE0B2" id="notifDay" />
+            <div style="font-size:9px;color:#808080;margin-top:2px">Ayın neçəsində xatırlatma?</div>
+          </div>
+          <div class="dbox red">
+            <div class="dl">⏰ SON TARİX (DEADLİNE)</div>
+            <div class="dd" style="margin-bottom:4px">Nə vaxta qədər tamamlanmalı?</div>
+            <input type="number" value="15" min="1" max="31" class="fi" style="width:60px;padding:4px 6px;font-size:13px;font-weight:700;text-align:center;border-color:#FFCDD2" id="deadlineDay" />
+            <div style="font-size:9px;color:#808080;margin-top:2px">Ayın neçəsində bitməli?</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="m-foot">
+      <button class="btn-ghost" onclick="closeAll()">Ləğv et</button>
+      <button class="btn-primary" onclick="closeAll();showToast('🚀 Təkrarlanan görev yaradıldı! 3 işçiyə dispatch edildi.')">🚀 Göndər — 3 işçiyə</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ -->
+<!-- MODAL 2: İzləmə — Müdür detalı    -->
+<!-- ═══════════════════════════════════ -->
+<div class="overlay" id="modal-trackRecurring">
+  <div class="modal modal-lg">
+    <div class="m-head">
+      <span style="font-size:16px">📊</span>
+      <h3>Aylıq Satış Hesabatı</h3>
+      <span style="font-size:9px;padding:3px 8px;border-radius:10px;background:#E8F0FE;color:#246FE0;font-weight:600">🔁 Hər ayın 10-u</span>
+      <span style="font-size:9px;padding:3px 8px;border-radius:10px;background:#F5F3F0;color:#808080;font-weight:500">Mart 2026</span>
+      <button class="m-close" onclick="closeAll()">✕</button>
+    </div>
+    <div class="m-body">
+      <!-- User tabs -->
+      <div class="utabs">
+        <div class="utab active" onclick="showUD('hasan',this)">HƏ Həsən — <strong>100%</strong></div>
+        <div class="utab" onclick="showUD('nigar',this)">NG Nigar — <strong>33%</strong></div>
+        <div class="utab" onclick="showUD('rashad',this)">RŞ Rəşad — <strong>66%</strong></div>
+      </div>
+
+      <!-- Həsən -->
+      <div class="ud" id="ud-hasan">
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#ECFDF5;border-radius:8px;border:1px solid #A7F3D0;margin-bottom:10px">
+          <div class="sb-av" style="background:#DC4C3E;width:32px;height:32px;font-size:11px">HƏ</div>
+          <div style="flex:1"><div style="font-size:13px;font-weight:600">Həsən Əliyev</div><div style="font-size:10px;color:#808080">Tamamlandı — 14 Mart, 16:30</div></div>
+          <span style="font-size:20px;font-weight:800;color:#058527">100%</span>
+        </div>
+        <div class="sd done"><div class="sd-ck ck-done">✓</div><span class="sd-tx">Satış məlumatlarını CRM-dən yüklə</span><span class="sd-badge" style="background:#ECFDF5;color:#058527">11 Mart</span></div>
+        <div class="sd done"><div class="sd-ck ck-done">✓</div><span class="sd-tx">Excel şablonunu doldur</span><span class="sd-badge" style="background:#ECFDF5;color:#058527">13 Mart</span></div>
+        <div class="sd done"><div class="sd-ck ck-done">✓</div><span class="sd-tx">Müdürə e-poçt ilə göndər</span><span class="sd-badge" style="background:#ECFDF5;color:#058527">14 Mart</span></div>
+      </div>
+
+      <!-- Nigar -->
+      <div class="ud" id="ud-nigar" style="display:none">
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#FFF8F0;border-radius:8px;border:1px solid #FFE0B2;margin-bottom:10px">
+          <div class="sb-av" style="background:#246FE0;width:32px;height:32px;font-size:11px">NG</div>
+          <div style="flex:1"><div style="font-size:13px;font-weight:600">Nigar Məmmədova</div><div style="font-size:10px;color:#DC4C3E">⏰ Deadline: 15 Mart — 2 gün qalıb</div></div>
+          <span style="font-size:20px;font-weight:800;color:#EB8909">33%</span>
+        </div>
+        <div class="sd done"><div class="sd-ck ck-done">✓</div><span class="sd-tx">Satış məlumatlarını CRM-dən yüklə</span><span class="sd-badge" style="background:#ECFDF5;color:#058527">12 Mart</span></div>
+        <div class="sd prog"><div class="sd-ck ck-prog">◉</div><span class="sd-tx">Excel şablonunu doldur</span><span class="sd-badge" style="background:#FFF3E0;color:#EB8909">Davam edir</span></div>
+        <div class="sd"><div class="sd-ck ck-wait"></div><span class="sd-tx">Müdürə e-poçt ilə göndər</span><span class="sd-badge" style="background:#F5F3F0;color:#808080">Gözləyir</span></div>
+
+        <!-- Nigar-ın yüklədiyi fayllar — müdür görür -->
+        <div style="margin-top:10px;padding:8px 10px;background:#F8FAFF;border:1px solid #D4E2FC;border-radius:6px">
+          <div style="font-size:10px;font-weight:600;color:#246FE0;margin-bottom:6px">📎 Nigar-ın yüklədiyi dosyalar (2/5)</div>
+          <div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid #F0F0F0">
+            <span style="font-size:9px;color:#B3B3B3">1</span>
+            <span style="font-size:11px">📄</span>
+            <div style="flex:1"><span style="font-size:10px;font-weight:600">sayimlar_son.xlsx</span> <span style="font-size:9px;color:#B3B3B3">320 KB</span></div>
+            <span style="font-size:9px;color:#B3B3B3">13 Mart</span>
+          </div>
+          <div style="padding-left:16px;padding:2px 0 4px 16px;border-bottom:1px solid #F0F0F0">
+            <span style="font-size:8px;color:#B3B3B3"><span style="text-decoration:line-through">sayim.xlsx</span> <span style="color:#DC4C3E">silindi</span> → <span style="color:#058527">sayimlar_son.xlsx</span></span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;padding:4px 0">
+            <span style="font-size:9px;color:#B3B3B3">2</span>
+            <span style="font-size:11px">📊</span>
+            <div style="flex:1"><span style="font-size:10px;font-weight:600">mart_rapor.pdf</span> <span style="font-size:9px;color:#B3B3B3">1.2 MB</span></div>
+            <span style="font-size:9px;color:#B3B3B3">14 Mart</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rəşad -->
+      <div class="ud" id="ud-rashad" style="display:none">
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#FFF8F0;border-radius:8px;border:1px solid #FFE0B2;margin-bottom:10px">
+          <div class="sb-av" style="background:#9333EA;width:32px;height:32px;font-size:11px">RŞ</div>
+          <div style="flex:1"><div style="font-size:13px;font-weight:600">Rəşad Hüseynov</div><div style="font-size:10px;color:#808080">Davam edir</div></div>
+          <span style="font-size:20px;font-weight:800;color:#EB8909">66%</span>
+        </div>
+        <div class="sd done"><div class="sd-ck ck-done">✓</div><span class="sd-tx">Satış məlumatlarını CRM-dən yüklə</span><span class="sd-badge" style="background:#ECFDF5;color:#058527">11 Mart</span></div>
+        <div class="sd done"><div class="sd-ck ck-done">✓</div><span class="sd-tx">Excel şablonunu doldur</span><span class="sd-badge" style="background:#ECFDF5;color:#058527">14 Mart</span></div>
+        <div class="sd"><div class="sd-ck ck-wait"></div><span class="sd-tx">Müdürə e-poçt ilə göndər</span><span class="sd-badge" style="background:#F5F3F0;color:#808080">Gözləyir</span></div>
+      </div>
+    </div>
+    <div class="m-foot">
+      <button class="btn-danger" onclick="event.stopPropagation();showToast('Bu ayın atanması silindi.')">🗑 Bu ayı sil</button>
+      <span style="flex:1"></span>
+      <button class="btn-ghost" onclick="closeAll()">Bağla</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ -->
+<!-- MODAL 3: İşçi — Görev Detalı       -->
+<!-- ═══════════════════════════════════ -->
+<div class="overlay" id="modal-workerTask">
+  <div class="modal">
+    <div class="m-head">
+      <span style="font-size:16px">📊</span>
+      <h3>Aylıq Satış Hesabatı</h3>
+      <span style="font-size:9px;padding:3px 8px;border-radius:10px;background:#E8F0FE;color:#246FE0;font-weight:600">🔁 Təkrarlanan</span>
+      <button class="m-close" onclick="closeAll()">✕</button>
+    </div>
+    <div class="m-body">
+      <div style="font-size:12px;color:#808080;margin-bottom:8px">Hər ay satış rəqəmlərini toplayıb hesabat şablonunu doldurun</div>
+
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <div style="padding:4px 8px;background:#E8F0FE;border-radius:6px;font-size:10px;color:#246FE0;font-weight:600">📅 Atandı: 10 Mart</div>
+        <div style="padding:4px 8px;background:#FFF3E0;border-radius:6px;font-size:10px;color:#EB8909;font-weight:600">🔔 Bildirim: 13 Mart</div>
+        <div style="padding:4px 8px;background:#FFEBEE;border-radius:6px;font-size:10px;color:#DC4C3E;font-weight:600">⏰ Deadline: 15 Mart</div>
+      </div>
+
+      <!-- Fayl -->
+      <div class="fatt" style="margin-bottom:12px">📄 <span style="flex:1"><strong>hesabat_sablon_2026.xlsx</strong> · 245 KB</span> <span style="color:#246FE0;font-weight:600;cursor:pointer">Yüklə</span></div>
+
+      <!-- Alt görevlər -->
+      <div style="font-size:11px;font-weight:600;color:#808080;margin-bottom:6px">Alt görevlər (klikləyin tamamlamaq üçün)</div>
+      <div class="wst" onclick="toggleW(0)"><div class="wst-ck" id="w0"></div><span class="wst-tx" id="w0t">Satış məlumatlarını CRM-dən yüklə</span><span class="sd-badge" id="w0s" style="background:#F5F3F0;color:#808080">Gözləyir</span></div>
+      <div class="wst" onclick="toggleW(1)"><div class="wst-ck" id="w1"></div><span class="wst-tx" id="w1t">Excel şablonunu doldur</span><span class="sd-badge" id="w1s" style="background:#F5F3F0;color:#808080">Gözləyir</span></div>
+      <div class="wst" onclick="toggleW(2)"><div class="wst-ck" id="w2"></div><span class="wst-tx" id="w2t">Müdürə e-poçt ilə göndər</span><span class="sd-badge" id="w2s" style="background:#F5F3F0;color:#808080">Gözləyir</span></div>
+
+      <div class="prog-row">
+        <div class="prog-bar"><div class="prog-fill" id="wprog" style="width:0%"></div></div>
+        <span id="wpct" style="font-size:12px;font-weight:700;color:#808080">0%</span>
+      </div>
+
+      <!-- ═══ DOSYA ƏLAVƏ — 5 Slot (maks 1.5 MB) ═══ -->
+      <div style="margin-top:14px;padding-top:12px;border-top:1px solid #EBEBEB">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <span style="font-size:11px;font-weight:600;color:#808080">📎 Dosya əlavə et <span style="color:#B3B3B3;font-weight:400">(maks 5 fayl, hər biri 1.5 MB)</span></span>
+          <span id="fileCount" style="font-size:10px;color:#B3B3B3;font-weight:600">0/5</span>
+        </div>
+
+        <div id="fileSlots">
+          <!-- Slot 1 — yüklənmiş + silindi + yeni yüklənib (tarixçə) -->
+          <div class="file-slot" style="padding:6px 8px;border:1px solid #EBEBEB;border-radius:6px;margin-bottom:4px;background:#FAFAFA">
+            <div style="display:flex;align-items:center;gap:6px">
+              <span style="font-size:9px;font-weight:700;color:#B3B3B3;width:14px">1</span>
+              <span style="font-size:14px">📄</span>
+              <div style="flex:1">
+                <div style="font-size:11px;font-weight:600;color:#058527">sayimlar_son.xlsx</div>
+                <div style="font-size:9px;color:#B3B3B3">320 KB · Yükləndi 13 Mart</div>
+              </div>
+              <button onclick="removeFile(this)" style="padding:2px 6px;border:1px solid #FFCDD2;background:#FFF5F5;color:#DC4C3E;font-size:9px;font-weight:600;border-radius:4px;cursor:pointer">Sil</button>
+            </div>
+            <!-- Tarixçə -->
+            <div style="margin-top:4px;padding-left:20px">
+              <div style="font-size:9px;color:#B3B3B3;display:flex;align-items:center;gap:4px">
+                <span style="text-decoration:line-through">sayim.xlsx</span>
+                <span style="color:#DC4C3E">silindi</span>
+                <span>→</span>
+                <span style="color:#058527">sayimlar_son.xlsx</span>
+                <span>yükləndi</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Slot 2 — yüklənmiş -->
+          <div class="file-slot" style="padding:6px 8px;border:1px solid #EBEBEB;border-radius:6px;margin-bottom:4px;background:#FAFAFA">
+            <div style="display:flex;align-items:center;gap:6px">
+              <span style="font-size:9px;font-weight:700;color:#B3B3B3;width:14px">2</span>
+              <span style="font-size:14px">📊</span>
+              <div style="flex:1">
+                <div style="font-size:11px;font-weight:600;color:#058527">mart_rapor.pdf</div>
+                <div style="font-size:9px;color:#B3B3B3">1.2 MB · Yükləndi 14 Mart</div>
+              </div>
+              <button onclick="removeFile(this)" style="padding:2px 6px;border:1px solid #FFCDD2;background:#FFF5F5;color:#DC4C3E;font-size:9px;font-weight:600;border-radius:4px;cursor:pointer">Sil</button>
+            </div>
+          </div>
+
+          <!-- Slot 3 — boş -->
+          <div class="file-slot" style="padding:6px 8px;border:1.5px dashed #EBEBEB;border-radius:6px;margin-bottom:4px;cursor:pointer;text-align:center" onclick="fakeUpload(this, 3)">
+            <div style="display:flex;align-items:center;gap:6px;justify-content:center">
+              <span style="font-size:9px;font-weight:700;color:#B3B3B3;width:14px">3</span>
+              <span style="font-size:11px;color:#B3B3B3">＋ Dosya yüklə</span>
+            </div>
+          </div>
+
+          <!-- Slot 4 — boş -->
+          <div class="file-slot" style="padding:6px 8px;border:1.5px dashed #EBEBEB;border-radius:6px;margin-bottom:4px;cursor:pointer;text-align:center" onclick="fakeUpload(this, 4)">
+            <div style="display:flex;align-items:center;gap:6px;justify-content:center">
+              <span style="font-size:9px;font-weight:700;color:#B3B3B3;width:14px">4</span>
+              <span style="font-size:11px;color:#B3B3B3">＋ Dosya yüklə</span>
+            </div>
+          </div>
+
+          <!-- Slot 5 — boş -->
+          <div class="file-slot" style="padding:6px 8px;border:1.5px dashed #EBEBEB;border-radius:6px;margin-bottom:4px;cursor:pointer;text-align:center" onclick="fakeUpload(this, 5)">
+            <div style="display:flex;align-items:center;gap:6px;justify-content:center">
+              <span style="font-size:9px;font-weight:700;color:#B3B3B3;width:14px">5</span>
+              <span style="font-size:11px;color:#B3B3B3">＋ Dosya yüklə</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-green" id="wbtn" onclick="closeAll();showToast('✅ Görev tamamlandı! Müdürə bildiriş göndərildi.')" style="margin-top:10px">✅ Görevi Tamamla</button>
+
+      <div style="margin-top:10px;padding:8px 10px;background:#FFF8F0;border:1px solid #FFE0B2;border-radius:6px;font-size:10px;color:#EB8909">
+        ⚠️ Tamamladıqdan sonra redaktə mümkün deyil
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+function switchView(v) {
+  document.querySelectorAll('.view-sw button').forEach(b => b.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  document.getElementById('managerView').style.display = v === 'manager' ? 'block' : 'none';
+  document.getElementById('workerView').style.display = v === 'worker' ? 'block' : 'none';
+}
+
+function openModal(id) {
+  document.getElementById('modal-' + id).classList.add('show');
+}
+function closeAll() {
+  document.querySelectorAll('.overlay').forEach(o => o.classList.remove('show'));
+}
+
+function selSched(el, type) {
+  document.querySelectorAll('.soi').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('recConfig').style.display = type === 'rec' ? 'block' : 'none';
+  document.getElementById('onceConfig').style.display = type === 'once' ? 'block' : 'none';
+  // Tarix qutularını dəyiş
+  let recDates = document.querySelector('.drow');
+  if (type === 'once') {
+    document.getElementById('schedDesc').innerHTML = '💡 <strong>Tək dəfə:</strong> Bu görev yalnız 1 dəfə seçilmiş tarixdə göndəriləcək və bir daha təkrarlanmayacaq.';
+    document.getElementById('schedDesc').style.background = '#FFF8F0';
+    document.getElementById('schedDesc').style.borderColor = '#FFE0B2';
+    document.getElementById('schedDesc').style.color = '#EB8909';
+    // Tarix boxları gizlə, tək tarix göstər
+    document.querySelectorAll('.drow')[0].style.display = 'none';
+    document.getElementById('onceDates').style.display = 'flex';
+  } else {
+    document.getElementById('schedDesc').innerHTML = '💡 <strong>Təkrarlanan:</strong> Sistem hər dövrdə avtomatik bütün işçilərə görev göndərəcək. Siz bir dəfə qurursunuz, qalanını sistem edir.';
+    document.getElementById('schedDesc').style.background = '#F8FAFF';
+    document.getElementById('schedDesc').style.borderColor = '#D4E2FC';
+    document.getElementById('schedDesc').style.color = '#246FE0';
+    document.querySelectorAll('.drow')[0].style.display = 'flex';
+    document.getElementById('onceDates').style.display = 'none';
+  }
+}
+
+function updateRecLabel() {
+  let day = document.getElementById('recDay').value;
+  document.getElementById('recExample').innerHTML = 'Məsələn: <strong>Hər ayın ' + day + '-i</strong> — sistem avtomatik görev yaradıb işçilərə göndərəcək';
+  document.getElementById('assignLabel').textContent = 'Hər ayın ' + day + '-i';
+}
+
+function onBizChange() {
+  let biz = document.getElementById('createBizSelect');
+  let label = biz.options[biz.selectedIndex].text.replace('🏢 ', '');
+  let dept = document.getElementById('createDeptSelect');
+  let deptName = dept.options[dept.selectedIndex].text;
+  document.getElementById('bizLabel').textContent = '(' + label + (deptName && dept.value ? ' — ' + deptName : '') + ')';
+}
+
+function showUD(name, el) {
+  document.querySelectorAll('.utab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.ud').forEach(d => d.style.display = 'none');
+  document.getElementById('ud-' + name).style.display = 'block';
+}
+
+// Worker toggle
+let ws = [false, false, false];
+function toggleW(i) {
+  ws[i] = !ws[i];
+  let ck = document.getElementById('w' + i);
+  let tx = document.getElementById('w' + i + 't');
+  let st = document.getElementById('w' + i + 's');
+  if (ws[i]) { ck.classList.add('done'); ck.innerHTML = '✓'; tx.classList.add('done'); st.style.background = '#ECFDF5'; st.style.color = '#058527'; st.textContent = 'Tamamlandı'; }
+  else { ck.classList.remove('done'); ck.innerHTML = ''; tx.classList.remove('done'); st.style.background = '#F5F3F0'; st.style.color = '#808080'; st.textContent = 'Gözləyir'; }
+  let c = ws.filter(s => s).length;
+  let p = Math.round((c / 3) * 100);
+  document.getElementById('wprog').style.width = p + '%';
+  document.getElementById('wpct').textContent = p + '%';
+  document.getElementById('wpct').style.color = p === 100 ? '#058527' : p > 0 ? '#EB8909' : '#808080';
+  document.getElementById('wbtn').classList.toggle('show', p === 100);
+}
+
+function showEditConfirm() {
+  document.getElementById('modal-editConfirm').classList.add('show');
+}
+
+function showPage(page) {
+  let tasksContent = document.getElementById('tasksContent');
+  let templatesPage = document.getElementById('templatesPage');
+  let btns = document.querySelectorAll('#managerView .sb-btn');
+  btns.forEach(b => b.classList.remove('active'));
+
+  if (page === 'templates') {
+    if (tasksContent) tasksContent.style.display = 'none';
+    templatesPage.style.display = 'block';
+    // Şablonlar butonunu aktiv et
+    btns.forEach(b => { if (b.textContent.includes('Şablonlar')) b.classList.add('active'); });
+  } else {
+    if (tasksContent) tasksContent.style.display = 'block';
+    templatesPage.style.display = 'none';
+    btns.forEach(b => { if (b.textContent.includes('Tapşırıqlar')) b.classList.add('active'); });
+  }
+}
+
+function switchTplTab(tab) {
+  document.getElementById('tplTab1').classList.toggle('active', tab === 'gorev');
+  document.getElementById('tplTab2').classList.toggle('active', tab === 'recurring');
+  document.getElementById('tplGorev').style.display = tab === 'gorev' ? 'block' : 'none';
+  document.getElementById('tplRecurring').style.display = tab === 'recurring' ? 'block' : 'none';
+}
+
+let tplStates = { 1: true, 2: true, 3: false };
+function toggleTpl(id) {
+  tplStates[id] = !tplStates[id];
+  let toggle = document.getElementById('tpl' + id + 'Toggle');
+  let knob = document.getElementById('tpl' + id + 'Knob');
+  let status = document.getElementById('tpl' + id + 'Status');
+  let card = document.getElementById('tpl' + id);
+
+  if (tplStates[id]) {
+    toggle.style.background = '#058527';
+    knob.style.left = 'auto';
+    knob.style.right = '2px';
+    status.textContent = 'Aktiv';
+    status.style.color = '#058527';
+    card.style.opacity = '1';
+    showToast('▶ Şablon aktivləşdirildi! Növbəti dövrdə görev göndəriləcək.');
+  } else {
+    toggle.style.background = '#EBEBEB';
+    knob.style.right = 'auto';
+    knob.style.left = '2px';
+    status.textContent = 'Dayandırılıb';
+    status.style.color = '#EB8909';
+    card.style.opacity = '0.7';
+    showToast('⏸ Şablon dayandırıldı. Yeni görev göndərilməyəcək.');
+  }
+}
+
+function toggleEndDate() {
+  let cb = document.getElementById('hasEndDate');
+  document.getElementById('endDateRow').style.display = cb.checked ? 'block' : 'none';
+}
+
+let isPaused = false;
+function togglePause() {
+  isPaused = !isPaused;
+  let btn = document.getElementById('pauseBtn');
+  let dot = document.getElementById('recStatusDot');
+  let txt = document.getElementById('recStatusText');
+  let bar = document.getElementById('recStatusBar');
+
+  if (isPaused) {
+    btn.innerHTML = '▶ Davam et';
+    btn.style.background = '#ECFDF5';
+    btn.style.color = '#058527';
+    btn.style.borderColor = '#A7F3D0';
+    dot.style.background = '#EB8909';
+    txt.style.color = '#EB8909';
+    txt.textContent = 'Dayandırılıb — yeni görev göndərilməyəcək';
+    bar.style.background = '#FFF8F0';
+    bar.style.borderColor = '#FFE0B2';
+    showToast('⏸ Təkrarlanan görev dayandırıldı. Yeni görev göndərilməyəcək.');
+  } else {
+    btn.innerHTML = '⏸ Dayandır';
+    btn.style.background = '#FFF8F0';
+    btn.style.color = '#EB8909';
+    btn.style.borderColor = '#FFE0B2';
+    dot.style.background = '#058527';
+    txt.style.color = '#058527';
+    txt.textContent = 'Aktiv — növbəti göndərmə: 10 Aprel 2026';
+    bar.style.background = '#ECFDF5';
+    bar.style.borderColor = '#A7F3D0';
+    showToast('▶ Təkrarlanan görev yenidən aktivləşdirildi!');
+  }
+}
+
+function fakeUpload(el, slotNum) {
+  el.style.border = '1px solid #EBEBEB';
+  el.style.background = '#FAFAFA';
+  el.style.cursor = 'default';
+  el.onclick = null;
+  el.innerHTML = `
+    <div style="display:flex;align-items:center;gap:6px">
+      <span style="font-size:9px;font-weight:700;color:#B3B3B3;width:14px">${slotNum}</span>
+      <span style="font-size:14px">📄</span>
+      <div style="flex:1">
+        <div style="font-size:11px;font-weight:600;color:#058527">yeni_dosya_${slotNum}.xlsx</div>
+        <div style="font-size:9px;color:#B3B3B3">890 KB · Yükləndi indi</div>
+      </div>
+      <button onclick="removeFile(this.parentElement.parentElement)" style="padding:2px 6px;border:1px solid #FFCDD2;background:#FFF5F5;color:#DC4C3E;font-size:9px;font-weight:600;border-radius:4px;cursor:pointer">Sil</button>
+    </div>`;
+  updateFileCount();
+  showToast('📎 Dosya yükləndi: yeni_dosya_' + slotNum + '.xlsx');
+}
+
+function removeFile(slotEl) {
+  event.stopPropagation();
+  let num = slotEl.querySelector('span').textContent.trim();
+  slotEl.style.border = '1.5px dashed #EBEBEB';
+  slotEl.style.background = '#fff';
+  slotEl.style.cursor = 'pointer';
+  slotEl.onclick = function(){ fakeUpload(this, num); };
+  slotEl.innerHTML = `
+    <div style="display:flex;align-items:center;gap:6px;justify-content:center">
+      <span style="font-size:9px;font-weight:700;color:#B3B3B3;width:14px">${num}</span>
+      <span style="font-size:11px;color:#B3B3B3">＋ Dosya yüklə</span>
+    </div>`;
+  updateFileCount();
+  showToast('🗑 Dosya silindi');
+}
+
+function updateFileCount() {
+  let filled = document.querySelectorAll('.file-slot').length - document.querySelectorAll('.file-slot[style*="dashed"]').length;
+  // approximate count
+  let total = 0;
+  document.querySelectorAll('.file-slot').forEach(s => {
+    if (s.querySelector('[style*="color:#058527"]') || s.querySelector('button[onclick*="removeFile"]')) total++;
+  });
+  document.getElementById('fileCount').textContent = total + '/5';
+}
+
+function showToast(msg) {
+  let t = document.getElementById('toast');
+  t.innerHTML = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// Close on overlay click
+document.querySelectorAll('.overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) closeAll(); });
+});
+</script>
+
+</body>
+</html>

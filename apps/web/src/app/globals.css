@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    /* ═══ FocusFlow Branding ═══ */
+    --todoist-red: #4F46E5;
+    --todoist-red-light: #EEF2FF;
+    --todoist-bg: #F8FAFC;
+    --todoist-surface: #FFFFFF;
+    --todoist-text: #0F172A;
+    --todoist-text-secondary: #334155;
+    --todoist-text-tertiary: #94A3B8;
+    --todoist-border: #E2E8F0;
+    --todoist-divider: #F1F5F9;
+    --todoist-sidebar-flat: #FFFFFF;
+    --todoist-sidebar-text: #64748B;
+    --todoist-sidebar-text-active: #0F172A;
+    --todoist-sidebar-hover: #F1F5F9;
+    --todoist-sidebar-active: #EEF2FF;
+    --todoist-sidebar-divider: #E2E8F0;
+    --todoist-sidebar-label: #94A3B8;
+    --todoist-sidebar-badge-bg: rgba(79,70,229,0.1);
+    --todoist-sidebar-badge-text: #4F46E5;
+    --todoist-sidebar-profile-bg: #4F46E5;
+    --todoist-sidebar-avatar: #4F46E5;
+    --todoist-sidebar-avatar-text: #FFFFFF;
+    --todoist-primary: #4F46E5;
+    --todoist-primary-light: rgba(79,70,229,0.06);
+    --todoist-success: #10B981;
+    --todoist-gorev-bg: rgba(79,70,229,0.06);
+    --todoist-gorev-text: #4F46E5;
+    --todoist-todo-bg: rgba(99,102,241,0.06);
+    --todoist-todo-text: #6366F1;
+    --todoist-p1: #EF4444;
+    --todoist-p2: #F59E0B;
+    --todoist-p3: #3B82F6;
+    --todoist-p4: #94A3B8;
+  }
+
+  /* ═══ Dark Mode ═══ */
+  .dark {
+    --todoist-bg: #0F172A;
+    --todoist-surface: #1E293B;
+    --todoist-text: #F1F5F9;
+    --todoist-text-secondary: #94A3B8;
+    --todoist-text-tertiary: #475569;
+    --todoist-border: #334155;
+    --todoist-divider: #1E293B;
+    --todoist-sidebar-flat: #1E293B;
+    --todoist-sidebar-text: #94A3B8;
+    --todoist-sidebar-text-active: #F1F5F9;
+    --todoist-sidebar-hover: #334155;
+    --todoist-sidebar-active: rgba(79,70,229,0.2);
+    --todoist-sidebar-divider: #334155;
+    --todoist-sidebar-label: #475569;
+    --todoist-sidebar-badge-bg: rgba(79,70,229,0.2);
+    --todoist-sidebar-badge-text: #818CF8;
+    --todoist-sidebar-profile-bg: rgba(79,70,229,0.3);
+    --todoist-sidebar-avatar: #818CF8;
+    --todoist-sidebar-avatar-text: #FFFFFF;
+    color-scheme: dark;
+  }
+
+  .dark body { background-color: #0F172A; color: #F1F5F9; }
+  .dark header { background-color: #1E293B !important; border-color: #334155 !important; }
+  .dark aside { background-color: #1E293B !important; }
+  .dark main { background-color: #0F172A !important; }
+  .dark input, .dark select, .dark textarea { background-color: #334155 !important; color: #F1F5F9 !important; border-color: #475569 !important; color-scheme: dark; }
+  .dark input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.8); }
+  .dark .bg-white { background-color: #1E293B !important; }
+  .dark select option { background-color: #334155 !important; color: #F1F5F9 !important; }
+
+  .dark table th { background-color: #1E293B !important; color: #94A3B8 !important; border-color: #334155 !important; }
+  .dark table td { border-color: #334155 !important; }
+  .dark table tr:hover td { background-color: #334155 !important; }
+
+  .dark .shadow-2xl { box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6) !important; }
+  .dark .shadow-xl { box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5) !important; }
+  .dark .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.5) !important; }
+  .dark [data-sonner-toaster], .dark div[role="status"] { background-color: #334155 !important; color: #F1F5F9 !important; }
+  .dark div[role="status"] > div { background-color: #334155 !important; color: #F1F5F9 !important; }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #CBD5E1 transparent;
+  }
+  .dark * { scrollbar-color: #475569 transparent; }
+}

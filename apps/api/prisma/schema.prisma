@@ -1,0 +1,864 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ──────────────────────────────────────────
+// Tenant & Business
+// ──────────────────────────────────────────
+
+model Tenant {
+  id        String   @id @default(uuid())
+  name      String
+  subdomain String?  @unique
+  plan      String   @default("starter") // starter | pro | enterprise
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users       User[]
+  businesses  Business[]
+  customRoles CustomRole[]
+  settings    TenantSettings?
+}
+
+model TenantSettings {
+  id        String @id @default(uuid())
+  tenantId  String @unique
+  tenant    Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  maxUsers       Int @default(20)
+  maxBranches    Int @default(2)
+  maxDepartments Int @default(5)
+
+  defaultTheme    String @default("sunset")
+  defaultLanguage String @default("az")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Business {
+  id        String   @id @default(uuid())
+  name      String
+  logo      String?
+  tenantId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant       Tenant               @relation(fields: [tenantId], references: [id])
+  users        UserBusiness[]
+  departments  BusinessDepartment[]
+  tasks         Task[]
+  todos         Todo[]
+  transactions  Transaction[]
+  taskTemplates TaskTemplate[]
+
+  @@index([tenantId])
+}
+
+// ──────────────────────────────────────────
+// Xüsusi Rol Sistemi (SaaS sahibi idarə edir)
+// ──────────────────────────────────────────
+
+model CustomRole {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  tenantId    String
+  permissions String[]
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant         Tenant @relation(fields: [tenantId], references: [id])
+  users          User[]
+  userBusinesses UserBusiness[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+}
+
+// ──────────────────────────────────────────
+// User & Roles (ağac ierarxiya)
+// ──────────────────────────────────────────
+
+enum UserRole {
+  SUPER_ADMIN
+  TENANT_ADMIN
+  BUSINESS_MANAGER
+  TEAM_MANAGER
+  EMPLOYEE
+}
+
+model User {
+  id           String      @id @default(uuid())
+  email        String      @unique
+  password     String
+  fullName     String
+  role         UserRole    @default(EMPLOYEE)
+  customRoleId String?
+  parentId     String?
+  tenantId     String
+  status       String      @default("active") // active | inactive
+  isSystemAdmin Boolean    @default(false)
+  isSuperAdmin  Boolean    @default(false)
+  refreshToken String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  tenant     Tenant      @relation(fields: [tenantId], references: [id])
+  customRole CustomRole? @relation(fields: [customRoleId], references: [id])
+  parent     User?       @relation("UserHierarchy", fields: [parentId], references: [id])
+  children   User[]      @relation("UserHierarchy")
+
+  businesses          UserBusiness[]
+  assignedTasks       TaskAssignee[]
+  createdTasks        Task[]              @relation("TaskCreator")
+  approvedTasks       Task[]              @relation("TaskApprover")
+  todos               Todo[]
+  createdTemplates    TaskTemplate[]      @relation("TemplateCreator")
+  templateAssignments TemplateAssignee[]
+  attachments         Attachment[]        @relation("UserAttachments")
+  comments            Comment[]           @relation("UserComments")
+  employeeTransactions Transaction[]      @relation("EmployeeTransactions")
+  creatorTransactions  Transaction[]      @relation("CreatorTransactions")
+  employeeLedger       EmployeeLedger[]   @relation("EmployeeLedgerEntries")
+  salaries             Salary[]
+  salaryPayments       SalaryPayment[]    @relation("SalaryPayer")
+  notifications        Notification[]     @relation("UserNotifications")
+  sentNotifications    Notification[]     @relation("SenderNotifications")
+
+  // Todoist modulu
+  todoistProjects  TodoistProject[]  @relation("TodoistUserProjects")
+  todoistTasks     TodoistTask[]     @relation("TodoistUserTasks")
+  todoistLabels    TodoistLabel[]    @relation("TodoistUserLabels")
+  todoistComments  TodoistComment[]  @relation("TodoistUserComments")
+  todoistFilters    TodoistFilter[]    @relation("TodoistUserFilters")
+  todoistActivities TodoistActivity[]  @relation("TodoistUserActivities")
+  todoistTemplates  TodoistTemplate[]  @relation("TodoistUserTemplates")
+
+  @@index([tenantId])
+  @@index([parentId])
+  @@index([customRoleId])
+}
+
+model UserBusiness {
+  id            String    @id @default(uuid())
+  userId        String
+  businessId    String
+  departmentId  String?
+  positionTitle String?          // Vəzifə: "Müdir", "İşçi", "Mütəxəssis"
+  customRoleId  String?          // Bu təyinat üçün yetki qrupu
+  salary        Float?           // Bu şöbədəki maaş (₼)
+  payDay        Int?             // Ödəmə günü (1-31, null = ay sonu)
+  startDate     DateTime @default(now()) // İşə başlama tarixi
+
+  user       User        @relation(fields: [userId], references: [id])
+  business   Business    @relation(fields: [businessId], references: [id])
+  department Department? @relation(fields: [departmentId], references: [id])
+  customRole CustomRole? @relation(fields: [customRoleId], references: [id])
+
+  @@unique([userId, businessId, departmentId])
+  @@index([departmentId])
+  @@index([customRoleId])
+}
+
+// ──────────────────────────────────────────
+// Departamentlər (Şöbələr)
+// ──────────────────────────────────────────
+
+model Department {
+  id        String   @id @default(uuid())
+  name      String
+  color     String   @default("#246FE0")
+  tenantId  String
+  createdAt DateTime @default(now())
+
+  tasks          Task[]
+  businesses     BusinessDepartment[]
+  userBusinesses UserBusiness[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+}
+
+model BusinessDepartment {
+  id           String   @id @default(uuid())
+  businessId   String
+  departmentId String
+  createdAt    DateTime @default(now())
+
+  business      Business       @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  department    Department     @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  taskTemplates TaskTemplate[]
+
+  @@unique([businessId, departmentId])
+  @@index([businessId])
+  @@index([departmentId])
+}
+
+// ──────────────────────────────────────────
+// Task (Müdir → İşçi tapşırıqları)
+// ──────────────────────────────────────────
+
+enum TaskType {
+  TASK       // Tapşırıq — fayl əlavə oluna bilər
+  GOREV      // Görev — sadə iş
+}
+
+enum TaskStatus {
+  CREATED
+  IN_PROGRESS
+  COMPLETED
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+}
+
+enum Priority {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+  INFO
+}
+
+model Task {
+  id            String     @id @default(uuid())
+  title         String
+  description   String?
+  type          TaskType   @default(TASK)
+  priority      Priority   @default(MEDIUM)
+  status        TaskStatus @default(CREATED)
+  dueDate       DateTime?
+  businessId    String?
+  departmentId  String?
+  parentId      String?    // alt-görev üçün (sub-task)
+  approverId    String?    // yetkili kişi (alt-görev üçün)
+  creatorId     String
+  tenantId      String
+  bulkNotes     Json       @default("[]")   // [{text, date, senderId}] — yetkili toplu notları
+  groupId           String?                      // eyni batch-də yaradılan TASK-ları qruplayır
+  finalized         Boolean    @default(false)  // yetkili tamamladı — söhbətlər kilidli
+  finalFile         Json?      // {note, fileId, fileName, fileSize} — finalize zamanı əlavə olunan not+fayl
+  creatorApproved   Boolean    @default(false)  // yaradan onayladı — görev tamamilə bitdi
+  sourceTemplateId  String?    // hansı təkrarlanan şablondan yaranıb
+  dispatchPeriod    String?    // "2026-03" — hansı dövrdə dispatch olunub
+  projectId         String?    // layihə (TodoistProject ilə paylaşılır)
+  closedBy          String?    // görevi bağlayan userId
+  closedByRole      String?    // "creator" | "approver"
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  creator        User           @relation("TaskCreator", fields: [creatorId], references: [id])
+  approver       User?          @relation("TaskApprover", fields: [approverId], references: [id])
+  business       Business?      @relation(fields: [businessId], references: [id])
+  department     Department?    @relation(fields: [departmentId], references: [id])
+  parent         Task?          @relation("SubTasks", fields: [parentId], references: [id], onDelete: Cascade)
+  subTasks       Task[]         @relation("SubTasks")
+  assignees      TaskAssignee[]
+  attachments    Attachment[]   @relation("TaskAttachments")
+  comments       Comment[]      @relation("TaskComments")
+  sourceTemplate TaskTemplate?  @relation("TemplateDispatchedTasks", fields: [sourceTemplateId], references: [id])
+  labels         TaskLabel[]
+  project        TodoistProject? @relation("TaskProject", fields: [projectId], references: [id])
+
+  @@index([tenantId])
+  @@index([businessId])
+  @@index([departmentId])
+  @@index([parentId])
+  @@index([creatorId])
+  @@index([approverId])
+  @@index([groupId])
+  @@index([sourceTemplateId])
+  @@index([projectId])
+}
+
+enum AssigneeStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  DECLINED
+  FORCE_COMPLETED   // Yaradıcı görevi bağladı — işçi bitirməmişdi (donuq)
+}
+
+model TaskAssignee {
+  id             String         @id @default(uuid())
+  taskId         String
+  userId         String
+  status         AssigneeStatus @default(PENDING)
+  notes          Json           @default("[]")   // [{text, sender, date, fileId?}] — işçi notları
+  approverNotes  Json           @default("[]")   // [{text, sender, date, fileId?}] — yetkili notları
+  chatClosed     Boolean        @default(false)  // yetkili söhbəti bağlaya bilər
+  updatedAt      DateTime       @updatedAt
+
+  task  Task               @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user  User               @relation(fields: [userId], references: [id])
+  files TaskAssigneeFile[]
+
+  @@unique([taskId, userId])
+}
+
+model TaskAssigneeFile {
+  id              String   @id @default(uuid())
+  taskAssigneeId  String
+  slotNumber      Int      // 1-5
+  filename        String
+  storagePath     String
+  mimeType        String?
+  size            Int      // bytes, maks 1.5MB = 1572864
+  uploadedAt      DateTime @default(now())
+  isDeleted       Boolean  @default(false)  // soft delete — tarixçə üçün
+  deletedAt       DateTime?
+
+  taskAssignee TaskAssignee @relation(fields: [taskAssigneeId], references: [id], onDelete: Cascade)
+
+  @@index([taskAssigneeId])
+  @@index([taskAssigneeId, slotNumber])
+}
+
+// ──────────────────────────────────────────
+// Todo (Şəxsi / Komanda)
+// ──────────────────────────────────────────
+
+enum TodoStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  PENDING_APPROVAL
+  ACCEPTED
+}
+
+enum TodoVisibility {
+  PRIVATE
+  TEAM
+  BUSINESS
+}
+
+model Todo {
+  id          String         @id @default(uuid())
+  title       String
+  description String?
+  priority    Priority       @default(MEDIUM)
+  status      TodoStatus     @default(PENDING)
+  visibility  TodoVisibility @default(PRIVATE)
+  dueDate     DateTime?
+  businessId  String?
+  userId      String
+  tenantId    String
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  user        User         @relation(fields: [userId], references: [id])
+  business    Business?    @relation(fields: [businessId], references: [id])
+  attachments Attachment[] @relation("TodoAttachments")
+
+  @@index([tenantId])
+  @@index([userId])
+}
+
+// ──────────────────────────────────────────
+// Fayl Əlavələri
+// ──────────────────────────────────────────
+
+model Attachment {
+  id             String   @id @default(uuid())
+  filename       String   // orijinal fayl adı
+  storagePath    String   // server-dəki yol
+  mimeType       String
+  size           Int      // bayt
+  taskId         String?
+  todoId         String?
+  todoistTaskId  String?
+  uploaderId     String
+  tenantId       String
+  createdAt      DateTime @default(now())
+
+  task         Task?        @relation("TaskAttachments", fields: [taskId], references: [id], onDelete: Cascade)
+  todo         Todo?        @relation("TodoAttachments", fields: [todoId], references: [id], onDelete: Cascade)
+  todoistTask  TodoistTask? @relation("TodoistTaskAttachments", fields: [todoistTaskId], references: [id], onDelete: Cascade)
+  uploader     User         @relation("UserAttachments", fields: [uploaderId], references: [id])
+
+  @@index([taskId])
+  @@index([todoId])
+  @@index([todoistTaskId])
+  @@index([tenantId])
+}
+
+// ──────────────────────────────────────────
+// Şərhlər (Tapşırıq müzakirəsi)
+// ──────────────────────────────────────────
+
+model Comment {
+  id        String   @id @default(uuid())
+  content   String
+  taskId    String
+  authorId  String
+  tenantId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  task   Task @relation("TaskComments", fields: [taskId], references: [id], onDelete: Cascade)
+  author User @relation("UserComments", fields: [authorId], references: [id])
+
+  @@index([taskId])
+  @@index([tenantId])
+}
+
+// ──────────────────────────────────────────
+// Tapşırıq Şablonları (Avtomatik zamanlama)
+// ──────────────────────────────────────────
+
+enum ScheduleType {
+  ONCE
+  DAILY
+  WEEKLY
+  MONTHLY
+  CUSTOM
+}
+
+model TaskTemplate {
+  id          String       @id @default(uuid())
+  name        String
+  description String?
+  isActive    Boolean      @default(true)
+  isRecurring Boolean      @default(false)  // true = təkrarlanan görev şablonu
+  tenantId    String
+  creatorId   String
+  businessId  String?      // filial
+  departmentId String?     // şöbə
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  // Zamanlama
+  scheduleType ScheduleType @default(WEEKLY)
+  scheduleTime String       @default("09:00") // "HH:mm"
+  dayOfWeek    Int?         // 0-6 (həftəlik üçün)
+  dayOfMonth   Int?         // 1-31 (aylıq üçün)
+  customDays   Int?         // hər neçə gündən bir (xüsusi)
+  lastRunAt    DateTime?
+  nextRunAt    DateTime?
+
+  // Təkrarlanan görev üçün əlavə sahələr
+  notificationDay Int?     // 1-31, xatırlatma günü
+  deadlineDay     Int?     // 1-31, son tarix günü
+  endDate         DateTime? // opsional bitiş tarixi
+
+  creator    User               @relation("TemplateCreator", fields: [creatorId], references: [id])
+  business   Business?          @relation(fields: [businessId], references: [id])
+  department BusinessDepartment? @relation(fields: [departmentId], references: [id])
+  items      TemplateItem[]
+  assignees  TemplateAssignee[]
+  tasks      Task[]             @relation("TemplateDispatchedTasks")
+
+  @@index([tenantId])
+  @@index([isActive, nextRunAt])
+  @@index([isRecurring])
+}
+
+model TemplateItem {
+  id         String   @id @default(uuid())
+  title      String
+  priority   Priority @default(MEDIUM)
+  sortOrder  Int      @default(0)
+  templateId String
+
+  template TaskTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+}
+
+model TemplateAssignee {
+  id         String @id @default(uuid())
+  templateId String
+  userId     String
+
+  template TaskTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  user     User         @relation(fields: [userId], references: [id])
+
+  @@unique([templateId, userId])
+}
+
+// ──────────────────────────────────────────
+// Maliyyə Modulu
+// ──────────────────────────────────────────
+
+enum TransactionType {
+  DEBIT
+  CREDIT
+}
+
+model FinanceCategory {
+  id       String @id @default(uuid())
+  name     String
+  tenantId String
+  color    String @default("#6366f1")
+
+  transactions Transaction[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+}
+
+model EmployeeLedger {
+  id              String   @id @default(uuid())
+  userId          String
+  userBusinessId  String?
+  type            String                    // DEBIT | CREDIT
+  amount          Float
+  description     String?
+  category        String   @default("MAAS") // MAAS, BONUS, AVANS
+  month           Int?
+  year            Int?
+  transactionId   String?  @unique          // ödəmə kassadan düşdükdə bağlı Transaction
+  tenantId        String
+  createdBy       String
+  createdAt       DateTime @default(now())
+
+  user User @relation("EmployeeLedgerEntries", fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([tenantId])
+  @@index([month, year])
+}
+
+model Transaction {
+  id          String          @id @default(uuid())
+  amount      Float
+  type        TransactionType
+  description String?
+  date        DateTime
+  categoryId  String?
+  businessId  String?
+  employeeId      String?     // kimin xərci
+  userBusinessId  String?     // hansı təyinat üçün maaş ödəməsi
+  salaryMonth     Int?        // maaş ayı (1-12)
+  salaryYear      Int?        // maaş ili
+  tenantId        String
+  createdBy   String
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  category FinanceCategory? @relation(fields: [categoryId], references: [id])
+  business Business?        @relation(fields: [businessId], references: [id])
+  employee User?            @relation("EmployeeTransactions", fields: [employeeId], references: [id])
+  creator  User             @relation("CreatorTransactions", fields: [createdBy], references: [id])
+
+  @@index([tenantId])
+  @@index([businessId])
+  @@index([date])
+  @@index([type])
+}
+
+// ──────────────────────────────────────────
+// Maaş & HR Modulu
+// ──────────────────────────────────────────
+
+model Salary {
+  id         String   @id @default(uuid())
+  userId     String
+  amount     Float    // əsas maaş
+  currency   String   @default("AZN")
+  startDate  DateTime @default(now())
+  tenantId   String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user     User            @relation(fields: [userId], references: [id])
+  payments SalaryPayment[]
+
+  @@index([userId])
+  @@index([tenantId])
+}
+
+model SalaryPayment {
+  id        String   @id @default(uuid())
+  salaryId  String
+  amount    Float    // ödənilən məbləğ
+  bonus     Float    @default(0)
+  month     Int      // 1-12
+  year      Int
+  method    String   @default("bank") // bank | cash | transfer
+  note      String?
+  paidAt    DateTime @default(now())
+  paidBy    String
+  tenantId  String
+  createdAt DateTime @default(now())
+
+  salary Salary @relation(fields: [salaryId], references: [id])
+  payer  User   @relation("SalaryPayer", fields: [paidBy], references: [id])
+
+  @@unique([salaryId, month, year])
+  @@index([tenantId])
+}
+
+// ──────────────────────────────────────────
+// Bildiriş Sistemi
+// ──────────────────────────────────────────
+
+enum NotificationType {
+  TASK_ASSIGNED
+  TASK_COMPLETED
+  TASK_APPROVED
+  TASK_REJECTED
+  TODO_DUE
+  SALARY_PAID
+  COMMENT_ADDED
+  TEMPLATE_EXECUTED
+  SYSTEM
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  type      NotificationType
+  title     String
+  message   String
+  isRead    Boolean          @default(false)
+  link      String?          // səhifəyə yönləndirmə linki
+  userId    String           // kimə göndərilir
+  senderId  String?          // kim göndərir
+  tenantId  String
+  createdAt DateTime         @default(now())
+
+  user   User  @relation("UserNotifications", fields: [userId], references: [id])
+  sender User? @relation("SenderNotifications", fields: [senderId], references: [id])
+
+  @@index([userId, isRead])
+  @@index([tenantId])
+  @@index([createdAt])
+}
+
+// ──────────────────────────────────────────
+// Todoist Modulu (Şəxsi tapşırıq idarəetmə)
+// ──────────────────────────────────────────
+
+enum TodoistPriority {
+  P1  // Qırmızı — təcili
+  P2  // Narıncı — yüksək
+  P3  // Mavi — orta
+  P4  // Boz — default
+}
+
+enum TodoistViewType {
+  LIST
+  BOARD
+}
+
+model TodoistProject {
+  id         String          @id @default(uuid())
+  name       String
+  color      String          @default("#808080")
+  viewType   TodoistViewType @default(LIST)
+  isFavorite Boolean         @default(false)
+  isInbox    Boolean         @default(false)
+  isDeleted  Boolean         @default(false)
+  deletedAt  DateTime?
+  sortOrder  Int             @default(0)
+  userId     String
+  tenantId   String
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  user       User              @relation("TodoistUserProjects", fields: [userId], references: [id])
+  sections   TodoistSection[]
+  tasks      TodoistTask[]
+  gorevTasks Task[]            @relation("TaskProject")
+
+  @@index([userId])
+  @@index([tenantId])
+  @@index([updatedAt])
+}
+
+model TodoistSection {
+  id        String    @id @default(uuid())
+  name      String
+  sortOrder Int       @default(0)
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+  projectId String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  project TodoistProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tasks   TodoistTask[]
+
+  @@index([projectId])
+  @@index([updatedAt])
+}
+
+model TodoistTask {
+  id          String          @id @default(uuid())
+  content     String
+  description String?
+  priority    TodoistPriority @default(P4)
+  isCompleted Boolean         @default(false)
+  dueDate     DateTime?
+  dueString   String?         // "hər bazar ertəsi", "sabah" kimi
+  isRecurring Boolean         @default(false)
+  recurRule   String?         // RRULE: "FREQ=WEEKLY;BYDAY=MO"
+  sortOrder   Int             @default(0)
+  duration    Int?            // dəqiqə ilə müddət (60 = 1 saat)
+  reminder    DateTime?       // xatırlatma vaxtı
+  reminderSent Boolean        @default(false)
+  location    String?         // konum (ünvan və ya koordinat)
+  isDeleted   Boolean         @default(false)
+  deletedAt   DateTime?
+  projectId   String
+  sectionId   String?
+  parentId    String?         // alt-tapşırıq
+  userId      String
+  tenantId    String
+  completedAt DateTime?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  project    TodoistProject     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  section    TodoistSection?    @relation(fields: [sectionId], references: [id], onDelete: SetNull)
+  parent     TodoistTask?       @relation("TodoistSubTasks", fields: [parentId], references: [id], onDelete: Cascade)
+  children   TodoistTask[]      @relation("TodoistSubTasks")
+  user       User               @relation("TodoistUserTasks", fields: [userId], references: [id])
+  labels      TodoistTaskLabel[]
+  comments    TodoistComment[]
+  activities  TodoistActivity[]
+  attachments Attachment[]       @relation("TodoistTaskAttachments")
+
+  @@index([userId])
+  @@index([tenantId])
+  @@index([projectId])
+  @@index([sectionId])
+  @@index([parentId])
+  @@index([dueDate])
+  @@index([isCompleted])
+  @@index([reminder, reminderSent, isCompleted])
+  @@index([updatedAt])
+}
+
+model TodoistLabel {
+  id        String    @id @default(uuid())
+  name      String
+  color     String    @default("#808080")
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+  userId    String
+  tenantId  String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  user       User              @relation("TodoistUserLabels", fields: [userId], references: [id])
+  tasks      TodoistTaskLabel[]
+  taskLabels TaskLabel[]
+
+  @@unique([userId, name])
+  @@index([userId])
+  @@index([updatedAt])
+}
+
+model TodoistTaskLabel {
+  id      String @id @default(uuid())
+  taskId  String
+  labelId String
+
+  task  TodoistTask  @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  label TodoistLabel @relation(fields: [labelId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, labelId])
+}
+
+// GÖREV tapşırıqları üçün etiket join table
+model TaskLabel {
+  id      String @id @default(uuid())
+  taskId  String
+  labelId String
+
+  task  Task         @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  label TodoistLabel @relation(fields: [labelId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, labelId])
+  @@index([taskId])
+  @@index([labelId])
+}
+
+model TodoistComment {
+  id        String    @id @default(uuid())
+  content   String
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+  taskId    String
+  userId    String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  task TodoistTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User        @relation("TodoistUserComments", fields: [userId], references: [id])
+
+  @@index([taskId])
+  @@index([updatedAt])
+}
+
+model TodoistFilter {
+  id       String @id @default(uuid())
+  name     String
+  query    String   // JSON filter: {"priority":["P1"],"labels":["iş"]}
+  color    String @default("#808080")
+  userId   String
+  tenantId String
+
+  user User @relation("TodoistUserFilters", fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model TodoistActivity {
+  id        String   @id @default(uuid())
+  action    String   // "created", "completed", "updated", "deleted", "moved"
+  details   String?  // JSON: {"field":"priority","from":"P4","to":"P1"}
+  taskId    String?
+  projectId String?
+  userId    String
+  tenantId  String
+  createdAt DateTime @default(now())
+
+  task    TodoistTask?    @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  user    User            @relation("TodoistUserActivities", fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([taskId])
+  @@index([createdAt])
+}
+
+model TodoistTemplate {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  tasks       String   // JSON: [{content, priority, children:[]}]
+  color       String   @default("#808080")
+  userId      String
+  tenantId    String
+  createdAt   DateTime @default(now())
+
+  user User @relation("TodoistUserTemplates", fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+// ──────────────────────────────────────────
+// Super Admin Audit Log
+// ──────────────────────────────────────────
+
+model AdminAuditLog {
+  id        String   @id @default(uuid())
+  userId    String
+  userEmail String
+  action    String   // login, tenant.create, tenant.update, tenant.deactivate, role.create, settings.update
+  details   String?
+  ip        String?
+  tenantId  String?  // hansı tenant-ə aiddir (null = sistem əməliyyatı)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}

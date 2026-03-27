@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Todo Dizayn Müqayisəsi — Todoist vs WorkFlow Pro</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#F5F3F0;color:#1F1F1F}
+.header{padding:24px 36px 8px}
+.header h1{font-size:22px;font-weight:800}
+.header p{font-size:12px;color:#888;margin-top:2px}
+
+.tabs{display:flex;gap:6px;padding:14px 36px 20px}
+.tabs button{padding:8px 16px;border:1.5px solid #EBEBEB;border-radius:10px;background:#fff;font-size:12px;font-weight:600;cursor:pointer;color:#888;transition:.2s}
+.tabs button.active{border-color:#DC4C3E;background:#FFF5F3;color:#DC4C3E}
+
+.panels{padding:0 36px 60px}
+.panel{display:none}.panel.active{display:block}
+
+.frame{background:#fff;border-radius:16px;border:1px solid #EBEBEB;overflow:hidden;max-width:1100px;margin:0 auto 20px;box-shadow:0 4px 20px rgba(0,0,0,.06)}
+.tbar{display:flex;align-items:center;gap:7px;padding:10px 14px;background:#FAFAFA;border-bottom:1px solid #EBEBEB}
+.dot{width:11px;height:11px;border-radius:50%}
+.dr{background:#FF5F57}.dy{background:#FFBD2E}.dg{background:#28C840}
+.body{display:flex;min-height:600px}
+
+/* Sidebar */
+.sb{width:250px;background:#FCFAF8;border-right:1px solid #EBEBEB;padding:14px 10px;flex-shrink:0;overflow-y:auto}
+.sb .profile{display:flex;align-items:center;gap:8px;padding:8px;margin-bottom:6px}
+.sb .av{width:28px;height:28px;border-radius:50%;background:#DC4C3E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700}
+.sb .nm{font-size:12px;font-weight:600}
+.sb .add{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;font-size:12px;font-weight:600;color:#DC4C3E;cursor:pointer;margin-bottom:4px}
+.sb .add:hover{background:#FDECEA}
+.sb .nav{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:8px;font-size:12px;font-weight:500;color:#1F1F1F;cursor:pointer}
+.sb .nav:hover{background:#F0EDEA}
+.sb .nav.a{background:#FFEFE5;color:#DC4C3E;font-weight:600}
+.sb .nav .badge{margin-left:auto;font-size:10px;font-weight:700;color:#DC4C3E}
+.sb .dv{height:1px;background:#EBEBEB;margin:6px 0}
+.sb .label{font-size:9px;font-weight:700;color:#B3B3B3;text-transform:uppercase;letter-spacing:.5px;padding:6px 10px 3px}
+.sb .proj{display:flex;align-items:center;gap:8px;padding:5px 10px;font-size:12px;color:#666;cursor:pointer;border-radius:6px}
+.sb .proj:hover{background:#F0EDEA}
+.sb .pdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* Content */
+.ct{flex:1;overflow-y:auto;padding:0;background:#fff}
+.ct-inner{padding:24px 28px}
+.ct h2{font-size:22px;font-weight:800;margin-bottom:2px}
+.ct .sub{font-size:11px;color:#B3B3B3;margin-bottom:16px}
+
+/* ═══ TODOIST REAL DIZAYN ═══ */
+/* Section divider line */
+.sec-hdr{display:flex;align-items:center;gap:8px;padding:12px 0 6px;cursor:pointer}
+.sec-arrow{font-size:10px;color:#999;transition:.15s}
+.sec-name{font-size:13px;font-weight:700;color:#1F1F1F}
+.sec-count{font-size:10px;color:#B3B3B3}
+.sec-line{flex:1;height:1px;background:#EBEBEB}
+.sec-menu{opacity:0;font-size:12px;color:#999;cursor:pointer}
+.sec-hdr:hover .sec-menu{opacity:1}
+
+/* Task row — Todoist pixel-perfect */
+.task{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid #F5F3F0;cursor:pointer;transition:background .1s}
+.task:hover{background:#FAFAF8;margin:0 -8px;padding:8px 8px;border-radius:6px}
+.task-check{width:18px;height:18px;border-radius:50%;border:2px solid;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s}
+.task-check:hover{background:rgba(0,0,0,.04)}
+.task-check.done{background:var(--pcolor);border-color:var(--pcolor)}
+.task-check.done::after{content:'✓';color:#fff;font-size:10px;font-weight:700}
+.task-body{flex:1;min-width:0}
+.task-title{font-size:13px;color:#1F1F1F;line-height:1.4}
+.task-title.done{text-decoration:line-through;color:#B3B3B3}
+.task-desc{font-size:11px;color:#B3B3B3;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.task-meta{display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap}
+.task-date{font-size:10px;font-weight:500;display:flex;align-items:center;gap:3px}
+.task-date.overdue{color:#DC4C3E}
+.task-date.today{color:#058527}
+.task-date.tomorrow{color:#EB8909}
+.task-label{font-size:9px;font-weight:600;padding:1px 6px;border-radius:3px}
+.task-proj{font-size:10px;color:#808080;display:flex;align-items:center;gap:3px}
+.task-subtask{font-size:10px;color:#808080;display:flex;align-items:center;gap:2px}
+.task-recurring{font-size:10px;color:#9333EA;display:flex;align-items:center;gap:2px}
+.task-comment{font-size:10px;color:#808080;display:flex;align-items:center;gap:2px}
+.task-attach{font-size:10px;color:#808080}
+.task-actions{display:flex;gap:4px;opacity:0;transition:.15s;align-items:center;flex-shrink:0}
+.task:hover .task-actions{opacity:1}
+.task-act{width:24px;height:24px;border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#B3B3B3;font-size:12px}
+.task-act:hover{background:#F0F0F0;color:#1F1F1F}
+.task-drag{width:16px;display:flex;flex-direction:column;align-items:center;gap:1px;cursor:grab;opacity:0;transition:.15s;padding-top:4px}
+.task:hover .task-drag{opacity:.4}
+.task-drag:hover{opacity:1!important}
+.task-drag span{width:3px;height:3px;border-radius:50%;background:#B3B3B3;display:block}
+
+/* Quick add inline */
+.qadd{display:flex;align-items:center;gap:8px;padding:8px 0;color:#B3B3B3;font-size:12px;cursor:pointer;transition:.15s}
+.qadd:hover{color:#DC4C3E}
+.qadd .plus{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;color:#DC4C3E}
+
+/* Diff callout */
+.diff{padding:12px 16px;border-radius:10px;margin-bottom:16px;font-size:11px;display:flex;align-items:center;gap:8px}
+.diff.good{background:#ECFDF5;color:#058527;border:1px solid #A7F3D0}
+.diff.bad{background:#FEF2F2;color:#DC4C3E;border:1px solid #FECACA}
+.diff.info{background:#EFF6FF;color:#2563EB;border:1px solid #BFDBFE}
+.diff-icon{font-size:14px}
+
+/* Compare table */
+.cmp{width:100%;border-collapse:collapse;font-size:12px;margin-top:16px}
+.cmp th{text-align:left;font-size:10px;font-weight:700;color:#B3B3B3;text-transform:uppercase;letter-spacing:.5px;padding:8px 12px;border-bottom:2px solid #EBEBEB}
+.cmp td{padding:8px 12px;border-bottom:1px solid #F5F3F0}
+.cmp .yes{color:#058527;font-weight:600}
+.cmp .no{color:#DC4C3E;font-weight:600}
+.cmp .partial{color:#EB8909;font-weight:600}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📋 Todo Dizayn Müqayisəsi</h1>
+  <p>Todoist real dizaynı vs WorkFlow Pro — fərqlər və təkliflər</p>
+</div>
+
+<div class="tabs">
+  <button class="active" onclick="show(0)">Todoist Dizayn</button>
+  <button onclick="show(1)">WorkFlow Pro (hazırki)</button>
+  <button onclick="show(2)">Fərqlər Cədvəli</button>
+</div>
+
+<div class="panels">
+
+<!-- ═══ PANEL 1: Todoist Real Dizayn ═══ -->
+<div class="panel active" id="p0">
+  <div class="diff info"><span class="diff-icon">ℹ️</span> Bu Todoist-in real dizaynıdır — hər piksel mümkün qədər dəqiq kopyalanıb</div>
+
+  <div class="frame">
+    <div class="tbar"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div><span style="margin-left:8px;font-size:11px;color:#999">Todoist</span></div>
+    <div class="body">
+      <!-- Sidebar -->
+      <div class="sb">
+        <div class="profile"><div class="av">HƏ</div><div class="nm">Həsən Əliyev</div></div>
+        <div class="add">＋ Tapşırıq əlavə et</div>
+        <div class="nav" style="color:#246FE0"><span>🔍</span> Axtarış</div>
+        <div class="nav a"><span>📥</span> Gələnlər <span class="badge">5</span></div>
+        <div class="nav"><span>📅</span> Bugün <span class="badge" style="color:#058527">3</span></div>
+        <div class="nav"><span>📆</span> Gələcək</div>
+        <div class="nav"><span>📊</span> Filtrlər & Etiketlər</div>
+        <div class="dv"></div>
+        <div class="label">Layihələr</div>
+        <div class="proj"><div class="pdot" style="background:#DC4C3E"></div> Strateji Plan 2026</div>
+        <div class="proj"><div class="pdot" style="background:#F97316"></div> Maliyyə İdarəetmə</div>
+        <div class="proj"><div class="pdot" style="background:#059669"></div> İşçi İdarəetmə</div>
+        <div class="proj"><div class="pdot" style="background:#EC4899"></div> Şəxsi</div>
+        <div class="proj" style="color:#B3B3B3">＋ Layihə əlavə et</div>
+      </div>
+
+      <!-- Content -->
+      <div class="ct">
+        <div class="ct-inner">
+          <h2>Gələnlər</h2>
+          <div class="sub">5 tapşırıq</div>
+
+          <!-- Tapşırıq 1 — overdue, subtask, comment -->
+          <div class="task">
+            <div class="task-drag"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="task-check" style="--pcolor:#DC4C3E;border-color:#DC4C3E"></div>
+            <div class="task-body">
+              <div class="task-title">Müştəri prezentasiyasını hazırla</div>
+              <div class="task-desc">AzərEnerji toplantısı üçün slide deck</div>
+              <div class="task-meta">
+                <span class="task-date overdue">📅 Gecikmiş — Dünən</span>
+                <span class="task-subtask">🔲 2/5</span>
+                <span class="task-comment">💬 3</span>
+                <span class="task-attach">📎</span>
+                <span class="task-label" style="background:#FEE2E0;color:#DC4C3E">təcili</span>
+                <span class="task-label" style="background:#E8F0FE;color:#246FE0">strateji</span>
+              </div>
+            </div>
+            <div class="task-actions">
+              <div class="task-act" title="Redaktə et">✏️</div>
+              <div class="task-act" title="Tarix">📅</div>
+              <div class="task-act" title="Şərh">💬</div>
+              <div class="task-act" title="Daha çox">⋯</div>
+            </div>
+          </div>
+
+          <!-- Tapşırıq 2 — bugün, recurring -->
+          <div class="task">
+            <div class="task-drag"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="task-check" style="--pcolor:#EB8909;border-color:#EB8909"></div>
+            <div class="task-body">
+              <div class="task-title">Hər gün su iç — 2 litr</div>
+              <div class="task-meta">
+                <span class="task-date today">📅 Bugün</span>
+                <span class="task-recurring">🔁 Hər gün</span>
+              </div>
+            </div>
+            <div class="task-actions">
+              <div class="task-act">✏️</div>
+              <div class="task-act">📅</div>
+              <div class="task-act">⋯</div>
+            </div>
+          </div>
+
+          <!-- Tapşırıq 3 — sabah, label -->
+          <div class="task">
+            <div class="task-drag"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="task-check" style="--pcolor:#246FE0;border-color:#246FE0"></div>
+            <div class="task-body">
+              <div class="task-title">Q1 hesabatı üçün data toplayın</div>
+              <div class="task-meta">
+                <span class="task-date tomorrow">📅 Sabah</span>
+                <span class="task-label" style="background:#FFF3E0;color:#F97316">maliyyə</span>
+                <span class="task-proj"><span class="pdot" style="background:#F97316;width:6px;height:6px;border-radius:50%;display:inline-block"></span> Maliyyə İdarəetmə</span>
+              </div>
+            </div>
+            <div class="task-actions">
+              <div class="task-act">✏️</div>
+              <div class="task-act">📅</div>
+              <div class="task-act">⋯</div>
+            </div>
+          </div>
+
+          <!-- Tapşırıq 4 — normal, no date -->
+          <div class="task">
+            <div class="task-drag"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="task-check" style="--pcolor:#B3B3B3;border-color:#B3B3B3"></div>
+            <div class="task-body">
+              <div class="task-title">Ofis bitkilərinə su ver</div>
+              <div class="task-meta">
+                <span class="task-proj"><span class="pdot" style="background:#EC4899;width:6px;height:6px;border-radius:50%;display:inline-block"></span> Şəxsi</span>
+              </div>
+            </div>
+            <div class="task-actions">
+              <div class="task-act">✏️</div>
+              <div class="task-act">📅</div>
+              <div class="task-act">⋯</div>
+            </div>
+          </div>
+
+          <!-- Tapşırıq 5 — tamamlanmış -->
+          <div class="task" style="opacity:.5">
+            <div class="task-drag"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="task-check done" style="--pcolor:#B3B3B3;border-color:#B3B3B3"></div>
+            <div class="task-body">
+              <div class="task-title done">Server yeniləmə planını yaz</div>
+              <div class="task-meta">
+                <span class="task-date" style="color:#B3B3B3">📅 20 Mart</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick add -->
+          <div class="qadd">
+            <span class="plus">＋</span>
+            Tapşırıq əlavə et
+          </div>
+
+          <!-- Section separator -->
+          <div class="sec-hdr">
+            <span class="sec-arrow">▼</span>
+            <span class="sec-name">Bu həftə</span>
+            <span class="sec-count">3</span>
+            <span class="sec-line"></span>
+            <span class="sec-menu">⋯</span>
+          </div>
+
+          <div class="task">
+            <div class="task-drag"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="task-check" style="--pcolor:#DC4C3E;border-color:#DC4C3E"></div>
+            <div class="task-body">
+              <div class="task-title">KVKK audit planını tamamla</div>
+              <div class="task-meta">
+                <span class="task-date" style="color:#808080">📅 28 Mart</span>
+                <span class="task-subtask">🔲 1/3</span>
+                <span class="task-label" style="background:#FEE2E0;color:#DC4C3E">təcili</span>
+                <span class="task-label" style="background:#E8F0FE;color:#246FE0">strateji</span>
+              </div>
+            </div>
+            <div class="task-actions">
+              <div class="task-act">✏️</div>
+              <div class="task-act">📅</div>
+              <div class="task-act">⋯</div>
+            </div>
+          </div>
+
+          <div class="task">
+            <div class="task-drag"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="task-check" style="--pcolor:#EB8909;border-color:#EB8909"></div>
+            <div class="task-body">
+              <div class="task-title">Yeni işçi müsahibə suallarını hazırla</div>
+              <div class="task-meta">
+                <span class="task-date" style="color:#808080">📅 27 Mart</span>
+                <span class="task-label" style="background:#ECFDF5;color:#059669">HR</span>
+              </div>
+            </div>
+            <div class="task-actions">
+              <div class="task-act">✏️</div>
+              <div class="task-act">📅</div>
+              <div class="task-act">⋯</div>
+            </div>
+          </div>
+
+          <div class="qadd">
+            <span class="plus">＋</span>
+            Bu seksiyaya əlavə et
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PANEL 2: WorkFlow Pro Hazırki ═══ -->
+<div class="panel" id="p1">
+  <div class="diff bad"><span class="diff-icon">⚠️</span> Hazırki dizaynda fərqlər var — aşağıda Todoist ilə side-by-side müqayisə</div>
+
+  <div class="frame">
+    <div class="tbar"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div><span style="margin-left:8px;font-size:11px;color:#999">WorkFlow Pro — Hazırki</span></div>
+    <div class="body">
+      <div class="sb">
+        <div class="profile"><div class="av">HƏ</div><div class="nm">Həsən Əliyev</div></div>
+        <div class="nav a"><span>📅</span> Bugün <span class="badge">8</span></div>
+        <div class="nav"><span>📥</span> Gələnlər</div>
+        <div class="nav"><span>📆</span> Gələcək</div>
+        <div class="dv"></div>
+        <div class="nav"><span>📋</span> Tapşırıqlar</div>
+        <div class="nav"><span>✅</span> Todo</div>
+        <div class="nav"><span>📑</span> Şablonlar</div>
+        <div class="dv"></div>
+        <div class="label">Layihələr</div>
+        <div class="proj"><div class="pdot" style="background:#DC4C3E"></div> Strateji Plan 2026</div>
+        <div class="proj"><div class="pdot" style="background:#F97316"></div> Maliyyə İdarəetmə</div>
+        <div class="dv"></div>
+        <div class="label">Etiketlər</div>
+        <div class="proj" style="font-size:11px"><div class="pdot" style="background:#DC4C3E"></div> təcili</div>
+        <div class="proj" style="font-size:11px"><div class="pdot" style="background:#059669"></div> HR</div>
+      </div>
+      <div class="ct">
+        <div class="ct-inner">
+          <!-- Bizdə: başlıq + butonlar + filtr tabları + chip filtrlər -->
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="width:10px;height:10px;border-radius:50%;background:#DC4C3E"></div>
+              <h2 style="font-size:22px">Strateji Plan 2026</h2>
+            </div>
+            <div style="display:flex;gap:4px">
+              <button style="padding:4px 10px;border:1px solid #EBEBEB;border-radius:6px;font-size:10px;background:#fff;cursor:pointer">Şablon kimi saxla</button>
+              <button style="padding:4px 10px;border:1px solid #EBEBEB;border-radius:6px;font-size:10px;background:#fff;cursor:pointer">☑ Seç</button>
+              <button style="padding:4px 8px;border:1px solid #EBEBEB;border-radius:6px;font-size:10px;background:#DC4C3E;color:#fff;cursor:pointer">Siyahı</button>
+              <button style="padding:4px 8px;border:1px solid #EBEBEB;border-radius:6px;font-size:10px;background:#fff;cursor:pointer">Board</button>
+              <button style="padding:4px 8px;border:1px solid #EBEBEB;border-radius:6px;font-size:10px;background:#fff;cursor:pointer">Təqvim</button>
+            </div>
+          </div>
+          <div class="sub">Layihə tapşırıqları</div>
+
+          <!-- Status filtrlər — Todoist-də YOXDUR -->
+          <div style="display:flex;gap:0;margin-bottom:12px;border-bottom:2px solid #EBEBEB">
+            <div style="padding:8px 16px;font-size:12px;font-weight:600;color:#DC4C3E;border-bottom:2px solid #DC4C3E;margin-bottom:-2px">Aktiv <span style="font-size:9px;background:#FEE2E0;color:#DC4C3E;padding:1px 5px;border-radius:8px">12</span></div>
+            <div style="padding:8px 16px;font-size:12px;font-weight:600;color:#999">Tamamlandı</div>
+            <div style="padding:8px 16px;font-size:12px;font-weight:600;color:#999">Hamısı</div>
+          </div>
+
+          <!-- Label chip filtrlər — Todoist-də sidebar-da -->
+          <div style="display:flex;gap:4px;margin-bottom:12px;flex-wrap:wrap">
+            <span style="padding:4px 10px;border-radius:16px;font-size:10px;font-weight:600;background:#DC4C3E;color:#fff;cursor:pointer">Hamısı</span>
+            <span style="padding:4px 10px;border-radius:16px;font-size:10px;font-weight:600;background:#fff;border:1px solid #EBEBEB;color:#666;cursor:pointer"><span style="width:6px;height:6px;border-radius:50%;background:#DC4C3E;display:inline-block;margin-right:3px"></span> təcili</span>
+            <span style="padding:4px 10px;border-radius:16px;font-size:10px;font-weight:600;background:#fff;border:1px solid #EBEBEB;color:#666;cursor:pointer"><span style="width:6px;height:6px;border-radius:50%;background:#059669;display:inline-block;margin-right:3px"></span> HR</span>
+          </div>
+
+          <!-- Tapşırıqlar — bizdə badge yoxdur -->
+          <div class="task">
+            <div class="task-check" style="border-color:#DC4C3E"></div>
+            <div class="task-body">
+              <div class="task-title">Müştəri prezentasiyasını hazırla</div>
+              <div class="task-desc">AzərEnerji toplantısı üçün slide deck</div>
+              <div class="task-meta">
+                <span class="task-date overdue">Gecikmiş</span>
+                <!-- ❌ Subtask sayı yoxdur -->
+                <!-- ❌ Comment sayı yoxdur -->
+                <!-- ❌ Fayl ikonu yoxdur -->
+                <!-- ❌ Recurring ikonu yoxdur -->
+                <span class="task-label" style="background:#FEE2E0;color:#DC4C3E">təcili</span>
+              </div>
+            </div>
+            <!-- ❌ Hover action butonları yoxdur (yalnız sil) -->
+            <div style="opacity:.3;color:#DC4C3E;font-size:11px;cursor:pointer">🗑</div>
+          </div>
+
+          <div class="task">
+            <div class="task-check" style="border-color:#EB8909"></div>
+            <div class="task-body">
+              <div class="task-title">Hər gün su iç — 2 litr</div>
+              <div class="task-meta">
+                <span class="task-date today">Bugün</span>
+                <!-- ❌ Recurring ikonu yoxdur -->
+              </div>
+            </div>
+            <div style="opacity:.3;color:#DC4C3E;font-size:11px;cursor:pointer">🗑</div>
+          </div>
+
+          <div class="task">
+            <div class="task-check" style="border-color:#246FE0"></div>
+            <div class="task-body">
+              <div class="task-title">Q1 hesabatı üçün data toplayın</div>
+              <div class="task-meta">
+                <span class="task-date tomorrow">Sabah</span>
+                <span class="task-label" style="background:#FFF3E0;color:#F97316">maliyyə</span>
+              </div>
+            </div>
+            <div style="opacity:.3;color:#DC4C3E;font-size:11px;cursor:pointer">🗑</div>
+          </div>
+
+          <div class="qadd"><span class="plus">＋</span> Tapşırıq əlavə et</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PANEL 3: Fərqlər Cədvəli ═══ -->
+<div class="panel" id="p2">
+  <div class="diff info"><span class="diff-icon">📊</span> Todoist vs WorkFlow Pro — komponent-komponent müqayisə</div>
+
+  <div class="frame" style="max-width:900px">
+    <div style="padding:20px">
+      <h2 style="font-size:18px;margin-bottom:16px">Tapşırıq Kartı Fərqləri</h2>
+      <table class="cmp">
+        <tr><th>Element</th><th>Todoist</th><th>WorkFlow Pro</th><th>Status</th></tr>
+        <tr><td>Checkbox (prioritet rəngli)</td><td>✅ Var</td><td>✅ Var</td><td class="yes">✅ Eyni</td></tr>
+        <tr><td>Başlıq + təsvir</td><td>✅ Var</td><td>✅ Var</td><td class="yes">✅ Eyni</td></tr>
+        <tr><td>Tarix (Bugün/Sabah/Gecikmiş)</td><td>✅ Rəngli</td><td>✅ Rəngli</td><td class="yes">✅ Eyni</td></tr>
+        <tr><td>Etiket badge-ləri</td><td>✅ Rəngli pill</td><td>✅ Rəngli pill</td><td class="yes">✅ Eyni</td></tr>
+        <tr><td><strong>Subtask sayı (🔲 2/5)</strong></td><td>✅ Var</td><td>❌ Yoxdur</td><td class="no">❌ Əksik</td></tr>
+        <tr><td><strong>Comment sayı (💬 3)</strong></td><td>✅ Var</td><td>❌ Yoxdur</td><td class="no">❌ Əksik</td></tr>
+        <tr><td><strong>Fayl ikonu (📎)</strong></td><td>✅ Var</td><td>❌ Yoxdur</td><td class="no">❌ Əksik</td></tr>
+        <tr><td><strong>Recurring ikonu (🔁)</strong></td><td>✅ Var</td><td>❌ Yoxdur</td><td class="no">❌ Əksik</td></tr>
+        <tr><td><strong>Hover action butonları</strong></td><td>✅ 4 buton (edit,date,comment,more)</td><td>❌ Yalnız sil</td><td class="no">❌ Əksik</td></tr>
+        <tr><td><strong>Drag handle (6 nöqtə)</strong></td><td>✅ Hover-da görünür</td><td>✅ Var</td><td class="yes">✅ Eyni</td></tr>
+        <tr><td>Layihə adı (Inbox-da)</td><td>✅ Rəngli nöqtə + ad</td><td>✅ Var</td><td class="yes">✅ Eyni</td></tr>
+      </table>
+
+      <h2 style="font-size:18px;margin:24px 0 16px">Səhifə Layout Fərqləri</h2>
+      <table class="cmp">
+        <tr><th>Element</th><th>Todoist</th><th>WorkFlow Pro</th><th>Status</th></tr>
+        <tr><td>Status filtr tabları</td><td>❌ Yoxdur</td><td>✅ Aktiv/Tamamlandı/Hamısı</td><td class="yes">✅ Bizim üstünlük</td></tr>
+        <tr><td>Label chip filtrlər</td><td>❌ Sidebar-da filtr</td><td>✅ İnline chip-lər</td><td class="yes">✅ Bizim üstünlük</td></tr>
+        <tr><td>Board görünüşü</td><td>✅ Premium</td><td>✅ Pulsuz</td><td class="yes">✅ Bizim üstünlük</td></tr>
+        <tr><td>Təqvim görünüşü</td><td>✅ Premium</td><td>✅ Pulsuz</td><td class="yes">✅ Bizim üstünlük</td></tr>
+        <tr><td>Bulk seçim + əməliyyat</td><td>✅ Var</td><td>✅ Var</td><td class="yes">✅ Eyni</td></tr>
+        <tr><td>Şablon kimi saxla</td><td>✅ Premium</td><td>✅ Pulsuz</td><td class="yes">✅ Bizim üstünlük</td></tr>
+        <tr><td><strong>Seksiyalar arası drag</strong></td><td>✅ Var</td><td>✅ <strong>YENİ əlavə edildi!</strong></td><td class="yes">✅ Düzəldi</td></tr>
+        <tr><td><strong>Board drag-drop</strong></td><td>✅ Var</td><td>✅ <strong>YENİ əlavə edildi!</strong></td><td class="yes">✅ Düzəldi</td></tr>
+        <tr><td><strong>Recurring tamamla→tarix sürüşsün</strong></td><td>✅ Var</td><td>✅ <strong>YENİ əlavə edildi!</strong></td><td class="yes">✅ Düzəldi</td></tr>
+      </table>
+
+      <h2 style="font-size:18px;margin:24px 0 16px">🎯 Qalan 4 əksiklik (kartda badge-lər)</h2>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+        <div style="padding:14px;border-radius:10px;border:1px solid #FECACA;background:#FEF2F2">
+          <div style="font-size:13px;font-weight:700;color:#DC4C3E;margin-bottom:4px">🔲 Subtask sayı</div>
+          <div style="font-size:11px;color:#808080">Kartda "2/5 alt görev" badge-i göstərilmir. Backend-dən `_count.children` gəlməli.</div>
+        </div>
+        <div style="padding:14px;border-radius:10px;border:1px solid #FECACA;background:#FEF2F2">
+          <div style="font-size:13px;font-weight:700;color:#DC4C3E;margin-bottom:4px">💬 Şərh sayı</div>
+          <div style="font-size:11px;color:#808080">Kartda comment count badge-i yoxdur. Backend-dən `_count.comments` gəlməli.</div>
+        </div>
+        <div style="padding:14px;border-radius:10px;border:1px solid #FECACA;background:#FEF2F2">
+          <div style="font-size:13px;font-weight:700;color:#DC4C3E;margin-bottom:4px">📎 Fayl əlavəsi</div>
+          <div style="font-size:11px;color:#808080">Faylı olan tapşırıqlarda 📎 ikonu görünmür.</div>
+        </div>
+        <div style="padding:14px;border-radius:10px;border:1px solid #FECACA;background:#FEF2F2">
+          <div style="font-size:13px;font-weight:700;color:#DC4C3E;margin-bottom:4px">🔁 Təkrarlanan ikonu</div>
+          <div style="font-size:11px;color:#808080">`isRecurring` olan tapşırıqlarda 🔁 badge yoxdur.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+function show(i){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'))
+  document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('active'))
+  document.getElementById('p'+i).classList.add('active')
+  document.querySelectorAll('.tabs button')[i].classList.add('active')
+}
+</script>
+</body>
+</html>

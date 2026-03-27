@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tema Testi — Login/Register Səhifəsi (6 Tema)</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#08080C;color:#fff}
+.hdr{padding:20px 32px 6px}
+.hdr h1{font-size:22px;font-weight:800;color:#fff}
+.hdr p{font-size:11px;color:#555;margin-top:2px}
+
+.tabs{display:flex;gap:6px;padding:12px 32px 16px;flex-wrap:wrap}
+.tabs button{padding:8px 14px;border:1.5px solid #1E1E2A;border-radius:10px;background:#111118;font-size:11px;font-weight:600;cursor:pointer;transition:.2s;color:#555;display:flex;align-items:center;gap:6px}
+.tabs button.a{border-color:var(--c);background:var(--bg);color:var(--c);box-shadow:0 0 12px var(--glow)}
+.tabs button:hover:not(.a){border-color:#333;color:#999}
+
+.state-bar{display:flex;gap:6px;padding:0 32px 12px;flex-wrap:wrap}
+.state-btn{padding:5px 12px;border-radius:8px;font-size:10px;font-weight:600;cursor:pointer;transition:.2s;border:1px solid #2A2A2E;background:#161618;color:#666}
+.state-btn.a{background:#fff;color:#000;border-color:#fff}
+.state-btn:hover:not(.a){background:#1E1E22;color:#aaa}
+
+.view-toggle{display:flex;gap:0;margin:0 32px 12px;width:fit-content;border-radius:8px;overflow:hidden;border:1px solid #2A2A2E}
+.vt-btn{padding:6px 16px;font-size:10px;font-weight:600;cursor:pointer;background:#161618;color:#666;border:none;transition:.15s}
+.vt-btn.a{background:#fff;color:#000}
+
+.container{padding:0 32px 40px}
+.frame{border-radius:16px;overflow:hidden;max-width:960px;margin:0 auto;box-shadow:0 4px 24px rgba(0,0,0,.3)}
+.title-bar{display:flex;align-items:center;gap:7px;padding:10px 14px}
+.dt{width:11px;height:11px;border-radius:50%}
+.dr{background:#FF5F57}.dy{background:#FFBD2E}.dg{background:#28C840}
+
+.login-wrap{display:flex;min-height:540px}
+.login-left{width:50%;display:flex;align-items:center;justify-content:center;padding:40px}
+.login-left-inner{text-align:center;max-width:320px}
+.login-right{width:50%;display:flex;align-items:center;justify-content:center;padding:40px}
+.login-form{width:100%;max-width:340px}
+
+.ll-icon{width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
+.ll-title{font-size:28px;font-weight:800;letter-spacing:-0.5px}
+.ll-sub{font-size:14px;margin-top:6px;opacity:.8}
+.ll-features{margin-top:28px;text-align:left;display:flex;flex-direction:column;gap:10px}
+.ll-feat{display:flex;align-items:center;gap:10px;font-size:13px}
+.ll-feat-dot{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px}
+
+.lf-title{font-size:20px;font-weight:700;margin-bottom:3px}
+.lf-sub{font-size:13px;margin-bottom:20px}
+.lf-error{padding:10px 14px;border-radius:10px;font-size:12px;margin-bottom:14px;display:none}
+.lf-error.show{display:flex;align-items:center;gap:8px}
+.lf-group{margin-bottom:14px}
+.lf-label{font-size:12px;font-weight:600;margin-bottom:5px;display:block}
+.lf-input{width:100%;padding:10px 14px;border-radius:10px;font-size:13px;outline:none;transition:.2s;font-family:inherit}
+.lf-input:focus{box-shadow:0 0 0 3px}
+.lf-input.err{border-color:#EF4444 !important}
+.lf-err-text{font-size:10px;color:#EF4444;margin-top:3px}
+.lf-pw-wrap{position:relative}
+.lf-pw-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:14px;opacity:.5}
+.lf-forgot{text-align:right;margin-top:6px}
+.lf-forgot a{font-size:11px;font-weight:600;text-decoration:none}
+.lf-btn{width:100%;padding:12px;border-radius:10px;font-size:14px;font-weight:700;border:none;cursor:pointer;transition:.2s;margin-top:6px;display:flex;align-items:center;justify-content:center;gap:8px}
+.lf-btn:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,0,0,.15)}
+.lf-btn.loading{opacity:.7;pointer-events:none}
+.lf-link{text-align:center;margin-top:18px;font-size:13px}
+.lf-link a{font-weight:600;text-decoration:none}
+.lf-spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Register extras */
+.lf-strength{height:4px;border-radius:2px;margin-top:6px;overflow:hidden;background:#eee}
+.lf-strength-bar{height:100%;border-radius:2px;transition:width .3s}
+
+/* Themes */
+.theme-coral .login-left{background:linear-gradient(135deg,#FF6B6B,#FF8E53)}
+.theme-coral .ll-icon{background:rgba(255,255,255,.2)}
+.theme-coral .ll-title,.theme-coral .ll-sub,.theme-coral .ll-feat{color:#fff}
+.theme-coral .ll-feat-dot{background:rgba(255,255,255,.2);color:#fff}
+.theme-coral .login-right{background:#FFF9F5}
+.theme-coral .title-bar{background:#FFF0ED}
+.theme-coral .lf-title{color:#2D1B0E}
+.theme-coral .lf-sub{color:#B89080}
+.theme-coral .lf-label{color:#2D1B0E}
+.theme-coral .lf-input{border:1.5px solid #F0DDD0;background:#fff;color:#2D1B0E}
+.theme-coral .lf-input:focus{border-color:#FF6B6B;box-shadow:0 0 0 3px rgba(255,107,107,.15)}
+.theme-coral .lf-btn{background:linear-gradient(135deg,#FF6B6B,#FF8E53);color:#fff}
+.theme-coral .lf-forgot a,.theme-coral .lf-link a{color:#FF6B6B}
+.theme-coral .lf-error{background:#FFF0ED;color:#FF6B6B}
+.theme-coral .lf-link{color:#B89080}
+
+.theme-slate .login-left{background:#171717}
+.theme-slate .ll-icon{background:#333}
+.theme-slate .ll-title{color:#fff}.theme-slate .ll-sub{color:#999}.theme-slate .ll-feat{color:#ccc}
+.theme-slate .ll-feat-dot{background:#333;color:#999}
+.theme-slate .login-right{background:#FBFBFB}
+.theme-slate .title-bar{background:#F6F6F6;border-bottom:1px solid #EBEBEB}
+.theme-slate .lf-title{color:#171717}
+.theme-slate .lf-sub{color:#999}
+.theme-slate .lf-label{color:#171717}
+.theme-slate .lf-input{border:1.5px solid #EBEBEB;background:#fff;color:#171717}
+.theme-slate .lf-input:focus{border-color:#2563EB;box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.theme-slate .lf-btn{background:#171717;color:#fff}
+.theme-slate .lf-forgot a,.theme-slate .lf-link a{color:#2563EB}
+.theme-slate .lf-error{background:#FEF2F2;color:#EF4444}
+.theme-slate .lf-link{color:#999}
+
+.theme-forest .login-left{background:linear-gradient(135deg,#064E3B,#059669)}
+.theme-forest .ll-icon{background:rgba(52,211,153,.25)}
+.theme-forest .ll-title,.theme-forest .ll-sub,.theme-forest .ll-feat{color:#fff}
+.theme-forest .ll-feat-dot{background:rgba(52,211,153,.25);color:#34D399}
+.theme-forest .login-right{background:#F0FDF4}
+.theme-forest .title-bar{background:#ECFDF5;border-bottom:1px solid #D1FAE5}
+.theme-forest .lf-title{color:#14332A}
+.theme-forest .lf-sub{color:#6B8F80}
+.theme-forest .lf-label{color:#14332A}
+.theme-forest .lf-input{border:1.5px solid #D1FAE5;background:#fff;color:#14332A}
+.theme-forest .lf-input:focus{border-color:#059669;box-shadow:0 0 0 3px rgba(5,150,105,.12)}
+.theme-forest .lf-btn{background:linear-gradient(135deg,#059669,#34D399);color:#fff}
+.theme-forest .lf-forgot a,.theme-forest .lf-link a{color:#059669}
+.theme-forest .lf-error{background:#FEF2F2;color:#DC2626}
+.theme-forest .lf-link{color:#6B8F80}
+
+.theme-lavender .login-left{background:linear-gradient(135deg,#7C3AED,#A78BFA)}
+.theme-lavender .ll-icon{background:rgba(255,255,255,.2)}
+.theme-lavender .ll-title,.theme-lavender .ll-sub,.theme-lavender .ll-feat{color:#fff}
+.theme-lavender .ll-feat-dot{background:rgba(255,255,255,.2);color:#fff}
+.theme-lavender .login-right{background:#FAF8FF}
+.theme-lavender .title-bar{background:#F3EEFF;border-bottom:1px solid #E8E0F5}
+.theme-lavender .lf-title{color:#2D1B69}
+.theme-lavender .lf-sub{color:#9B8EC4}
+.theme-lavender .lf-label{color:#2D1B69}
+.theme-lavender .lf-input{border:1.5px solid #E8E0F5;background:#fff;color:#2D1B69}
+.theme-lavender .lf-input:focus{border-color:#7C3AED;box-shadow:0 0 0 3px rgba(124,58,237,.12)}
+.theme-lavender .lf-btn{background:linear-gradient(135deg,#7C3AED,#A78BFA);color:#fff}
+.theme-lavender .lf-forgot a,.theme-lavender .lf-link a{color:#7C3AED}
+.theme-lavender .lf-error{background:#F3EEFF;color:#7C3AED}
+.theme-lavender .lf-link{color:#9B8EC4}
+
+.theme-sunset .login-left{background:linear-gradient(135deg,#7C2D12,#F97316)}
+.theme-sunset .ll-icon{background:rgba(251,191,36,.3)}
+.theme-sunset .ll-title,.theme-sunset .ll-sub,.theme-sunset .ll-feat{color:#fff}
+.theme-sunset .ll-feat-dot{background:rgba(251,191,36,.25);color:#FBBF24}
+.theme-sunset .login-right{background:#FFFBF5}
+.theme-sunset .title-bar{background:#FFF7ED;border-bottom:1px solid #FED7AA}
+.theme-sunset .lf-title{color:#431407}
+.theme-sunset .lf-sub{color:#C2956B}
+.theme-sunset .lf-label{color:#431407}
+.theme-sunset .lf-input{border:1.5px solid #FED7AA;background:#fff;color:#431407}
+.theme-sunset .lf-input:focus{border-color:#F97316;box-shadow:0 0 0 3px rgba(249,115,22,.12)}
+.theme-sunset .lf-btn{background:linear-gradient(135deg,#F97316,#FBBF24);color:#fff}
+.theme-sunset .lf-forgot a,.theme-sunset .lf-link a{color:#F97316}
+.theme-sunset .lf-error{background:#FFF7ED;color:#F97316}
+.theme-sunset .lf-link{color:#C2956B}
+
+.theme-ice .login-left{background:linear-gradient(135deg,#1E3A5F,#1D4ED8)}
+.theme-ice .ll-icon{background:rgba(96,165,250,.3)}
+.theme-ice .ll-title,.theme-ice .ll-sub,.theme-ice .ll-feat{color:#fff}
+.theme-ice .ll-feat-dot{background:rgba(96,165,250,.25);color:#60A5FA}
+.theme-ice .login-right{background:#F0F7FF}
+.theme-ice .title-bar{background:#E5F0FF;border-bottom:1px solid #D0E0F5}
+.theme-ice .lf-title{color:#0F1729}
+.theme-ice .lf-sub{color:#6B82A8}
+.theme-ice .lf-label{color:#0F1729}
+.theme-ice .lf-input{border:1.5px solid #D0E0F5;background:#fff;color:#0F1729}
+.theme-ice .lf-input:focus{border-color:#1D4ED8;box-shadow:0 0 0 3px rgba(29,78,216,.12)}
+.theme-ice .lf-btn{background:linear-gradient(135deg,#1D4ED8,#60A5FA);color:#fff}
+.theme-ice .lf-forgot a,.theme-ice .lf-link a{color:#1D4ED8}
+.theme-ice .lf-error{background:#EFF6FF;color:#1D4ED8}
+.theme-ice .lf-link{color:#6B82A8}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <h1>🎨 Tema Testi — Giriş / Qeydiyyat Səhifəsi</h1>
+  <p>6 tema × 4 vəziyyət × 2 görünüş — interaktiv test</p>
+</div>
+
+<!-- Tema seçimi -->
+<div class="tabs">
+  <button class="a" onclick="setTheme('coral')" style="--c:#FF6B6B;--bg:rgba(255,107,107,.08);--glow:rgba(255,107,107,.1)">🔥 Coral</button>
+  <button onclick="setTheme('slate')" style="--c:#888;--bg:rgba(136,136,136,.06);--glow:rgba(136,136,136,.06)">📐 Slate</button>
+  <button onclick="setTheme('forest')" style="--c:#059669;--bg:rgba(5,150,105,.08);--glow:rgba(5,150,105,.1)">🌿 Forest</button>
+  <button onclick="setTheme('lavender')" style="--c:#7C3AED;--bg:rgba(124,58,237,.08);--glow:rgba(124,58,237,.1)">💜 Lavender</button>
+  <button onclick="setTheme('sunset')" style="--c:#F97316;--bg:rgba(249,115,22,.08);--glow:rgba(249,115,22,.1)">🌅 Sunset</button>
+  <button onclick="setTheme('ice')" style="--c:#1D4ED8;--bg:rgba(29,78,216,.08);--glow:rgba(29,78,216,.1)">❄️ Ice</button>
+</div>
+
+<!-- Vəziyyət seçimi -->
+<div class="state-bar">
+  <button class="state-btn a" onclick="setState('empty')">Boş Form</button>
+  <button class="state-btn" onclick="setState('filled')">Doldurulmuş</button>
+  <button class="state-btn" onclick="setState('error')">Xəta Halı</button>
+  <button class="state-btn" onclick="setState('loading')">Yüklənir</button>
+</div>
+
+<!-- Login / Register toggle -->
+<div class="view-toggle">
+  <button class="vt-btn a" onclick="setView('login')">Giriş</button>
+  <button class="vt-btn" onclick="setView('register')">Qeydiyyat</button>
+</div>
+
+<div class="container">
+
+<!-- ═══ LOGIN VIEW ═══ -->
+<div id="loginView">
+<div class="frame" id="loginFrame">
+  <div class="title-bar"><div class="dt dr"></div><div class="dt dy"></div><div class="dt dg"></div><span style="margin-left:8px;font-size:11px;opacity:.5" id="titleLabel">WorkFlow Pro — Giriş</span></div>
+  <div class="login-wrap" id="loginWrap">
+    <!-- Sol panel -->
+    <div class="login-left">
+      <div class="login-left-inner">
+        <div class="ll-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg></div>
+        <div class="ll-title">WorkFlow Pro</div>
+        <div class="ll-sub">İş proseslərinizi vahid platformada idarə edin</div>
+        <div class="ll-features">
+          <div class="ll-feat"><div class="ll-feat-dot"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>Tapşırıq və todo idarəetməsi</div>
+          <div class="ll-feat"><div class="ll-feat-dot"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>Maliyyə və maaş izləmə</div>
+          <div class="ll-feat"><div class="ll-feat-dot"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>Çoxlu işletmə dəstəyi</div>
+          <div class="ll-feat"><div class="ll-feat-dot"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>Real-time bildirişlər</div>
+          <div class="ll-feat"><div class="ll-feat-dot"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>Təkrarlanan görev şablonları</div>
+        </div>
+      </div>
+    </div>
+    <!-- Sağ panel — Login Form -->
+    <div class="login-right">
+      <div class="login-form">
+        <div class="lf-title" id="formTitle">Daxil olun</div>
+        <div class="lf-sub" id="formSub">Hesabınıza daxil olun</div>
+
+        <div class="lf-error" id="errorBox">⚠️ <span id="errorText">E-poçt və ya şifrə yanlışdır</span></div>
+
+        <div class="lf-group">
+          <label class="lf-label">E-poçt</label>
+          <input class="lf-input" id="emailInput" type="email" placeholder="sizin@email.com" />
+          <div class="lf-err-text" id="emailErr" style="display:none">Düzgün e-poçt daxil edin</div>
+        </div>
+
+        <div class="lf-group">
+          <label class="lf-label">Şifrə</label>
+          <div class="lf-pw-wrap">
+            <input class="lf-input" id="pwInput" type="password" placeholder="Şifrəniz" />
+            <span class="lf-pw-toggle" onclick="togglePw()">👁</span>
+          </div>
+          <div class="lf-err-text" id="pwErr" style="display:none">Şifrə minimum 6 simvol olmalıdır</div>
+          <div class="lf-forgot"><a href="#">Şifrəni unutdum?</a></div>
+        </div>
+
+        <button class="lf-btn" id="submitBtn" onclick="handleClick()">Daxil ol</button>
+
+        <div class="lf-link">Hesabınız yoxdur? <a href="#" onclick="setView('register')">Qeydiyyat</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ REGISTER VIEW ═══ -->
+<div id="registerView" style="display:none">
+<div class="frame" id="registerFrame">
+  <div class="title-bar"><div class="dt dr"></div><div class="dt dy"></div><div class="dt dg"></div><span style="margin-left:8px;font-size:11px;opacity:.5">WorkFlow Pro — Qeydiyyat</span></div>
+  <div class="login-wrap" id="registerWrap">
+    <div class="login-left">
+      <div class="login-left-inner">
+        <div class="ll-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg></div>
+        <div class="ll-title">WorkFlow Pro</div>
+        <div class="ll-sub">Pulsuz başlayın, kreditkart lazım deyil</div>
+        <div class="ll-features">
+          <div class="ll-feat"><div class="ll-feat-dot"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>14 gün pulsuz sınaq</div>
+          <div class="ll-feat"><div class="ll-feat-dot"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>Limitsiz tapşırıq və işçi</div>
+          <div class="ll-feat"><div class="ll-feat-dot"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>Bütün modullar aktiv</div>
+          <div class="ll-feat"><div class="ll-feat-dot"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>7/24 dəstək</div>
+        </div>
+      </div>
+    </div>
+    <div class="login-right">
+      <div class="login-form" style="max-width:360px">
+        <div class="lf-title">Qeydiyyat</div>
+        <div class="lf-sub">Yeni hesab yaradın</div>
+
+        <div class="lf-error" id="regErrorBox">⚠️ <span id="regErrorText">Bu e-poçt artıq istifadə olunur</span></div>
+
+        <div class="lf-group">
+          <label class="lf-label">Ad və Soyad</label>
+          <input class="lf-input" id="regName" type="text" placeholder="Adınız Soyadınız" />
+          <div class="lf-err-text" id="regNameErr" style="display:none">Ad və soyad daxil edin</div>
+        </div>
+
+        <div class="lf-group">
+          <label class="lf-label">Şirkət adı</label>
+          <input class="lf-input" id="regCompany" type="text" placeholder="Şirkətinizin adı" />
+          <div class="lf-err-text" id="regCompanyErr" style="display:none">Şirkət adı daxil edin</div>
+        </div>
+
+        <div class="lf-group">
+          <label class="lf-label">E-poçt</label>
+          <input class="lf-input" id="regEmail" type="email" placeholder="sizin@email.com" />
+          <div class="lf-err-text" id="regEmailErr" style="display:none">Düzgün e-poçt daxil edin</div>
+        </div>
+
+        <div class="lf-group">
+          <label class="lf-label">Şifrə</label>
+          <div class="lf-pw-wrap">
+            <input class="lf-input" id="regPw" type="password" placeholder="Minimum 6 simvol" oninput="updateStrength()" />
+            <span class="lf-pw-toggle" onclick="toggleRegPw()">👁</span>
+          </div>
+          <div class="lf-strength"><div class="lf-strength-bar" id="strengthBar" style="width:0%;background:#eee"></div></div>
+          <div class="lf-err-text" id="regPwErr" style="display:none">Şifrə minimum 6 simvol olmalıdır</div>
+        </div>
+
+        <div class="lf-group">
+          <label class="lf-label">Şifrəni təsdiqləyin</label>
+          <input class="lf-input" id="regPw2" type="password" placeholder="Şifrəni təkrar daxil edin" />
+          <div class="lf-err-text" id="regPw2Err" style="display:none">Şifrələr uyğun gəlmir</div>
+        </div>
+
+        <button class="lf-btn" id="regBtn">Qeydiyyatdan keç</button>
+
+        <div class="lf-link">Artıq hesabınız var? <a href="#" onclick="setView('login')">Daxil olun</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+</div>
+
+<script>
+let currentTheme = 'coral'
+let currentState = 'empty'
+let currentView = 'login'
+
+function setTheme(t) {
+  currentTheme = t
+  document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('a'))
+  event.currentTarget.classList.add('a')
+  applyAll()
+}
+
+function setState(s) {
+  currentState = s
+  document.querySelectorAll('.state-btn').forEach(b => b.classList.remove('a'))
+  event.currentTarget.classList.add('a')
+  applyAll()
+}
+
+function setView(v) {
+  currentView = v
+  document.querySelectorAll('.vt-btn').forEach(b => b.classList.remove('a'))
+  document.querySelectorAll('.vt-btn')[v === 'login' ? 0 : 1].classList.add('a')
+  document.getElementById('loginView').style.display = v === 'login' ? 'block' : 'none'
+  document.getElementById('registerView').style.display = v === 'register' ? 'block' : 'none'
+  applyAll()
+}
+
+function applyAll() {
+  // Theme class
+  ;['loginFrame','registerFrame'].forEach(id => {
+    let el = document.getElementById(id)
+    el.className = 'frame theme-' + currentTheme
+  })
+  ;['loginWrap','registerWrap'].forEach(id => {
+    let el = document.getElementById(id)
+    el.className = 'login-wrap theme-' + currentTheme
+  })
+
+  // State — login
+  let email = document.getElementById('emailInput')
+  let pw = document.getElementById('pwInput')
+  let errBox = document.getElementById('errorBox')
+  let emailErr = document.getElementById('emailErr')
+  let pwErr = document.getElementById('pwErr')
+  let btn = document.getElementById('submitBtn')
+
+  // Reset
+  email.value = ''; pw.value = ''
+  email.classList.remove('err'); pw.classList.remove('err')
+  errBox.classList.remove('show')
+  emailErr.style.display = 'none'; pwErr.style.display = 'none'
+  btn.innerHTML = 'Daxil ol'
+  btn.classList.remove('loading')
+
+  if (currentState === 'filled') {
+    email.value = 'leyla@techflow.az'
+    pw.value = '••••••'
+  } else if (currentState === 'error') {
+    email.value = 'test@wrong.com'
+    pw.value = '123'
+    errBox.classList.add('show')
+    pw.classList.add('err')
+    pwErr.style.display = 'block'
+    pwErr.textContent = 'Şifrə minimum 6 simvol olmalıdır'
+  } else if (currentState === 'loading') {
+    email.value = 'leyla@techflow.az'
+    pw.value = '••••••'
+    btn.innerHTML = '<div class="lf-spinner"></div> Gözləyin...'
+    btn.classList.add('loading')
+  }
+
+  // State — register
+  let regName = document.getElementById('regName')
+  let regCompany = document.getElementById('regCompany')
+  let regEmail = document.getElementById('regEmail')
+  let regPw = document.getElementById('regPw')
+  let regPw2 = document.getElementById('regPw2')
+  let regErrBox = document.getElementById('regErrorBox')
+  let regBtn = document.getElementById('regBtn')
+
+  regName.value = ''; regCompany.value = ''; regEmail.value = ''; regPw.value = ''; regPw2.value = ''
+  regErrBox.classList.remove('show')
+  document.querySelectorAll('#registerView .lf-err-text').forEach(e => e.style.display = 'none')
+  document.querySelectorAll('#registerView .lf-input').forEach(e => e.classList.remove('err'))
+  regBtn.innerHTML = 'Qeydiyyatdan keç'
+  regBtn.classList.remove('loading')
+  document.getElementById('strengthBar').style.width = '0%'
+
+  if (currentState === 'filled') {
+    regName.value = 'Kənan Hüseynov'
+    regCompany.value = 'Digital Agency MMC'
+    regEmail.value = 'kenan@digitalagency.az'
+    regPw.value = 'Str0ng!Pass'
+    regPw2.value = 'Str0ng!Pass'
+    document.getElementById('strengthBar').style.width = '100%'
+    document.getElementById('strengthBar').style.background = '#10B981'
+  } else if (currentState === 'error') {
+    regName.value = ''
+    regCompany.value = 'Test'
+    regEmail.value = 'admin@techflow.az'
+    regPw.value = '123'
+    regPw2.value = '456'
+    regErrBox.classList.add('show')
+    document.getElementById('regNameErr').style.display = 'block'; regName.classList.add('err')
+    document.getElementById('regPwErr').style.display = 'block'; regPw.classList.add('err')
+    document.getElementById('regPw2Err').style.display = 'block'; regPw2.classList.add('err')
+    document.getElementById('strengthBar').style.width = '20%'
+    document.getElementById('strengthBar').style.background = '#EF4444'
+  } else if (currentState === 'loading') {
+    regName.value = 'Kənan Hüseynov'
+    regCompany.value = 'Digital Agency MMC'
+    regEmail.value = 'kenan@digitalagency.az'
+    regPw.value = 'Str0ng!Pass'
+    regPw2.value = 'Str0ng!Pass'
+    regBtn.innerHTML = '<div class="lf-spinner"></div> Gözləyin...'
+    regBtn.classList.add('loading')
+    document.getElementById('strengthBar').style.width = '100%'
+    document.getElementById('strengthBar').style.background = '#10B981'
+  }
+}
+
+function togglePw() {
+  let inp = document.getElementById('pwInput')
+  inp.type = inp.type === 'password' ? 'text' : 'password'
+}
+
+function toggleRegPw() {
+  let inp = document.getElementById('regPw')
+  inp.type = inp.type === 'password' ? 'text' : 'password'
+}
+
+function updateStrength() {
+  let val = document.getElementById('regPw').value
+  let bar = document.getElementById('strengthBar')
+  if (val.length === 0) { bar.style.width = '0%'; bar.style.background = '#eee'; return }
+  if (val.length < 4) { bar.style.width = '20%'; bar.style.background = '#EF4444'; return }
+  if (val.length < 6) { bar.style.width = '40%'; bar.style.background = '#F97316'; return }
+  let score = 60
+  if (/[A-Z]/.test(val)) score += 10
+  if (/[0-9]/.test(val)) score += 10
+  if (/[^A-Za-z0-9]/.test(val)) score += 20
+  bar.style.width = Math.min(score, 100) + '%'
+  bar.style.background = score >= 80 ? '#10B981' : score >= 60 ? '#FBBF24' : '#F97316'
+}
+
+function handleClick() {
+  if (currentState !== 'loading') {
+    setState('loading')
+    document.querySelectorAll('.state-btn')[3].classList.add('a')
+    document.querySelectorAll('.state-btn')[0].classList.remove('a')
+    setTimeout(() => {
+      setState('error')
+      document.querySelectorAll('.state-btn')[2].classList.add('a')
+      document.querySelectorAll('.state-btn')[3].classList.remove('a')
+    }, 1500)
+  }
+}
+
+// Init
+applyAll()
+</script>
+</body>
+</html>

@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WorkFlow Pro — Test Panel</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; }
+.header { background: #1F1F1F; color: #fff; padding: 8px 16px; display: flex; align-items: center; gap: 12px; }
+.header h1 { font-size: 14px; font-weight: 600; }
+.header .status { font-size: 11px; padding: 2px 8px; border-radius: 10px; }
+.header .ok { background: #058527; }
+.header .err { background: #DC4C3E; }
+.header .loading { background: #EB8909; }
+.panels { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1px; background: #ddd; height: calc(100vh - 40px); }
+.panel { background: #fff; display: flex; flex-direction: column; overflow: hidden; }
+.panel-header { padding: 10px 12px; border-bottom: 2px solid; display: flex; align-items: center; justify-content: space-between; cursor: pointer; position: relative; }
+.panel-header:hover { background: #FAFAFA; }
+.panel-header .info { display: flex; align-items: center; gap: 8px; }
+.panel-header .avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; font-weight: 700; }
+.panel-header .name { font-size: 12px; font-weight: 700; }
+.panel-header .role { font-size: 9px; color: #808080; }
+.panel-header .switch-icon { font-size: 10px; color: #B3B3B3; }
+.panel-body { flex: 1; overflow-y: auto; padding: 8px; }
+
+/* User picker dropdown */
+.user-picker { position: fixed; background: #fff; border: 1px solid #EBEBEB; box-shadow: 0 4px 16px rgba(0,0,0,0.12); z-index: 50; max-height: 320px; overflow-y: auto; border-radius: 0 0 8px 8px; width: 200px; }
+.user-picker .picker-title { font-size: 9px; font-weight: 700; color: #808080; padding: 8px 10px 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+.user-picker .picker-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; cursor: pointer; transition: 0.1s; }
+.user-picker .picker-item:hover { background: #F5F3F0; }
+.user-picker .picker-item.active { background: #E8F0FE; }
+.user-picker .picker-item .p-avatar { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 9px; font-weight: 700; flex-shrink: 0; }
+.user-picker .picker-item .p-name { font-size: 11px; font-weight: 600; color: #1F1F1F; }
+.user-picker .picker-item .p-role { font-size: 9px; color: #808080; }
+.user-picker .picker-item .p-check { margin-left: auto; font-size: 12px; color: #058527; }
+
+.task-card { border: 1px solid #EBEBEB; border-radius: 8px; padding: 8px 10px; margin-bottom: 6px; cursor: pointer; transition: 0.15s; border-left: 3px solid; }
+.task-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.task-card .title { font-size: 11px; font-weight: 600; color: #1F1F1F; }
+.task-card .meta { font-size: 9px; color: #808080; margin-top: 3px; display: flex; gap: 8px; flex-wrap: wrap; }
+.task-card .badge { font-size: 8px; padding: 1px 5px; border-radius: 3px; font-weight: 600; }
+.subtask-list { margin-top: 5px; padding-left: 8px; border-left: 2px solid #E8F0FE; }
+.subtask-item { font-size: 10px; padding: 3px 0; color: #444; display: flex; align-items: center; gap: 4px; }
+.subtask-item .dot { width: 5px; height: 5px; border-radius: 50%; }
+.section-title { font-size: 10px; font-weight: 700; color: #808080; padding: 6px 4px 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+.empty { text-align: center; padding: 30px; color: #B3B3B3; font-size: 11px; }
+.log { padding: 4px 8px; font-size: 9px; color: #808080; border-top: 1px solid #f0f0f0; }
+
+/* Modal */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 100; }
+.modal { background: #fff; border-radius: 12px; width: 440px; max-height: 80vh; overflow-y: auto; }
+.modal h3 { font-size: 14px; margin-bottom: 8px; }
+.modal .close { float: right; cursor: pointer; font-size: 18px; color: #808080; border: none; background: none; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>WorkFlow Pro — Test Panel</h1>
+  <span id="globalStatus" class="status loading">Giris edilir...</span>
+  <span style="margin-left:auto;font-size:10px;color:#808080;">localhost:4000 API</span>
+</div>
+
+<div class="panels" id="panels"></div>
+<div id="modalRoot"></div>
+
+<script>
+const API = 'http://localhost:4000'
+const MAX_MESSAGES = 10
+const MAX_CHARS = 200
+
+// Default 4 panel users
+const DEFAULT_USERS = [
+  { email: 'hasan@techflow.az', pass: '123456', color: '#DC4C3E', label: 'Bas Mudir' },
+  { email: 'leyla@techflow.az', pass: '123456', color: '#246FE0', label: 'Filial Muduru (Baki)' },
+  { email: 'nigar@techflow.az', pass: '123456', color: '#058527', label: 'Isci (Baki)' },
+  { email: 'rashad@techflow.az', pass: '123456', color: '#7C3AED', label: 'Isci (Baki)' },
+]
+
+// All available users for switching
+const ALL_USERS = [
+  { email: 'admin@techflow.az', pass: '123456', color: '#1F1F1F', label: 'Sirket Admini' },
+  { email: 'hasan@techflow.az', pass: '123456', color: '#DC4C3E', label: 'Bas Mudir' },
+  { email: 'leyla@techflow.az', pass: '123456', color: '#246FE0', label: 'Baki — Filial Muduru' },
+  { email: 'tural@techflow.az', pass: '123456', color: '#2563EB', label: 'Baki' },
+  { email: 'orxan@techflow.az', pass: '123456', color: '#3B82F6', label: 'Baki' },
+  { email: 'sebine@techflow.az', pass: '123456', color: '#8B5CF6', label: 'Baki' },
+  { email: 'murad@techflow.az', pass: '123456', color: '#6366F1', label: 'Baki' },
+  { email: 'nigar@techflow.az', pass: '123456', color: '#058527', label: 'Baki' },
+  { email: 'elvin@techflow.az', pass: '123456', color: '#059669', label: 'Baki' },
+  { email: 'gunel@techflow.az', pass: '123456', color: '#10B981', label: 'Baki' },
+  { email: 'rashad@techflow.az', pass: '123456', color: '#7C3AED', label: 'Baki' },
+  { email: 'aynur@techflow.az', pass: '123456', color: '#EB8909', label: 'Gence — Filial Muduru' },
+  { email: 'kamran@techflow.az', pass: '123456', color: '#0891B2', label: 'Gence' },
+  { email: 'lamiye@techflow.az', pass: '123456', color: '#D97706', label: 'Gence' },
+  { email: 'togrul@techflow.az', pass: '123456', color: '#EA580C', label: 'Gence' },
+  { email: 'nermin@techflow.az', pass: '123456', color: '#E11D48', label: 'Gence' },
+  { email: 'zaur@techflow.az', pass: '123456', color: '#BE185D', label: 'Gence' },
+  { email: 'ulviyye@techflow.az', pass: '123456', color: '#9333EA', label: 'Gence' },
+  { email: 'ekber@techflow.az', pass: '123456', color: '#4F46E5', label: 'Gence' },
+  { email: 'rauf@techflow.az', pass: '123456', color: '#0D9488', label: 'Gence' },
+]
+
+const priorityColors = { CRITICAL: '#DC4C3E', HIGH: '#EB8909', MEDIUM: '#246FE0', LOW: '#808080', INFO: '#808080' }
+const statusLabels = { CREATED: 'Yaradildi', IN_PROGRESS: 'Davam edir', COMPLETED: 'Tamamlandi', PENDING_APPROVAL: 'Onay gozleyir', APPROVED: 'Onaylandi', REJECTED: 'Redd' }
+const statusColors = { CREATED: '#808080', IN_PROGRESS: '#246FE0', COMPLETED: '#058527', PENDING_APPROVAL: '#EB8909', APPROVED: '#058527', REJECTED: '#DC4C3E' }
+
+const statusConfig = {
+  PENDING:     { label: 'Gozleyir',  color: '#808080', bg: '#F0F0F0' },
+  IN_PROGRESS: { label: 'Davam edir', color: '#246FE0', bg: '#E8F0FE' },
+  COMPLETED:   { label: 'Tamamladi', color: '#058527', bg: '#E6F4EA' },
+  DECLINED:    { label: 'Redd etdi', color: '#DC4C3E', bg: '#FDECEA' },
+}
+
+// panels[i] = { token, userData, tasks, userEmail, userColor, userLabel }
+let panels = []
+let tokenCache = {}
+let openPickerIdx = null
+
+// localStorage persistence
+function savePanelSelections() {
+  const selections = panels.map(p => p.userEmail)
+  localStorage.setItem('testPanelUsers', JSON.stringify(selections))
+}
+function loadPanelSelections() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('testPanelUsers'))
+    if (Array.isArray(saved) && saved.length === DEFAULT_USERS.length) return saved
+  } catch {}
+  return null
+}
+
+async function loginUser(email, pass) {
+  if (tokenCache[email]) return tokenCache[email]
+  const res = await fetch(API + '/auth/login', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password: pass })
+  })
+  if (!res.ok) throw new Error('Login failed: ' + res.status)
+  const data = await res.json()
+  tokenCache[email] = data
+  return data
+}
+
+async function apiGet(token, path) {
+  const res = await fetch(API + path, { headers: { Authorization: 'Bearer ' + token } })
+  if (!res.ok) throw new Error(res.status + '')
+  return res.json()
+}
+
+async function apiPost(token, path, body) {
+  const res = await fetch(API + path, {
+    method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+    body: JSON.stringify(body)
+  })
+  if (!res.ok) throw new Error(res.status + '')
+  return res.json()
+}
+
+async function apiPatch(token, path, body) {
+  if (!token) {
+    // Token expire olubsa yenidən login et
+    const panelIdx = panels.findIndex(p => p.token === token || !p.token)
+    if (panelIdx >= 0) {
+      const p = panels[panelIdx]
+      const userDef = ALL_USERS.find(u => u.email === p.userEmail)
+      if (userDef) {
+        delete tokenCache[p.userEmail]
+        const data = await loginUser(p.userEmail, userDef.pass)
+        p.token = data.accessToken
+        token = data.accessToken
+      }
+    }
+  }
+  const res = await fetch(API + path, {
+    method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+    body: JSON.stringify(body)
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(err.message || res.status + '')
+  }
+  return res.json()
+}
+
+// ─── Refresh all panels ───
+async function refreshAllPanels() {
+  for (let i = 0; i < panels.length; i++) {
+    if (panels[i].token) await loadTasks(i)
+  }
+}
+
+// ─── Helpers ───
+function getInitials(name) {
+  return (name || '?').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+}
+
+function getTotalMessages(assignee) {
+  const wNotes = Array.isArray(assignee?.notes) ? assignee.notes : []
+  const aNotes = Array.isArray(assignee?.approverNotes) ? assignee.approverNotes : []
+  return wNotes.length + aNotes.length
+}
+
+function getRemainingMessages(assignee) {
+  return MAX_MESSAGES - getTotalMessages(assignee)
+}
+
+function getAllNotesSorted(assignee, workerLabel, approverLabel) {
+  const wNotes = Array.isArray(assignee?.notes) ? assignee.notes : []
+  const aNotes = Array.isArray(assignee?.approverNotes) ? assignee.approverNotes : []
+  return [
+    ...wNotes.map(n => ({...n, type:'worker'})),
+    ...aNotes.map(n => ({...n, type:'approver'}))
+  ].sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div')
+  div.textContent = str
+  return div.innerHTML
+}
+
+// ─── Task card rendering ───
+function renderTaskCard(task, panelIdx) {
+  const p = priorityColors[task.priority] || '#808080'
+  const s = statusLabels[task.status] || task.status
+  const sc = statusColors[task.status] || '#808080'
+  const assignees = (task.assignees || []).map(a => a.user?.fullName?.split(' ')[0] || '?').join(', ')
+  const due = task.dueDate ? new Date(task.dueDate).toLocaleDateString('az') : ''
+  const finalized = task.finalized === true
+
+  let subtasksHtml = ''
+  if (task.subTasks && task.subTasks.length > 0) {
+    subtasksHtml = '<div class="subtask-list">' + task.subTasks.map(st => {
+      const stStatus = statusColors[st.status] || '#808080'
+      const stFinalized = st.finalized === true
+      const stAssignees = (st.assignees || []).map(a => a.user?.fullName?.split(' ')[0] || '?').join(', ')
+      return `<div class="subtask-item">
+        <span class="dot" style="background:${stFinalized ? '#058527' : stStatus}"></span>
+        ${st.title}
+        <span style="color:#B3B3B3;font-size:8px;">${stAssignees}</span>
+        ${stFinalized ? '<span style="font-size:7px;color:#058527;font-weight:700;">TAMAMLANDI</span>' : ''}
+      </div>`
+    }).join('') + '</div>'
+  }
+
+  return `<div class="task-card" style="border-left-color:${p}" onclick="openTask(${panelIdx}, '${task.id}')">
+    <div class="title">
+      ${finalized ? '<span style="color:#058527;font-weight:700;font-size:10px;">&#10003; Tamamlandi</span> ' : ''}
+      ${task.title}
+    </div>
+    <div class="meta">
+      <span class="badge" style="background:${sc}20;color:${sc}">${s}</span>
+      ${task.type === 'GOREV' ? '<span class="badge" style="background:#FFF3E0;color:#EB8909">TOPLU</span>' : ''}
+      ${finalized ? '<span class="badge" style="background:#E6F4EA;color:#058527">TAMAMLANDI</span>' : ''}
+      ${due ? '<span>&#128197; ' + due + '</span>' : ''}
+      ${assignees ? '<span>&#128101; ' + assignees + '</span>' : ''}
+    </div>
+    ${subtasksHtml}
+  </div>`
+}
+
+function renderPanelHeader(idx) {
+  const p = panels[idx]
+  const name = p.userData?.fullName || p.userEmail
+  const initials = getInitials(name)
+  const el = document.getElementById('panel-header-' + idx)
+  el.style.borderBottomColor = p.userColor
+  el.innerHTML = `
+    <div class="info">
+      <div class="avatar" style="background:${p.userColor}">${initials}</div>
+      <div>
+        <div class="name">${name}</div>
+        <div class="role">${p.userLabel}</div>
+      </div>
+    </div>
+    <span class="switch-icon">&#9660; deyis</span>`
+}
+
+function renderPanel(idx) {
+  const p = panels[idx]
+  const el = document.getElementById('panel-body-' + idx)
+  if (!el) return
+
+  if (!p.tasks || p.tasks.length === 0) {
+    el.innerHTML = '<div class="empty">Tapshiriq yoxdur</div>'
+    return
+  }
+
+  const myId = p.userData?.id
+  const assignedToMe = p.tasks.filter(t => (t.assignees || []).some(a => a.user?.id === myId))
+  const createdByMe = p.tasks.filter(t => t.creator?.id === myId && !assignedToMe.includes(t))
+  const others = p.tasks.filter(t => !assignedToMe.includes(t) && !createdByMe.includes(t))
+
+  let html = ''
+  if (assignedToMe.length) {
+    html += '<div class="section-title">&#128204; Mene atanmish (' + assignedToMe.length + ')</div>'
+    html += assignedToMe.map(t => renderTaskCard(t, idx)).join('')
+  }
+  if (createdByMe.length) {
+    html += '<div class="section-title">&#9999; Yaratdiqlarim (' + createdByMe.length + ')</div>'
+    html += createdByMe.map(t => renderTaskCard(t, idx)).join('')
+  }
+  if (others.length) {
+    html += '<div class="section-title">&#128203; Diger (' + others.length + ')</div>'
+    html += others.map(t => renderTaskCard(t, idx)).join('')
+  }
+
+  el.innerHTML = html
+}
+
+async function loadTasks(idx) {
+  const p = panels[idx]
+  if (!p.token) return
+  try {
+    p.tasks = await apiGet(p.token, '/tasks')
+    renderPanel(idx)
+    log(idx, '&#10003; ' + p.tasks.length + ' tapshiriq')
+  } catch (e) {
+    log(idx, '&#10007; ' + e.message)
+  }
+}
+
+function log(idx, msg) {
+  const el = document.getElementById('panel-log-' + idx)
+  if (el) el.innerHTML = '<span>' + new Date().toLocaleTimeString() + '</span> ' + msg
+}
+
+// ─── User picker ───
+function togglePicker(idx) {
+  if (openPickerIdx === idx) { closePicker(); return }
+  closePicker()
+  openPickerIdx = idx
+  const picker = document.getElementById('panel-picker-' + idx)
+  const header = document.getElementById('panel-header-' + idx)
+  const rect = header.getBoundingClientRect()
+  picker.style.top = rect.bottom + 'px'
+  picker.style.left = rect.left + 'px'
+  picker.style.width = rect.width + 'px'
+  const currentEmail = panels[idx].userEmail
+
+  picker.innerHTML = `<div class="picker-title">Istifadeci secin</div>` +
+    ALL_USERS.map(u => {
+      const isActive = u.email === currentEmail
+      const initials = u.email[0].toUpperCase()
+      return `<div class="picker-item ${isActive ? 'active' : ''}" onclick="selectUser(${idx}, '${u.email}')">
+        <div class="p-avatar" style="background:${u.color}">${initials}</div>
+        <div>
+          <div class="p-name">${u.email.split('@')[0]}</div>
+          <div class="p-role">${u.label}</div>
+        </div>
+        ${isActive ? '<span class="p-check">&#10003;</span>' : ''}
+      </div>`
+    }).join('')
+  picker.style.display = 'block'
+}
+
+function closePicker() {
+  if (openPickerIdx !== null) {
+    const picker = document.getElementById('panel-picker-' + openPickerIdx)
+    if (picker) picker.style.display = 'none'
+    openPickerIdx = null
+  }
+}
+
+window.selectUser = async function(panelIdx, email) {
+  closePicker()
+  const userDef = ALL_USERS.find(u => u.email === email)
+  if (!userDef) return
+
+  const p = panels[panelIdx]
+  p.userEmail = email
+  p.userColor = userDef.color
+  p.userLabel = userDef.label
+  p.tasks = []
+
+  document.getElementById('panel-body-' + panelIdx).innerHTML = '<div class="empty">Giris edilir...</div>'
+  log(panelIdx, '&#9203; ' + email + ' giris edilir...')
+
+  try {
+    const data = await loginUser(email, userDef.pass)
+    p.token = data.accessToken
+    p.userData = data.user || {}
+    renderPanelHeader(panelIdx)
+    await loadTasks(panelIdx)
+    log(panelIdx, '&#10003; ' + (p.userData.fullName || email))
+    savePanelSelections()
+  } catch (e) {
+    p.token = null
+    p.userData = { fullName: email.split('@')[0] }
+    renderPanelHeader(panelIdx)
+    document.getElementById('panel-body-' + panelIdx).innerHTML = '<div class="empty">&#10007; Giris alinmadi</div>'
+    log(panelIdx, '&#10007; ' + e.message)
+  }
+}
+
+window.togglePicker = togglePicker
+window.refreshPanel = function(idx) { loadTasks(idx) }
+
+// ─── Confirm Modal ───
+function showConfirm({ title, message, type, confirmText, onConfirm }) {
+  const colors = {
+    warning: '#EB8909',
+    danger: '#DC4C3E',
+    info: '#246FE0',
+    success: '#058527',
+  }
+  const icons = {
+    warning: '&#9888;&#65039;',
+    danger: '&#9888;&#65039;',
+    info: '&#8505;&#65039;',
+    success: '&#10003;',
+  }
+  const clr = colors[type] || '#246FE0'
+  const icon = icons[type] || '&#8505;&#65039;'
+
+  const confirmDiv = document.createElement('div')
+  confirmDiv.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:200;'
+  confirmDiv.onclick = function(ev) { if (ev.target === confirmDiv) confirmDiv.remove() }
+  confirmDiv.innerHTML = `<div style="background:#fff;border-radius:16px;padding:24px;width:340px;text-align:center;" onclick="event.stopPropagation()">
+    <div style="width:48px;height:48px;border-radius:50%;background:${clr}15;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:24px;">${icon}</div>
+    <h4 style="font-size:14px;color:#1F1F1F;margin:0 0 8px;">${title}</h4>
+    <p style="font-size:12px;color:#808080;margin:0 0 16px;line-height:1.5;">${message}</p>
+    <div style="display:flex;gap:8px;">
+      <button onclick="this.closest('[style*=fixed]').remove()" style="flex:1;padding:10px;border-radius:10px;border:1px solid #EBEBEB;background:#fff;color:#808080;font-size:12px;font-weight:600;cursor:pointer;">Legv et</button>
+      <button id="confirm-btn-yes" style="flex:1;padding:10px;border-radius:10px;border:none;background:${clr};color:#fff;font-size:12px;font-weight:600;cursor:pointer;">${confirmText}</button>
+    </div>
+  </div>`
+  document.body.appendChild(confirmDiv)
+  confirmDiv.querySelector('#confirm-btn-yes').onclick = function() {
+    confirmDiv.remove()
+    onConfirm()
+  }
+}
+
+// ─── Close modal ───
+window.closeModal = function(e) {
+  if (e && e.target !== e.currentTarget) return
+  document.getElementById('modalRoot').innerHTML = ''
+}
+
+// ─── Open task ───
+window.openTask = function(panelIdx, taskId) {
+  const p = panels[panelIdx]
+  const task = p.tasks.find(t => t.id === taskId)
+  if (!task) return
+  const myId = p.userData?.id
+
+  // Determine role: assignee, approver, creator
+  let role = 'creator'
+  let targetTask = task
+  let approverName = '—'
+  const creatorName = task.creator?.fullName || '—'
+
+  if (task.type === 'GOREV') {
+    if (task.subTasks?.length > 0) {
+      for (const sub of task.subTasks) {
+        if (sub.approverId === myId) { role = 'approver'; targetTask = sub; approverName = sub.approver?.fullName || '—'; break }
+      }
+      if (role === 'creator') {
+        for (const sub of task.subTasks) {
+          const isA = (sub.assignees || []).some(a => (a.user?.id || a.userId) === myId)
+          if (isA) { role = 'assignee'; targetTask = sub; approverName = sub.approver?.fullName || '—'; break }
+        }
+      }
+    }
+    if (role === 'creator' && task.approverId) {
+      approverName = task.approver?.fullName || '—'
+      if (task.approverId === myId) { role = 'approver' }
+      else if ((task.assignees || []).some(a => (a.user?.id || a.userId) === myId)) { role = 'assignee' }
+    }
+  } else {
+    if ((task.assignees || []).some(a => (a.user?.id || a.userId) === myId) && task.creatorId !== myId) {
+      role = 'assignee'
+    }
+  }
+
+  const dueDate = targetTask.dueDate || task.dueDate
+  const fmtDate = dueDate ? new Date(dueDate).toLocaleDateString('az-AZ', { day: 'numeric', month: 'long', year: 'numeric' }) : ''
+  const desc = targetTask.description || task.description || ''
+  const title = targetTask === task ? task.title : targetTask.title
+  const finalized = targetTask.finalized === true
+
+  const modal = document.getElementById('modalRoot')
+
+  if (role === 'assignee') {
+    renderAssigneeModal(modal, panelIdx, task, targetTask, myId, title, fmtDate, desc, creatorName, approverName, finalized)
+  } else if (role === 'approver') {
+    renderApproverModal(modal, panelIdx, task, targetTask, myId, title, fmtDate, desc, creatorName, finalized)
+  } else {
+    renderCreatorModal(modal, panelIdx, task, targetTask, title, fmtDate, desc, creatorName, finalized)
+  }
+}
+
+// ════════════════════════════════════════════════
+// ASSIGNEE (ISCI) MODAL
+// ════════════════════════════════════════════════
+function renderAssigneeModal(modal, panelIdx, task, targetTask, myId, title, fmtDate, desc, creatorName, approverName, finalized) {
+  const myAssignment = (targetTask.assignees || []).find(a => (a.user?.id || a.userId) === myId)
+  const myStatus = myAssignment?.status || 'PENDING'
+  const isStatusFinalized = myStatus === 'COMPLETED' || myStatus === 'DECLINED'
+  const chatClosed = myAssignment?.chatClosed === true
+
+  // Bulk notes
+  const bulkNotes = Array.isArray(targetTask.bulkNotes) ? targetTask.bulkNotes : []
+
+  // All notes sorted
+  const allNotes = getAllNotesSorted(myAssignment)
+  const totalMsgs = getTotalMessages(myAssignment)
+  const remaining = getRemainingMessages(myAssignment)
+
+  // Buttons
+  let buttonsHtml = ''
+  if (finalized) {
+    buttonsHtml = `<div style="display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px solid #F0F0F0;">
+      <span style="font-size:12px;font-weight:600;color:#058527;">&#10003; Gorev yetkili terefinden tamamlandi</span>
+      <button onclick="closeModal()" style="padding:6px 16px;border-radius:8px;border:none;background:#F5F3F0;color:#808080;font-size:12px;font-weight:600;cursor:pointer;">Bagla</button>
+    </div>`
+  } else if (isStatusFinalized) {
+    const icon = myStatus === 'COMPLETED' ? '&#10003;' : '&#10007;'
+    const msg = myStatus === 'COMPLETED' ? 'Gorev tamamlandi' : 'Gorev redd edildi'
+    const clr = myStatus === 'COMPLETED' ? '#058527' : '#DC4C3E'
+    buttonsHtml = `<div style="display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px solid #F0F0F0;">
+      <span style="font-size:12px;font-weight:600;color:${clr}">${icon} ${msg}</span>
+      <button onclick="closeModal()" style="padding:6px 16px;border-radius:8px;border:none;background:#F5F3F0;color:#808080;font-size:12px;font-weight:600;cursor:pointer;">Bagla</button>
+    </div>`
+  } else if (myStatus === 'IN_PROGRESS') {
+    buttonsHtml = `<div style="display:flex;gap:8px;padding-top:10px;border-top:1px solid #F0F0F0;">
+      <button onclick="workerConfirmStatus(${panelIdx},'${targetTask.id}','DECLINED')" style="flex:1;padding:10px;border-radius:12px;border:none;background:#FDECEA;color:#DC4C3E;font-size:12px;font-weight:600;cursor:pointer;">&#10007; Redd et</button>
+      <button onclick="workerConfirmStatus(${panelIdx},'${targetTask.id}','COMPLETED')" style="flex:1;padding:10px;border-radius:12px;border:none;background:#058527;color:#fff;font-size:12px;font-weight:600;cursor:pointer;">&#10003; Onayla</button>
+    </div>`
+  } else {
+    buttonsHtml = `<div style="display:flex;gap:8px;padding-top:10px;border-top:1px solid #F0F0F0;">
+      <button onclick="workerConfirmStatus(${panelIdx},'${targetTask.id}','DECLINED')" style="flex:1;padding:10px;border-radius:12px;border:none;background:#FDECEA;color:#DC4C3E;font-size:12px;font-weight:600;cursor:pointer;">&#10007; Redd et</button>
+      <button onclick="workerConfirmStatus(${panelIdx},'${targetTask.id}','IN_PROGRESS')" style="flex:1;padding:10px;border-radius:12px;border:none;background:#246FE0;color:#fff;font-size:12px;font-weight:600;cursor:pointer;">&#9654; Basla</button>
+    </div>`
+  }
+
+  // Bulk notes display
+  let bulkNotesHtml = ''
+  if (bulkNotes.length > 0) {
+    bulkNotesHtml = `<div>
+      <div style="font-size:10px;font-weight:700;color:#808080;margin-bottom:4px;">&#128226; Toplu notlar</div>
+      ${bulkNotes.map(bn => `<div style="background:#F3E8FF;border:1px solid #E9D5FF;border-radius:10px;padding:8px 10px;margin-bottom:4px;">
+        <div style="display:flex;align-items:center;gap:4px;margin-bottom:2px;">
+          <span style="font-size:8px;font-weight:700;color:#7C3AED;">&#128737; Yetkili</span>
+          <span style="font-size:8px;color:#B3B3B3;">${bn.date ? new Date(bn.date).toLocaleTimeString('az-AZ',{hour:'2-digit',minute:'2-digit'}) : ''}</span>
+        </div>
+        <p style="font-size:11px;color:#6B21A8;margin:0;">${escapeHtml(bn.text)}</p>
+      </div>`).join('')}
+    </div>`
+  }
+
+  // Finalized banner
+  let finalizedBanner = ''
+  if (finalized) {
+    finalizedBanner = `<div style="background:#E6F4EA;border:1px solid #A8DAB5;border-radius:10px;padding:10px 12px;text-align:center;">
+      <span style="font-size:12px;font-weight:700;color:#058527;">&#10003; Gorev tamamlandi — butun emeliyyatlar dayandirilib</span>
+    </div>`
+  }
+
+  // Chat closed banner
+  let chatClosedBanner = ''
+  if (!finalized && chatClosed) {
+    chatClosedBanner = `<div style="background:#FDECEA;border:1px solid #F5C6CB;border-radius:10px;padding:8px 12px;text-align:center;">
+      <span style="font-size:11px;font-weight:600;color:#DC4C3E;">&#128274; Sohbet baglidir</span>
+    </div>`
+  }
+
+  // Message input area
+  let messageInputHtml = ''
+  if (finalized) {
+    // no input
+  } else if (chatClosed) {
+    // no input
+  } else if (remaining <= 0) {
+    messageInputHtml = `<div style="margin-top:8px;background:#FDECEA;border-radius:8px;padding:6px 10px;">
+      <span style="font-size:10px;font-weight:600;color:#DC4C3E;">&#128172; Mesaj limiti doldu (${MAX_MESSAGES}/${MAX_MESSAGES})</span>
+    </div>`
+  } else {
+    messageInputHtml = `<div style="display:flex;gap:6px;margin-top:8px;align-items:center;">
+      <span style="font-size:9px;color:#808080;white-space:nowrap;">&#128172; ${remaining} mesaj qalib</span>
+      <input id="assignee-note" type="text" maxlength="${MAX_CHARS}" placeholder="Not yazin..." style="flex:1;font-size:11px;background:#F5F3F0;border:1px solid #EBEBEB;border-radius:8px;padding:6px 10px;color:#1F1F1F;outline:none;">
+      <button onclick="sendWorkerNote(${panelIdx},'${targetTask.id}')" style="font-size:10px;font-weight:700;padding:6px 10px;border-radius:8px;border:none;background:#246FE0;color:#fff;cursor:pointer;white-space:nowrap;">Gonder</button>
+    </div>`
+  }
+
+  modal.innerHTML = `<div class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal" onclick="event.stopPropagation()" style="border-radius:16px;padding:0;overflow:hidden;max-height:80vh;overflow-y:auto;">
+      <div style="height:4px;background:#246FE0;"></div>
+      <div style="padding:20px;display:flex;flex-direction:column;gap:14px;">
+        <!-- Bashliq + Tarix -->
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+          <h3 style="font-size:16px;font-weight:700;color:#1F1F1F;margin:0;flex:1;">${escapeHtml(title)}</h3>
+          ${fmtDate ? `<span style="font-size:11px;font-weight:700;color:#DC4C3E;background:#FDECEA;padding:3px 8px;border-radius:6px;white-space:nowrap;">&#128197; ${fmtDate}</span>` : ''}
+        </div>
+        <!-- Yaradan / Yetkili -->
+        <div style="display:flex;align-items:center;justify-content:space-between;background:#F5F3F0;border-radius:12px;padding:8px 12px;">
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:10px;color:#808080;">Yaradan:</span>
+            <span style="font-size:12px;font-weight:600;color:#1F1F1F;">${escapeHtml(creatorName)}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:10px;color:#808080;">Yetkili:</span>
+            <span style="font-size:12px;font-weight:600;color:#7C3AED;">${escapeHtml(approverName)}</span>
+          </div>
+        </div>
+        ${finalizedBanner}
+        ${chatClosedBanner}
+        <!-- Detaylar -->
+        ${desc ? `<div>
+          <div style="font-size:10px;font-weight:700;color:#808080;margin-bottom:4px;">Detaylar</div>
+          <div style="background:#FAFAFA;border:1px solid #F0F0F0;border-radius:12px;padding:10px 12px;">
+            <p style="font-size:12px;color:#444;margin:0;line-height:1.5;">${escapeHtml(desc)}</p>
+          </div>
+        </div>` : ''}
+        ${bulkNotesHtml}
+        <!-- Notlar (mesaj balonciqlari) -->
+        <div>
+          <div style="font-size:10px;font-weight:700;color:#808080;margin-bottom:4px;">&#128172; Notlar</div>
+          <div style="background:#FAFAFA;border:1px solid #F0F0F0;border-radius:12px;padding:10px 12px;max-height:200px;overflow-y:auto;">
+            ${allNotes.length === 0
+              ? '<p style="font-size:11px;color:#B3B3B3;margin:0;">Hele not yazilmayib</p>'
+              : allNotes.map(n => `<div style="display:flex;${n.type==='worker'?'justify-content:flex-end':'justify-content:flex-start'};margin-bottom:6px;">
+                  <div style="max-width:85%;background:${n.type==='worker'?'#E8F0FE':'#F3E8FF'};border:1px solid ${n.type==='worker'?'#C6DAFB':'#E9D5FF'};border-radius:12px;padding:6px 10px;">
+                    <div style="display:flex;align-items:center;gap:4px;margin-bottom:2px;">
+                      <span style="font-size:8px;font-weight:700;color:${n.type==='worker'?'#246FE0':'#7C3AED'};">${n.type==='worker'?'&#128221; Siz':'&#128737; Yetkili'}</span>
+                      <span style="font-size:8px;color:#B3B3B3;">${n.date?new Date(n.date).toLocaleTimeString('az-AZ',{hour:'2-digit',minute:'2-digit'}):''}</span>
+                    </div>
+                    <p style="font-size:11px;color:${n.type==='worker'?'#1a56db':'#6B21A8'};margin:0;">${escapeHtml(n.text)}</p>
+                  </div>
+                </div>`).join('')
+            }
+          </div>
+          ${messageInputHtml}
+        </div>
+        <!-- Duymeler -->
+        ${buttonsHtml}
+      </div>
+    </div>
+  </div>`
+}
+
+// ════════════════════════════════════════════════
+// APPROVER (YETKILI) MODAL — 2 SCREEN
+// ════════════════════════════════════════════════
+let approverModalState = {}
+
+function renderApproverModal(modal, panelIdx, task, targetTask, myId, title, fmtDate, desc, creatorName, finalized) {
+  approverModalState = {
+    panelIdx, task, targetTask, myId, title, fmtDate, desc, creatorName, finalized,
+    currentScreen: 'list',
+    selectedWorkerIdx: null,
+    statusFilter: 'ALL',
+  }
+  renderApproverScreen(modal)
+}
+
+function renderApproverScreen(modal) {
+  const s = approverModalState
+  if (!modal) modal = document.getElementById('modalRoot')
+
+  if (s.currentScreen === 'list') {
+    renderApproverListScreen(modal)
+  } else {
+    renderApproverChatScreen(modal)
+  }
+}
+
+function renderApproverListScreen(modal) {
+  const s = approverModalState
+  const { panelIdx, task, targetTask, title, fmtDate, desc, creatorName, finalized } = s
+  const assigneesList = targetTask.assignees || []
+  const totalA = assigneesList.length
+  const completedA = assigneesList.filter(a => a.status === 'COMPLETED').length
+
+  // Bulk notes
+  const bulkNotes = Array.isArray(targetTask.bulkNotes) ? targetTask.bulkNotes : []
+
+  // Progress bar
+  const progressPct = totalA > 0 ? Math.round((completedA / totalA) * 100) : 0
+
+  // Status filter counts
+  const counts = { ALL: totalA, PENDING: 0, IN_PROGRESS: 0, COMPLETED: 0, DECLINED: 0 }
+  assigneesList.forEach(a => { if (counts[a.status] !== undefined) counts[a.status]++ })
+
+  // Filter
+  const filtered = s.statusFilter === 'ALL' ? assigneesList : assigneesList.filter(a => a.status === s.statusFilter)
+
+  // Worker list
+  const workersHtml = filtered.map((a, realIdx) => {
+    const origIdx = assigneesList.indexOf(a)
+    const u = a.user || {}
+    const sc = statusConfig[a.status] || statusConfig.PENDING
+    const initials = getInitials(u.fullName)
+    const totalMsgs = getTotalMessages(a)
+    const chatClosed = a.chatClosed === true
+
+    let actionLabel = ''
+    if (finalized) {
+      actionLabel = '<span style="font-size:9px;color:#058527;font-weight:600;">&#10003; Tamamlandi</span>'
+    } else if (chatClosed) {
+      actionLabel = '<span style="font-size:9px;color:#DC4C3E;">&#128274; Bagli</span>'
+    } else {
+      actionLabel = `<span style="font-size:9px;color:#246FE0;cursor:pointer;">&#128172; Yaz &#8594;</span>`
+    }
+
+    return `<div onclick="approverSelectWorker(${origIdx})" style="display:flex;align-items:center;gap:8px;padding:10px 12px;cursor:pointer;border-bottom:1px solid #F5F3F0;transition:0.1s;" onmouseover="this.style.background='#FAFAFA'" onmouseout="this.style.background='transparent'">
+      <div style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;background:${sc.bg};color:${sc.color};flex-shrink:0;">${initials}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:12px;font-weight:600;color:#1F1F1F;">${escapeHtml(u.fullName || '—')}</div>
+        <div style="font-size:9px;color:#B3B3B3;">${u.customRole?.name || ''} ${totalMsgs > 0 ? '&#128172; ' + totalMsgs + ' mesaj' : ''}</div>
+      </div>
+      <span style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:${sc.bg};color:${sc.color};">${sc.label}</span>
+      ${actionLabel}
+    </div>`
+  }).join('')
+
+  // Filter bar
+  const filterItems = [
+    { key: 'ALL', label: 'Hamisi' },
+    { key: 'PENDING', label: 'Gozleyir' },
+    { key: 'IN_PROGRESS', label: 'Davam edir' },
+    { key: 'COMPLETED', label: 'Tamamladi' },
+    { key: 'DECLINED', label: 'Redd etdi' },
+  ]
+  const filterBarHtml = filterItems.map(f => {
+    const active = s.statusFilter === f.key
+    const cnt = counts[f.key] || 0
+    return `<button onclick="approverSetFilter('${f.key}')" style="padding:4px 10px;border-radius:20px;border:1px solid ${active ? '#7C3AED' : '#EBEBEB'};background:${active ? '#F3E8FF' : '#fff'};color:${active ? '#7C3AED' : '#808080'};font-size:9px;font-weight:600;cursor:pointer;">${f.label} (${cnt})</button>`
+  }).join('')
+
+  // Bulk notes section
+  let bulkNotesDisplayHtml = ''
+  if (bulkNotes.length > 0) {
+    bulkNotesDisplayHtml = bulkNotes.map(bn => `<div style="background:#F3E8FF;border:1px solid #E9D5FF;border-radius:10px;padding:8px 10px;margin-top:4px;">
+      <div style="display:flex;align-items:center;gap:4px;margin-bottom:2px;">
+        <span style="font-size:8px;font-weight:700;color:#7C3AED;">&#128737; Yetkili</span>
+        <span style="font-size:8px;color:#B3B3B3;">${bn.date ? new Date(bn.date).toLocaleTimeString('az-AZ',{hour:'2-digit',minute:'2-digit'}) : ''}</span>
+      </div>
+      <p style="font-size:11px;color:#6B21A8;margin:0;">${escapeHtml(bn.text)}</p>
+    </div>`).join('')
+  }
+
+  // Footer
+  let footerHtml = ''
+  if (finalized) {
+    footerHtml = `<div style="background:#E6F4EA;border:1px solid #A8DAB5;border-radius:10px;padding:12px;text-align:center;">
+      <span style="font-size:13px;font-weight:700;color:#058527;">&#10003; Gorev tamamlandi</span>
+    </div>`
+  } else {
+    footerHtml = `<div style="display:flex;gap:8px;">
+      <button onclick="closeModal()" style="flex:1;padding:10px;border-radius:12px;border:1px solid #EBEBEB;background:#fff;color:#808080;font-size:12px;font-weight:600;cursor:pointer;">Bagla</button>
+      <button onclick="approverConfirmFinalize(${panelIdx},'${targetTask.id}')" style="flex:1;padding:10px;border-radius:12px;border:none;background:#058527;color:#fff;font-size:12px;font-weight:600;cursor:pointer;">&#10003; Tamamla</button>
+    </div>`
+  }
+
+  modal.innerHTML = `<div class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal" onclick="event.stopPropagation()" style="border-radius:16px;padding:0;overflow:hidden;max-height:80vh;overflow-y:auto;width:460px;">
+      <div style="height:4px;background:#7C3AED;"></div>
+      <div style="padding:20px;display:flex;flex-direction:column;gap:14px;">
+        <!-- Badge + Title -->
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+          <div style="flex:1;">
+            <span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;background:#F3E8FF;color:#7C3AED;">&#128737; Yetkili gorunusu</span>
+            <h3 style="font-size:16px;font-weight:700;color:#1F1F1F;margin:6px 0 0;">${escapeHtml(title)}</h3>
+          </div>
+          ${fmtDate ? `<span style="font-size:11px;font-weight:700;color:#DC4C3E;background:#FDECEA;padding:3px 8px;border-radius:6px;white-space:nowrap;">&#128197; ${fmtDate}</span>` : ''}
+        </div>
+
+        <!-- Creator / Approver -->
+        <div style="display:flex;align-items:center;justify-content:space-between;background:#F5F3F0;border-radius:12px;padding:8px 12px;">
+          <div><span style="font-size:10px;color:#808080;">Yaradan:</span> <span style="font-size:12px;font-weight:600;color:#1F1F1F;">${escapeHtml(creatorName)}</span></div>
+          <div><span style="font-size:10px;color:#808080;">Yetkili:</span> <span style="font-size:12px;font-weight:600;color:#7C3AED;">Siz</span></div>
+        </div>
+
+        <!-- Description -->
+        ${desc ? `<div style="background:#FAFAFA;border:1px solid #F0F0F0;border-radius:12px;padding:10px 12px;">
+          <p style="font-size:12px;color:#444;margin:0;line-height:1.5;">${escapeHtml(desc)}</p>
+        </div>` : ''}
+
+        <!-- Progress bar -->
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+            <span style="font-size:10px;font-weight:600;color:#808080;">Irelihleyis</span>
+            <span style="font-size:10px;font-weight:700;color:${completedA === totalA && totalA > 0 ? '#058527' : '#808080'};">${completedA}/${totalA}</span>
+          </div>
+          <div style="height:6px;background:#F0F0F0;border-radius:3px;overflow:hidden;">
+            <div style="height:100%;width:${progressPct}%;background:linear-gradient(90deg,#058527,#10B981);border-radius:3px;transition:width 0.3s;"></div>
+          </div>
+        </div>
+
+        <!-- Toplu not section -->
+        <div style="border:1px solid #E9D5FF;border-radius:12px;overflow:hidden;">
+          <div onclick="toggleBulkNotesSection()" style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#F3E8FF;cursor:pointer;">
+            <span style="font-size:11px;font-weight:700;color:#7C3AED;">&#128226; Toplu not</span>
+            <span id="bulk-toggle-icon" style="font-size:10px;color:#7C3AED;">&#9660;</span>
+          </div>
+          <div id="bulk-notes-section" style="display:none;padding:10px 12px;">
+            ${!finalized ? `<div style="display:flex;gap:6px;margin-bottom:6px;">
+              <textarea id="bulk-note-input" maxlength="${MAX_CHARS}" placeholder="Hamiya not gonder..." rows="2" style="flex:1;font-size:11px;background:#F5F3F0;border:1px solid #EBEBEB;border-radius:8px;padding:6px 10px;color:#1F1F1F;resize:none;outline:none;"></textarea>
+              <button onclick="sendBulkNote(${panelIdx},'${targetTask.id}')" style="font-size:10px;font-weight:700;padding:6px 10px;border-radius:8px;border:none;background:#7C3AED;color:#fff;cursor:pointer;white-space:nowrap;align-self:flex-end;">&#128226; Hamisina gonder</button>
+            </div>` : ''}
+            ${bulkNotesDisplayHtml || '<p style="font-size:10px;color:#B3B3B3;margin:0;">Hele toplu not yoxdur</p>'}
+          </div>
+        </div>
+
+        <!-- Status filter bar -->
+        <div style="display:flex;gap:4px;flex-wrap:wrap;">
+          ${filterBarHtml}
+        </div>
+
+        <!-- Worker list -->
+        <div style="border:1px solid #F0F0F0;border-radius:12px;overflow:hidden;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#F5F3F0;">
+            <span style="font-size:11px;font-weight:700;color:#1F1F1F;">&#128101; Atanan isciler (${totalA})</span>
+          </div>
+          ${workersHtml || '<div style="padding:16px;text-align:center;color:#B3B3B3;font-size:11px;">Bu filtrde isci yoxdur</div>'}
+        </div>
+
+        <!-- Footer -->
+        ${footerHtml}
+      </div>
+    </div>
+  </div>`
+}
+
+function renderApproverChatScreen(modal) {
+  const s = approverModalState
+  const { panelIdx, task, targetTask, title, finalized } = s
+  const assigneesList = targetTask.assignees || []
+  const a = assigneesList[s.selectedWorkerIdx]
+  if (!a) { s.currentScreen = 'list'; renderApproverScreen(modal); return }
+
+  const u = a.user || {}
+  const sc = statusConfig[a.status] || statusConfig.PENDING
+  const initials = getInitials(u.fullName)
+  const chatClosed = a.chatClosed === true
+
+  // All notes sorted
+  const allNotes = getAllNotesSorted(a)
+  const totalMsgs = getTotalMessages(a)
+  const remaining = getRemainingMessages(a)
+
+  // Chat bubbles
+  let chatBubblesHtml = ''
+  if (allNotes.length === 0) {
+    chatBubblesHtml = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 0;color:#B3B3B3;">
+      <div style="font-size:28px;margin-bottom:6px;">&#128172;</div>
+      <p style="font-size:11px;margin:0;">Hele mesaj yoxdur</p>
+    </div>`
+  } else {
+    chatBubblesHtml = allNotes.map(n => `<div style="display:flex;${n.type==='approver'?'justify-content:flex-end':'justify-content:flex-start'};margin-bottom:6px;">
+      <div style="max-width:80%;background:${n.type==='approver'?'#F3E8FF':'#FFF9E6'};border:1px solid ${n.type==='approver'?'#E9D5FF':'#FFF3CC'};border-radius:12px;padding:6px 10px;">
+        <div style="display:flex;align-items:center;gap:3px;margin-bottom:2px;">
+          <span style="font-size:8px;font-weight:700;color:${n.type==='approver'?'#7C3AED':'#EB8909'};">${n.type==='approver'?'&#128737; Siz':'&#128221; '+escapeHtml(u.fullName||'')}</span>
+          <span style="font-size:8px;color:#B3B3B3;">${n.date?new Date(n.date).toLocaleTimeString('az-AZ',{hour:'2-digit',minute:'2-digit'}):''}</span>
+        </div>
+        <p style="font-size:11px;color:${n.type==='approver'?'#6B21A8':'#555'};margin:0;">${escapeHtml(n.text)}</p>
+      </div>
+    </div>`).join('')
+  }
+
+  // Footer input
+  let footerInputHtml = ''
+  if (finalized) {
+    footerInputHtml = `<div style="background:#E6F4EA;border:1px solid #A8DAB5;border-radius:10px;padding:10px 12px;text-align:center;">
+      <span style="font-size:11px;font-weight:700;color:#058527;">&#10003; Gorev tamamlandi — butun emeliyyatlar dayandirilib</span>
+    </div>`
+  } else if (chatClosed) {
+    footerInputHtml = `<div style="background:#FDECEA;border:1px solid #F5C6CB;border-radius:10px;padding:10px 12px;text-align:center;">
+      <span style="font-size:11px;font-weight:600;color:#DC4C3E;">&#128274; Sohbet baglidir — isci mesaj yaza bilmez</span>
+    </div>`
+  } else if (remaining <= 0) {
+    footerInputHtml = `<div style="background:#FFF3E0;border:1px solid #FFE0B2;border-radius:10px;padding:10px 12px;text-align:center;">
+      <span style="font-size:11px;font-weight:600;color:#EB8909;">&#9888; Mesaj limiti doldu (${MAX_MESSAGES}/${MAX_MESSAGES})</span>
+    </div>`
+  } else {
+    footerInputHtml = `<div style="display:flex;gap:6px;align-items:center;">
+      <span style="font-size:9px;color:#808080;white-space:nowrap;">&#128172; ${remaining} mesaj qalib</span>
+      <input id="approver-chat-input" type="text" maxlength="${MAX_CHARS}" placeholder="Mesaj yazin..." style="flex:1;font-size:11px;background:#F5F3F0;border:1px solid #EBEBEB;border-radius:8px;padding:8px 10px;color:#1F1F1F;outline:none;">
+      <button onclick="sendApproverChatNote(${panelIdx},'${targetTask.id}','${u.id}',${s.selectedWorkerIdx})" style="font-size:10px;font-weight:700;padding:8px 12px;border-radius:8px;border:none;background:#7C3AED;color:#fff;cursor:pointer;white-space:nowrap;">Gonder</button>
+    </div>`
+  }
+
+  // Dropdown menu items
+  let dropdownItems = ''
+  if (!finalized) {
+    // Status changes
+    if (a.status === 'PENDING') {
+      dropdownItems += `<div onclick="approverChangeStatus(${panelIdx},'${targetTask.id}','${u.id}','IN_PROGRESS')" style="padding:8px 14px;cursor:pointer;font-size:11px;color:#246FE0;" onmouseover="this.style.background='#F5F3F0'" onmouseout="this.style.background='transparent'">&#9654; Basla (PENDING&#8594;IN_PROGRESS)</div>`
+    }
+    if (a.status === 'IN_PROGRESS') {
+      dropdownItems += `<div onclick="approverChangeStatus(${panelIdx},'${targetTask.id}','${u.id}','PENDING')" style="padding:8px 14px;cursor:pointer;font-size:11px;color:#808080;" onmouseover="this.style.background='#F5F3F0'" onmouseout="this.style.background='transparent'">&#8634; Gozleyir-e qaytar</div>`
+    }
+    if (a.status !== 'COMPLETED') {
+      dropdownItems += `<div onclick="approverChangeStatus(${panelIdx},'${targetTask.id}','${u.id}','COMPLETED')" style="padding:8px 14px;cursor:pointer;font-size:11px;color:#058527;" onmouseover="this.style.background='#F5F3F0'" onmouseout="this.style.background='transparent'">&#10003; Tamamlandi</div>`
+    }
+    if (a.status !== 'DECLINED') {
+      dropdownItems += `<div onclick="approverChangeStatus(${panelIdx},'${targetTask.id}','${u.id}','DECLINED')" style="padding:8px 14px;cursor:pointer;font-size:11px;color:#DC4C3E;" onmouseover="this.style.background='#F5F3F0'" onmouseout="this.style.background='transparent'">&#10007; Redd et</div>`
+    }
+    // Chat toggle
+    dropdownItems += `<div style="border-top:1px solid #F0F0F0;"></div>`
+    if (chatClosed) {
+      dropdownItems += `<div onclick="approverToggleChat(${panelIdx},'${targetTask.id}','${u.id}',false)" style="padding:8px 14px;cursor:pointer;font-size:11px;color:#058527;" onmouseover="this.style.background='#F5F3F0'" onmouseout="this.style.background='transparent'">&#128275; Sohbeti ac</div>`
+    } else {
+      dropdownItems += `<div onclick="approverToggleChat(${panelIdx},'${targetTask.id}','${u.id}',true)" style="padding:8px 14px;cursor:pointer;font-size:11px;color:#DC4C3E;" onmouseover="this.style.background='#F5F3F0'" onmouseout="this.style.background='transparent'">&#128274; Sohbeti bagla</div>`
+    }
+  }
+
+  modal.innerHTML = `<div class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal" onclick="event.stopPropagation()" style="border-radius:16px;padding:0;overflow:hidden;max-height:80vh;display:flex;flex-direction:column;width:440px;">
+      <div style="height:4px;background:#7C3AED;flex-shrink:0;"></div>
+
+      <!-- Header -->
+      <div style="padding:12px 16px;border-bottom:1px solid #F0F0F0;display:flex;align-items:center;gap:10px;flex-shrink:0;">
+        <button onclick="approverBackToList()" style="border:none;background:none;font-size:16px;cursor:pointer;color:#808080;padding:4px;">&#8592;</button>
+        <div style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;background:${sc.bg};color:${sc.color};flex-shrink:0;">${initials}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;font-weight:700;color:#1F1F1F;">${escapeHtml(u.fullName || '—')}</div>
+          <div style="font-size:9px;color:#808080;">${u.customRole?.name || ''}</div>
+        </div>
+        <span style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:${sc.bg};color:${sc.color};">${sc.label}</span>
+        ${!finalized ? `<div style="position:relative;">
+          <button onclick="toggleWorkerMenu(event)" style="border:none;background:none;font-size:18px;cursor:pointer;color:#808080;padding:4px;">&#8942;</button>
+          <div id="worker-dropdown-menu" style="display:none;position:absolute;right:0;top:100%;background:#fff;border:1px solid #EBEBEB;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.12);min-width:200px;z-index:10;overflow:hidden;">
+            ${dropdownItems}
+          </div>
+        </div>` : ''}
+      </div>
+
+      <!-- Chat body -->
+      <div id="approver-chat-body" style="flex:1;overflow-y:auto;padding:12px 16px;background:#FAFAFA;min-height:200px;max-height:350px;">
+        ${chatBubblesHtml}
+      </div>
+
+      <!-- Footer -->
+      <div style="padding:12px 16px;border-top:1px solid #F0F0F0;flex-shrink:0;">
+        ${footerInputHtml}
+      </div>
+    </div>
+  </div>`
+
+  // Scroll to bottom
+  setTimeout(() => {
+    const chatBody = document.getElementById('approver-chat-body')
+    if (chatBody) chatBody.scrollTop = chatBody.scrollHeight
+  }, 50)
+}
+
+// ═══ Approver modal actions ═══
+
+window.approverSelectWorker = function(workerIdx) {
+  approverModalState.selectedWorkerIdx = workerIdx
+  approverModalState.currentScreen = 'chat'
+  renderApproverScreen()
+}
+
+window.approverBackToList = function() {
+  approverModalState.currentScreen = 'list'
+  renderApproverScreen()
+}
+
+window.approverSetFilter = function(filter) {
+  approverModalState.statusFilter = filter
+  renderApproverScreen()
+}
+
+window.toggleBulkNotesSection = function() {
+  const el = document.getElementById('bulk-notes-section')
+  const icon = document.getElementById('bulk-toggle-icon')
+  if (el) {
+    if (el.style.display === 'none') {
+      el.style.display = 'block'
+      if (icon) icon.innerHTML = '&#9650;'
+    } else {
+      el.style.display = 'none'
+      if (icon) icon.innerHTML = '&#9660;'
+    }
+  }
+}
+
+window.toggleWorkerMenu = function(event) {
+  event.stopPropagation()
+  const menu = document.getElementById('worker-dropdown-menu')
+  if (menu) {
+    menu.style.display = menu.style.display === 'none' ? 'block' : 'none'
+  }
+}
+
+// Close dropdown on outside click
+document.addEventListener('click', function() {
+  const menu = document.getElementById('worker-dropdown-menu')
+  if (menu) menu.style.display = 'none'
+})
+
+window.sendBulkNote = async function(panelIdxArg, taskIdArg) {
+  const input = document.getElementById('bulk-note-input')
+  const text = input ? input.value.trim() : ''
+  if (!text) return
+  // Fallback: approverModalState-dən oxu
+  const panelIdx = (panelIdxArg !== undefined && panelIdxArg !== null) ? panelIdxArg : approverModalState.panelIdx
+  const taskId = taskIdArg || approverModalState.targetTask?.id
+  const p = panels[panelIdx]
+  if (!p || !p.token) {
+    log(panelIdx || 0, 'Token tapilmadi, yeniden giris edin')
+    return
+  }
+  try {
+    await apiPatch(p.token, '/tasks/' + taskId + '/bulk-note', { note: text })
+    log(panelIdx, '&#10003; Toplu not gonderildi')
+    await refreshAllPanels()
+    // Re-open the task
+    const task = p.tasks.find(t => t.id === approverModalState.task.id)
+    if (task) {
+      openTask(panelIdx, task.id)
+    }
+  } catch (e) {
+    log(panelIdx, '&#10007; ' + e.message)
+  }
+}
+
+window.sendApproverChatNote = async function(panelIdx, taskId, userId, workerIdx) {
+  const input = document.getElementById('approver-chat-input')
+  const text = input ? input.value.trim() : ''
+  if (!text) return
+  const p = panels[panelIdx]
+  try {
+    await apiPatch(p.token, '/tasks/' + taskId + '/assignee-note', { userId, approverNote: text })
+    log(panelIdx, '&#10003; Yetkili notu gonderildi')
+    await refreshAllPanels()
+    // Re-open in chat view
+    const task = p.tasks.find(t => t.id === approverModalState.task.id)
+    if (task) {
+      // Find the targetTask again
+      let newTargetTask = task
+      if (task.type === 'GOREV' && task.subTasks?.length > 0) {
+        for (const sub of task.subTasks) {
+          if (sub.approverId === approverModalState.myId) { newTargetTask = sub; break }
+        }
+      }
+      approverModalState.task = task
+      approverModalState.targetTask = newTargetTask
+      approverModalState.finalized = newTargetTask.finalized === true
+      approverModalState.selectedWorkerIdx = workerIdx
+      approverModalState.currentScreen = 'chat'
+      renderApproverScreen()
+    }
+  } catch (e) {
+    log(panelIdx, '&#10007; ' + e.message)
+  }
+}
+
+window.approverChangeStatus = async function(panelIdx, taskId, userId, status) {
+  // Close dropdown
+  const menu = document.getElementById('worker-dropdown-menu')
+  if (menu) menu.style.display = 'none'
+
+  const statusLabel = (statusConfig[status] || {}).label || status
+  showConfirm({
+    title: 'Status deyis',
+    message: `Iscinin statusunu "${statusLabel}" olaraq deyismek isteyirsiniz?`,
+    type: status === 'DECLINED' ? 'danger' : 'info',
+    confirmText: 'Beli, deyis',
+    onConfirm: async () => {
+      const p = panels[panelIdx]
+      try {
+        await apiPatch(p.token, '/tasks/' + taskId + '/change-assignee-status', { userId, status })
+        log(panelIdx, '&#10003; Status deyisdi: ' + status)
+        await refreshAllPanels()
+        reopenApproverChat(panelIdx)
+      } catch (e) {
+        log(panelIdx, '&#10007; ' + e.message)
+      }
+    }
+  })
+}
+
+window.approverToggleChat = async function(panelIdx, taskId, userId, closed) {
+  const menu = document.getElementById('worker-dropdown-menu')
+  if (menu) menu.style.display = 'none'
+
+  const p = panels[panelIdx]
+  try {
+    await apiPatch(p.token, '/tasks/' + taskId + '/close-chat', { userId, closed })
+    log(panelIdx, closed ? '&#128274; Sohbet baglandi' : '&#128275; Sohbet acildi')
+    await refreshAllPanels()
+    reopenApproverChat(panelIdx)
+  } catch (e) {
+    log(panelIdx, '&#10007; ' + e.message)
+  }
+}
+
+window.approverConfirmFinalize = function(panelIdx, taskId) {
+  showConfirm({
+    title: 'Gorevi tamamla',
+    message: 'Bu emeliyyatdan sonra butun sohbetler baglanacaq, isciler hec bir emeliyyat ede bilmeyecek ve gorev "Tamamlandi" olaraq qeyd olunacaq.',
+    type: 'success',
+    confirmText: 'Beli, tamamla',
+    onConfirm: async () => {
+      const p = panels[panelIdx]
+      try {
+        await apiPatch(p.token, '/tasks/' + taskId + '/finalize', {})
+        log(panelIdx, '&#10003; Gorev tamamlandi')
+        closeModal()
+        await refreshAllPanels()
+      } catch (e) {
+        log(panelIdx, '&#10007; ' + e.message)
+      }
+    }
+  })
+}
+
+function reopenApproverChat(panelIdx) {
+  const p = panels[panelIdx]
+  const task = p.tasks.find(t => t.id === approverModalState.task.id)
+  if (task) {
+    let newTargetTask = task
+    if (task.type === 'GOREV' && task.subTasks?.length > 0) {
+      for (const sub of task.subTasks) {
+        if (sub.approverId === approverModalState.myId) { newTargetTask = sub; break }
+      }
+    }
+    approverModalState.task = task
+    approverModalState.targetTask = newTargetTask
+    approverModalState.finalized = newTargetTask.finalized === true
+    renderApproverScreen()
+  }
+}
+
+// ════════════════════════════════════════════════
+// CREATOR / OTHER MODAL
+// ════════════════════════════════════════════════
+function renderCreatorModal(modal, panelIdx, task, targetTask, title, fmtDate, desc, creatorName, finalized) {
+  const s = statusLabels[task.status] || task.status
+  const sc = statusColors[task.status] || '#808080'
+  const assignees = (task.assignees || []).map(a => a.user?.fullName || '?').join(', ') || 'Yoxdur'
+
+  let subtasksHtml = ''
+  if (task.type === 'GOREV' && task.subTasks?.length) {
+    subtasksHtml = '<div style="font-size:10px;font-weight:700;color:#808080;margin-top:4px;">Alt-gorevler:</div>' + task.subTasks.map(st => {
+      const stS = statusLabels[st.status] || st.status
+      const stSc = statusColors[st.status] || '#808080'
+      const stFinalized = st.finalized === true
+      const stAssignees = (st.assignees || []).map(a => {
+        const aSc = statusConfig[a.status] || statusConfig.PENDING
+        return `<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 6px;border:1px solid #EBEBEB;border-radius:6px;margin-top:3px;">
+          <span style="font-size:11px;font-weight:600;">${a.user?.fullName || '?'}</span>
+          <span style="font-size:9px;padding:1px 6px;border-radius:3px;font-weight:600;background:${aSc.bg};color:${aSc.color};">${aSc.label}</span>
+        </div>`
+      }).join('')
+      return `<div style="border:1px solid #EBEBEB;border-radius:8px;padding:8px;margin-top:6px;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:11px;font-weight:600;">${escapeHtml(st.title)}</span>
+          ${stFinalized ? '<span style="font-size:8px;color:#058527;font-weight:700;background:#E6F4EA;padding:1px 5px;border-radius:3px;">TAMAMLANDI</span>' : ''}
+        </div>
+        <div style="font-size:9px;color:#808080;margin-top:2px;">&#128197; ${st.dueDate ? new Date(st.dueDate).toLocaleDateString('az') : '—'} ${st.approver ? '| &#128737; ' + escapeHtml(st.approver.fullName) : ''}</div>
+        ${stAssignees}
+      </div>`
+    }).join('')
+  }
+
+  modal.innerHTML = `<div class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal" onclick="event.stopPropagation()" style="border-radius:16px;padding:0;overflow:hidden;max-height:80vh;overflow-y:auto;">
+      <div style="height:4px;background:#EB8909;"></div>
+      <div style="padding:20px;display:flex;flex-direction:column;gap:12px;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+          <h3 style="font-size:16px;font-weight:700;color:#1F1F1F;margin:0;flex:1;">${escapeHtml(task.title)}</h3>
+          ${fmtDate ? `<span style="font-size:11px;font-weight:700;color:#DC4C3E;background:#FDECEA;padding:3px 8px;border-radius:6px;white-space:nowrap;">&#128197; ${fmtDate}</span>` : ''}
+        </div>
+        <div style="display:flex;gap:6px;">
+          <span style="font-size:10px;padding:2px 8px;border-radius:4px;font-weight:600;background:${sc}20;color:${sc};">${s}</span>
+          ${task.type === 'GOREV' ? '<span style="font-size:10px;padding:2px 8px;border-radius:4px;font-weight:600;background:#FFF3E0;color:#EB8909;">TOPLU GOREV</span>' : ''}
+          ${finalized ? '<span style="font-size:10px;padding:2px 8px;border-radius:4px;font-weight:600;background:#E6F4EA;color:#058527;">TAMAMLANDI</span>' : ''}
+        </div>
+        ${task.approver ? `<div style="display:flex;align-items:center;justify-content:space-between;background:#F5F3F0;border-radius:12px;padding:8px 12px;">
+          <div><span style="font-size:10px;color:#808080;">Yaradan:</span> <span style="font-size:12px;font-weight:600;">${escapeHtml(creatorName)}</span></div>
+          <div><span style="font-size:10px;color:#808080;">Yetkili:</span> <span style="font-size:12px;font-weight:600;color:#7C3AED;">${escapeHtml(task.approver.fullName)}</span></div>
+        </div>` : ''}
+        ${desc ? `<div style="background:#FAFAFA;border:1px solid #F0F0F0;border-radius:12px;padding:10px 12px;font-size:12px;color:#444;">${escapeHtml(desc)}</div>` : ''}
+        <div><span style="font-size:10px;font-weight:700;color:#808080;">&#128101; Atananlar:</span> <span style="font-size:11px;">${escapeHtml(assignees)}</span></div>
+        ${subtasksHtml}
+        <div style="padding-top:8px;border-top:1px solid #F0F0F0;text-align:right;">
+          <button onclick="closeModal()" style="padding:8px 20px;border-radius:8px;border:none;background:#F5F3F0;color:#808080;font-size:12px;font-weight:600;cursor:pointer;">Bagla</button>
+        </div>
+      </div>
+    </div>
+  </div>`
+}
+
+// ═══ Worker actions ═══
+
+window.workerConfirmStatus = function(panelIdx, taskId, status) {
+  const messages = {
+    DECLINED: 'Tapshirigi redd etmek isteyirsiniz? Bu geri alinmaz.',
+    COMPLETED: 'Tapshirigi tamamladiginizi tesdiq edirsiniz? Bu geri alinmaz.',
+    IN_PROGRESS: 'Tapshiriga baslamaq isteyirsiniz?',
+  }
+  const types = {
+    DECLINED: 'danger',
+    COMPLETED: 'info',
+    IN_PROGRESS: 'info',
+  }
+  const confirms = {
+    DECLINED: 'Beli, redd et',
+    COMPLETED: 'Beli, tamamla',
+    IN_PROGRESS: 'Beli, basla',
+  }
+  showConfirm({
+    title: status === 'DECLINED' ? 'Eminsiniz?' : 'Tesdiq edin',
+    message: messages[status] || '',
+    type: types[status] || 'info',
+    confirmText: confirms[status] || 'Beli',
+    onConfirm: () => doStatusChange(panelIdx, taskId, status)
+  })
+}
+
+window.doStatusChange = async function(panelIdx, taskId, status) {
+  const p = panels[panelIdx]
+  try {
+    await apiPatch(p.token, '/tasks/' + taskId + '/my-status', { status })
+    log(panelIdx, '&#10003; Status: ' + status)
+    closeModal()
+    await refreshAllPanels()
+  } catch (e) {
+    log(panelIdx, '&#10007; ' + e.message)
+  }
+}
+
+window.sendWorkerNote = async function(panelIdx, taskId) {
+  const p = panels[panelIdx]
+  const input = document.getElementById('assignee-note')
+  const noteText = input ? input.value.trim() : ''
+  if (!noteText) return
+
+  if (input) input.value = ''
+
+  try {
+    await apiPatch(p.token, '/tasks/' + taskId + '/worker-note', { note: noteText })
+    log(panelIdx, '&#10003; Isci notu gonderildi')
+    await refreshAllPanels()
+    // Re-open task to refresh modal
+    openTask(panelIdx, taskId)
+  } catch (e) {
+    log(panelIdx, '&#10007; ' + (e.message || 'Xeta'))
+  }
+}
+
+// Close picker on outside click
+document.addEventListener('click', function(e) {
+  if (openPickerIdx !== null) {
+    const header = document.getElementById('panel-header-' + openPickerIdx)
+    const picker = document.getElementById('panel-picker-' + openPickerIdx)
+    if (header && !header.contains(e.target) && picker && !picker.contains(e.target)) {
+      closePicker()
+    }
+  }
+})
+
+// ─── Init ───
+async function init() {
+  const panelsEl = document.getElementById('panels')
+  let loginCount = 0
+
+  for (let i = 0; i < DEFAULT_USERS.length; i++) {
+    const u = DEFAULT_USERS[i]
+    panelsEl.innerHTML += `<div class="panel" id="panel-${i}">
+      <div class="panel-header" id="panel-header-${i}" style="border-bottom-color:${u.color}" onclick="togglePicker(${i})">
+        <div class="info">
+          <div class="avatar" style="background:${u.color}">${u.email[0].toUpperCase()}</div>
+          <div>
+            <div class="name" id="panel-name-${i}">${u.email.split('@')[0]}</div>
+            <div class="role">${u.label}</div>
+          </div>
+        </div>
+        <span class="switch-icon">&#9660; deyis</span>
+      </div>
+      <div class="panel-body" id="panel-body-${i}"><div class="empty">Giris edilir...</div></div>
+      <div class="log" id="panel-log-${i}"></div>
+    </div>`
+  }
+
+  // Create picker divs at body level
+  for (let i = 0; i < DEFAULT_USERS.length; i++) {
+    const div = document.createElement('div')
+    div.className = 'user-picker'
+    div.id = 'panel-picker-' + i
+    div.style.display = 'none'
+    document.body.appendChild(div)
+  }
+
+  // Load saved selections
+  const savedSelections = loadPanelSelections()
+
+  // Login users
+  for (let i = 0; i < DEFAULT_USERS.length; i++) {
+    const savedEmail = savedSelections ? savedSelections[i] : null
+    const u = savedEmail ? (ALL_USERS.find(au => au.email === savedEmail) || DEFAULT_USERS[i]) : DEFAULT_USERS[i]
+    try {
+      const data = await loginUser(u.email, u.pass)
+      panels[i] = { token: data.accessToken, userData: data.user || {}, tasks: [], userEmail: u.email, userColor: u.color, userLabel: u.label }
+      renderPanelHeader(i)
+      log(i, '&#10003; ' + (data.user?.fullName || u.email))
+      loginCount++
+      await loadTasks(i)
+    } catch (e) {
+      panels[i] = { token: null, userData: { fullName: u.email.split('@')[0] }, tasks: [], userEmail: u.email, userColor: u.color, userLabel: u.label }
+      log(i, '&#10007; ' + e.message)
+      document.getElementById('panel-body-' + i).innerHTML = '<div class="empty">&#10007; Giris alinmadi</div>'
+    }
+  }
+
+  const gs = document.getElementById('globalStatus')
+  if (loginCount === DEFAULT_USERS.length) {
+    gs.textContent = loginCount + '/' + DEFAULT_USERS.length + ' giris ugurlu'
+    gs.className = 'status ok'
+  } else {
+    gs.textContent = loginCount + '/' + DEFAULT_USERS.length + ' giris'
+    gs.className = 'status err'
+  }
+}
+
+init()
+</script>
+</body>
+</html>
