@@ -9,7 +9,7 @@ export class CommentsController {
   constructor(private commentsService: CommentsService) {}
 
   @Post()
-  @RequirePermissions('comments.create')
+  @RequirePermissions('tasks.read')
   create(@Body() body: { taskId: string; content: string }, @Req() req: any) {
     return this.commentsService.create(body.taskId, body.content, req.user.sub, req.user.tenantId)
   }
@@ -21,13 +21,13 @@ export class CommentsController {
   }
 
   @Put(':id')
-  @RequirePermissions('comments.create')
+  @RequirePermissions('tasks.read')
   update(@Param('id') id: string, @Body() body: { content: string }, @Req() req: any) {
     return this.commentsService.update(id, body.content, req.user.sub, req.user.tenantId)
   }
 
   @Delete(':id')
-  @RequirePermissions('comments.delete')
+  @RequirePermissions('tasks.read')
   remove(@Param('id') id: string, @Req() req: any) {
     return this.commentsService.remove(id, req.user.sub, req.user.tenantId)
   }

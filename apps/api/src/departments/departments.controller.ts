@@ -9,31 +9,31 @@ export class DepartmentsController {
   constructor(private departmentsService: DepartmentsService) {}
 
   @Post()
-  @RequirePermissions('departments.create')
+  @RequirePermissions('users.manage')
   create(@Body() body: { name: string; color?: string }, @Req() req: any) {
     return this.departmentsService.create(body, req.user.tenantId)
   }
 
   @Get()
-  @RequirePermissions('departments.read')
+  @RequirePermissions('users.read')
   findAll(@Req() req: any, @Query('businessId') businessId?: string) {
     return this.departmentsService.findAll(req.user.tenantId, businessId)
   }
 
   @Post('assign-business')
-  @RequirePermissions('departments.update')
+  @RequirePermissions('users.manage')
   assignToBusiness(@Body() body: { businessId: string; departmentId: string }) {
     return this.departmentsService.assignToBusiness(body.businessId, body.departmentId)
   }
 
   @Delete('unassign-business')
-  @RequirePermissions('departments.update')
+  @RequirePermissions('users.manage')
   unassignFromBusiness(@Body() body: { businessId: string; departmentId: string }) {
     return this.departmentsService.unassignFromBusiness(body.businessId, body.departmentId)
   }
 
   @Delete(':id')
-  @RequirePermissions('departments.delete')
+  @RequirePermissions('users.manage')
   remove(@Param('id') id: string, @Req() req: any) {
     return this.departmentsService.remove(id, req.user.tenantId)
   }

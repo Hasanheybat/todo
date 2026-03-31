@@ -149,6 +149,7 @@ export class AdminService {
         adminName: admin?.fullName || '',
         userCount: t._count.users,
         branchCount: t._count.businesses,
+        permissionCount: t.allowedPermissions?.length || 0,
       })
     }
     return result
@@ -187,7 +188,7 @@ export class AdminService {
     return input.replace(/[<>'";&|`$\\]/g, '').replace(/[\x00-\x1f\x7f]/g, '').replace(/:\/\//g, '').trim()
   }
 
-  async createTenant(data: { name: string; plan?: string; adminEmail: string; adminPassword: string; adminName: string }, actorId?: string, actorEmail?: string) {
+  async createTenant(data: { name: string; plan?: string; adminEmail: string; adminPassword: string; adminName: string; allowedPermissions?: string[] }, actorId?: string, actorEmail?: string) {
     // Input sanitizasiyası
     data.name = this.sanitize(data.name)
     data.adminName = this.sanitize(data.adminName)
@@ -203,6 +204,7 @@ export class AdminService {
       data: {
         name: data.name,
         plan: data.plan || 'starter',
+        allowedPermissions: data.allowedPermissions || [],
       },
     })
 
@@ -236,7 +238,7 @@ export class AdminService {
     return this.getTenant(tenant.id)
   }
 
-  async updateTenant(id: string, data: { name?: string; plan?: string; maxUsers?: number; maxBranches?: number; maxDepartments?: number }, actorId?: string, actorEmail?: string) {
+  async updateTenant(id: string, data: { name?: string; plan?: string; maxUsers?: number; maxBranches?: number; maxDepartments?: number; allowedPermissions?: string[] }, actorId?: string, actorEmail?: string) {
     const tenant = await this.prisma.tenant.findUnique({ where: { id } })
     if (!tenant) throw new NotFoundException('İşletmə tapılmadı')
 
@@ -247,6 +249,7 @@ export class AdminService {
       if (!tenantUpdate.name || tenantUpdate.name.length > 100) throw new BadRequestException('İşletmə adı 1-100 simvol olmalıdır')
     }
     if (data.plan) tenantUpdate.plan = data.plan
+    if (data.allowedPermissions) tenantUpdate.allowedPermissions = data.allowedPermissions
 
     if (Object.keys(tenantUpdate).length > 0) {
       await this.prisma.tenant.update({ where: { id }, data: tenantUpdate })

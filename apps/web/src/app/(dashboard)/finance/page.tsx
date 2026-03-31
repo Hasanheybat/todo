@@ -239,7 +239,7 @@ export default function FinancePage() {
   ]
 
   return (
-    <PageGuard requires={['finance.read']}>
+    <PageGuard requires={['finance.manage']}>
     <div className="pb-10">
       {/* Header */}
       <div className="flex items-center justify-between mt-2 mb-5">

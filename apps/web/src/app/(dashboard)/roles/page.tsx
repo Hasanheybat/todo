@@ -28,7 +28,16 @@ export default function RolesPage() {
   const [isNew, setIsNew] = useState(false)
   const [confirmModal, setConfirmModal] = useState<{ open: boolean; title: string; message: string; type: 'danger' | 'warning' | 'info'; confirmText: string; onConfirm: () => void }>({ open: false, title: '', message: '', type: 'info', confirmText: '', onConfirm: () => {} })
 
-  useEffect(() => { loadRoles() }, [])
+  const [allowedPerms, setAllowedPerms] = useState<string[]>([])
+
+  useEffect(() => { loadRoles(); loadAllowed() }, [])
+
+  async function loadAllowed() {
+    try {
+      const data = await api.getPermissions()
+      setAllowedPerms(Array.isArray(data) ? data : ALL_PERMISSIONS)
+    } catch { setAllowedPerms(ALL_PERMISSIONS) }
+  }
 
   async function loadRoles() {
     try {
@@ -76,7 +85,10 @@ export default function RolesPage() {
   // Kaskad limit: yalnız özündə olan yetkiləri verə bilər
   // Kaskad limit: yalnız özündə olan yetkiləri verə bilər
   function canGrant(permKey: string): boolean {
-    return myPerms.includes(permKey) || myPerms.includes('*')
+    // Tenant-ın icazə verdiyi yetkidə olmalı VƏ istifadəçinin özündə olmalı
+    const tenantAllows = allowedPerms.length === 0 || allowedPerms.includes(permKey)
+    const userHas = myPerms.includes(permKey) || myPerms.includes('*')
+    return tenantAllows && userHas
   }
 
   async function handleSave() {
@@ -120,8 +132,8 @@ export default function RolesPage() {
 
   if (loading) return <div className="flex items-center justify-center h-64"><span className="text-[13px]" style={{ color: 'var(--todoist-text-secondary)' }}>Yüklənir...</span></div>
 
-  // Yalnız roles.create yetkisi olan (admin) bu səhifəni görə bilər
-  if (!canGrant('roles.create')) {
+  // Yalnız users.manage yetkisi olan (admin) bu səhifəni görə bilər
+  if (!canGrant('users.manage')) {
     return (
       <div className="flex items-center justify-center h-64">
         <p className="text-[13px]" style={{ color: 'var(--todoist-text-secondary)' }}>Bu səhifəyə giriş icazəniz yoxdur</p>
@@ -130,7 +142,7 @@ export default function RolesPage() {
   }
 
   return (
-    <PageGuard requires={['roles.read']}>
+    <PageGuard requires={['users.manage']}>
     <div className="pb-10">
       <div className="flex items-center justify-between mt-2 mb-4">
         <div>
@@ -142,7 +154,7 @@ export default function RolesPage() {
       <div className="flex gap-4" style={{ minHeight: 'calc(100vh - 200px)' }}>
         {/* ── Sol panel: Rol siyahısı ── */}
         <div className="w-64 shrink-0">
-          {canGrant('roles.create') && (
+          {canGrant('users.manage') && (
             <button
               onClick={startNewRole}
               className="w-full rounded-lg px-3 py-2 text-[12px] font-bold mb-3 transition"
@@ -280,7 +292,7 @@ export default function RolesPage() {
               {/* Butonlar */}
               <div className="flex items-center justify-between mt-5 pt-4 border-t" style={{ borderColor: 'var(--todoist-divider)' }}>
                 <div>
-                  {selectedRole && !selectedRole.isDefault && !isNew && canGrant('roles.delete') && (
+                  {selectedRole && !selectedRole.isDefault && !isNew && canGrant('users.manage') && (
                     <button
                       onClick={handleDelete}
                       className="text-[11px] font-bold px-3 py-1.5 rounded-lg"
@@ -290,7 +302,7 @@ export default function RolesPage() {
                     </button>
                   )}
                 </div>
-                {(isNew ? canGrant('roles.create') : canGrant('roles.update')) && (
+                {(isNew ? canGrant('users.manage') : canGrant('users.manage')) && (
                   <button
                     onClick={handleSave}
                     disabled={saving || !editName.trim()}

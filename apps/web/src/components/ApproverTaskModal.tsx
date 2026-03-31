@@ -46,6 +46,7 @@ function formatFileSize(bytes: number) {
 export default function ApproverTaskModal({ open, onClose, task, subTask, currentUserId, onApprove, onRefresh, isCreator, onEdit }: ApproverTaskModalProps) {
   const [screen, setScreen] = useState<'list' | 'chat' | 'finalize'>('list')
   const [chatUserId, setChatUserId] = useState<string | null>(null)
+  const [chatTaskId, setChatTaskId] = useState<string | null>(null)
   const [filter, setFilter] = useState('all')
 
   // Mesaj state
@@ -106,6 +107,8 @@ export default function ApproverTaskModal({ open, onClose, task, subTask, curren
     }
   }, [open])
 
+  // task prop yeniləndikdə local notes-u silmə — text dedup bunu həll edir
+
   useEffect(() => {
     if (chatUserId && chatBodyRef.current) {
       chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight
@@ -135,7 +138,7 @@ export default function ApproverTaskModal({ open, onClose, task, subTask, curren
   const title = subTask ? subTask.title : task.title
   const description = targetTask.description || task.description || ''
   const serverBulkNotes: any[] = Array.isArray(targetTask.bulkNotes) ? targetTask.bulkNotes : []
-  const bulkNotes: any[] = [...serverBulkNotes, ...localBulkNotes]
+  const bulkNotes: any[] = [...serverBulkNotes, ...localBulkNotes.filter((ln: any) => !serverBulkNotes.some((sn: any) => sn.text === ln.text))]
 
   // Yalnız yaradanın faylları
   const noteFileIds = new Set<string>()
@@ -155,27 +158,35 @@ export default function ApproverTaskModal({ open, onClose, task, subTask, curren
 
   function countByStatus(st: string) { return assignees.filter((a: any) => a.status === st).length }
 
-  const chatAssignee = assignees.find((a: any) => (a.user?.id || a.userId) === chatUserId)
+  const chatAssignee = chatTaskId
+    ? assignees.find((a: any) => a._taskId === chatTaskId && (a.user?.id || a.userId) === chatUserId)
+    : assignees.find((a: any) => (a.user?.id || a.userId) === chatUserId)
+  if (chatUserId) console.log('[chatAssignee]', chatUserId, chatTaskId, chatAssignee?._taskId, 'notes:', chatAssignee?.approverNotes?.length)
   const chatUser = chatAssignee?.user || {}
 
   // ── Mesaj helpers ──
+  function getNoteKey(a: any) {
+    const userId = a.user?.id || a.userId
+    return a._taskId ? `${userId}_${a._taskId}` : userId
+  }
+
   function getMergedMessages(a: any) {
     const serverWorker: any[] = Array.isArray(a.notes) ? a.notes : []
     const serverApprover: any[] = Array.isArray(a.approverNotes) ? a.approverNotes : []
-    const userId = a.user?.id || a.userId
-    const localApp = localNotes[userId] || []
+    const key = getNoteKey(a)
+    const localApp = localNotes[key] || []
     return [
       ...serverWorker.map((n: any, idx: number) => ({ ...n, type: 'worker', origIndex: idx })),
       ...serverApprover.map((n: any, idx: number) => ({ ...n, type: 'approver', origIndex: idx })),
-      ...localApp.filter((ln: any) => !serverApprover.some((sn: any) => sn.text === ln.text && sn.date === ln.date)).map((n: any, idx: number) => ({ ...n, type: 'approver', origIndex: serverApprover.length + idx })),
+      ...localApp.filter((ln: any) => !serverApprover.some((sn: any) => sn.text === ln.text)).map((n: any, idx: number) => ({ ...n, type: 'approver', origIndex: serverApprover.length + idx })),
     ].sort((x, y) => new Date(x.date).getTime() - new Date(y.date).getTime())
   }
 
   function getApproverNoteCount(a: any) {
     const serverApprover: any[] = Array.isArray(a.approverNotes) ? a.approverNotes : []
-    const userId = a.user?.id || a.userId
-    const localApp = localNotes[userId] || []
-    const localNew = localApp.filter((ln: any) => !serverApprover.some((sn: any) => sn.text === ln.text && sn.date === ln.date))
+    const key = getNoteKey(a)
+    const localApp = localNotes[key] || []
+    const localNew = localApp.filter((ln: any) => !serverApprover.some((sn: any) => sn.text === ln.text))
     return serverApprover.length + localNew.length
   }
 
@@ -184,9 +195,9 @@ export default function ApproverTaskModal({ open, onClose, task, subTask, curren
   }
 
   // ── Fayl seç ──
-  function handleFileSelect(userId: string) {
+  function handleFileSelect(inputKey: string) {
     if (fileInputRef.current) {
-      fileInputRef.current.dataset.userId = userId
+      fileInputRef.current.dataset.inputKey = inputKey
       fileInputRef.current.value = ''
       fileInputRef.current.click()
     }
@@ -194,29 +205,30 @@ export default function ApproverTaskModal({ open, onClose, task, subTask, curren
 
   function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
-    const userId = e.target.dataset.userId || ''
-    if (!file || !userId) return
+    const key = e.target.dataset.inputKey || e.target.dataset.userId || ''
+    if (!file || !key) return
 
     if (file.size > MAX_FILE_SIZE) {
       alert(`Fayl böyüklüyü maksimum ${formatFileSize(MAX_FILE_SIZE)} ola bilər. Seçilən fayl: ${formatFileSize(file.size)}`)
       return
     }
-    setPendingFiles(prev => ({ ...prev, [userId]: file }))
+    setPendingFiles(prev => ({ ...prev, [key]: file }))
   }
 
-  function removePendingFile(userId: string) {
-    setPendingFiles(prev => ({ ...prev, [userId]: null }))
+  function removePendingFile(key: string) {
+    setPendingFiles(prev => ({ ...prev, [key]: null }))
   }
 
   // ── API: Fayl yüklə + Mesaj göndər ──
   async function sendApproverNote(userId: string) {
-    const noteText = noteInputs[userId] || ''
-    const file = pendingFiles[userId]
+    const inputKey = chatTaskId ? `${userId}_${chatTaskId}` : userId
+    const noteText = noteInputs[inputKey] || ''
+    const file = pendingFiles[inputKey]
     if (!noteText?.trim() && !file) return
 
-    setNoteInputs(prev => ({ ...prev, [userId]: '' }))
-    setPendingFiles(prev => ({ ...prev, [userId]: null }))
-    setSavingNote(userId)
+    setNoteInputs(prev => ({ ...prev, [inputKey]: '' }))
+    setPendingFiles(prev => ({ ...prev, [inputKey]: null }))
+    setSavingNote(inputKey)
 
     try {
       let fileId: string | undefined
@@ -239,9 +251,8 @@ export default function ApproverTaskModal({ open, onClose, task, subTask, curren
         fileSize = att.size
       }
 
-      // Grouped TASK-da hər assignee fərqli task-dadır
-      const assignee = assignees.find((a: any) => (a.user?.id || a.userId) === userId)
-      const noteTaskId = assignee?._taskId || targetId
+      // Grouped TASK-da hər assignee fərqli task-dadır — chatTaskId ilə düzgün task tap
+      const noteTaskId = chatTaskId || (assignees.find((a: any) => (a.user?.id || a.userId) === userId)?._taskId) || targetId
 
       // Notu göndər
       const res = await fetch(`${API}/tasks/${noteTaskId}/assignee-note`, {
@@ -253,11 +264,12 @@ export default function ApproverTaskModal({ open, onClose, task, subTask, curren
         const err = await res.json().catch(() => ({}))
         alert(err.message || 'Xəta baş verdi')
       } else {
-        // Lokal note-a fileId ilə birlikdə əlavə et
+        // Anlıq göstər (optimistic)
         const newNote: any = { text: noteText, sender: 'approver', date: new Date().toISOString() }
         if (fileId) { newNote.fileId = fileId; newNote.fileName = fileName; newNote.fileSize = fileSize }
-        else if (file) { newNote.fileName = file.name; newNote.fileSize = file.size }
-        setLocalNotes(prev => ({ ...prev, [userId]: [...(prev[userId] || []), newNote] }))
+        const noteKey = chatTaskId ? `${userId}_${chatTaskId}` : userId
+        setLocalNotes(prev => ({ ...prev, [noteKey]: [...(prev[noteKey] || []), newNote] }))
+        // Server yenilənsin — bitdikdə localNotes təmizlənəcək
         onRefresh?.()
       }
     } catch (e: any) {
@@ -297,8 +309,7 @@ export default function ApproverTaskModal({ open, onClose, task, subTask, curren
         body: JSON.stringify({ note: bulkNoteText, fileId, fileName, fileSize }),
       })
       if (res.ok) {
-        // Lokal state-ə yeni notu əlavə et
-        const newNote: any = { text: bulkNoteText, date: new Date().toISOString(), senderId: currentUserId }
+        const newNote: any = { text: bulkNoteText, date: new Date().toISOString(), senderId: currentUserId, senderName: 'Siz' }
         if (fileId) { newNote.fileId = fileId; newNote.fileName = fileName; newNote.fileSize = fileSize }
         setLocalBulkNotes(prev => [...prev, newNote])
         setBulkNoteText('')
@@ -327,7 +338,9 @@ export default function ApproverTaskModal({ open, onClose, task, subTask, curren
 
   // Helper: grouped task-da assignee-nin taskId-sini tap
   function getAssigneeTaskId(userId: string) {
-    const a = assignees.find((x: any) => (x.user?.id || x.userId) === userId)
+    const a = chatTaskId
+      ? assignees.find((x: any) => x._taskId === chatTaskId && (x.user?.id || x.userId) === userId)
+      : assignees.find((x: any) => (x.user?.id || x.userId) === userId)
     return a?._taskId || targetId
   }
 
@@ -433,8 +446,8 @@ export default function ApproverTaskModal({ open, onClose, task, subTask, curren
   }
 
   // ── Navigate ──
-  function openChat(userId: string) { setChatUserId(userId); setBulkNoteOpen(false); setDropdownOpen(false) }
-  function goBack() { setChatUserId(null); setBulkNoteOpen(false); setDropdownOpen(false) }
+  function openChat(userId: string, taskId?: string) { console.log('[openChat]', userId, taskId); setChatUserId(userId); setChatTaskId(taskId || null); setBulkNoteOpen(false); setDropdownOpen(false) }
+  function goBack() { setChatUserId(null); setChatTaskId(null); setBulkNoteOpen(false); setDropdownOpen(false) }
 
   // ═══ Sağ panel: toplu mesaj chat ═══
   function renderBulkChatPanel() {
@@ -600,8 +613,8 @@ export default function ApproverTaskModal({ open, onClose, task, subTask, curren
           {/* Başlıq */}
           <h3 className="text-[16px] font-extrabold leading-tight" style={{ color: '#0F172A' }}>{title}</h3>
 
-          {/* Açıqlama */}
-          {description && (
+          {/* Açıqlama — yalnız GÖREV-də göstər, TASK-da gizlət */}
+          {description && !isCreator && (
             <div className="rounded-xl px-3 py-2" style={{ backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0' }}>
               <p className="text-[12px] leading-relaxed" style={{ color: '#334155' }}>{renderMentionText(description)}</p>
             </div>
@@ -675,9 +688,9 @@ export default function ApproverTaskModal({ open, onClose, task, subTask, curren
             const initials = u.fullName?.split(' ').map((n: string) => n[0]).join('') || '?'
 
             return (
-              <div key={a.id || userId} className="flex items-center gap-2.5 px-4 py-2.5 cursor-pointer transition hover:bg-gray-50"
+              <div key={a._taskId ? `${a._taskId}-${userId}` : (a.id || userId)} className="flex items-center gap-2.5 px-4 py-2.5 cursor-pointer transition hover:bg-gray-50"
                 style={{ borderBottom: '1px solid #F8F8F8' }}
-                onClick={() => openChat(userId)}>
+                onClick={() => openChat(userId, a._taskId)}>
                 <div className="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 relative"
                   style={{ backgroundColor: sc.bg, color: sc.color }}>
                   {initials}
@@ -686,6 +699,7 @@ export default function ApproverTaskModal({ open, onClose, task, subTask, curren
                 <div className="flex-1 min-w-0">
                   <span className="text-[12px] font-semibold block truncate" style={{ color: '#0F172A' }}>{u.fullName || '—'}</span>
                   <div className="flex items-center gap-1.5 text-[9px]" style={{ color: '#94A3B8' }}>
+                    {a._taskTitle && <span className="truncate max-w-[80px]" title={a._taskTitle}>📋 {a._taskTitle}</span>}
                     {mc > 0 && <span>💬 {mc}</span>}
                     <span>🛡 {ac}/{MAX_APPROVER_NOTES}</span>
                   </div>
@@ -735,10 +749,31 @@ export default function ApproverTaskModal({ open, onClose, task, subTask, curren
                 </button>
               )
             ) : (
-              <button onClick={() => onEdit?.(task)} className="flex-1 py-2.5 rounded-xl text-[12px] font-bold text-white flex items-center justify-center gap-1.5" style={{ backgroundColor: '#4F46E5' }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                Düzənlə
-              </button>
+              <div className="flex-1 flex gap-2">
+                <button onClick={() => {
+                  // TASK group — orijinal task + group tasks göndər
+                  const originalTask = task._groupTasks?.[0] || task
+                  onEdit?.({ ...originalTask, _groupTasks: task._groupTasks })
+                }} className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: '#F1F5F9', border: '1px solid #E2E8F0' }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" strokeWidth="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </button>
+                <button onClick={() => {
+                  setConfirmModal({ open: true, type: 'info', title: 'Görevi onayla', message: 'Bütün tapşırıqlar tamamlanmış sayılacaq. Onaylamaq istəyirsiniz?', confirmText: 'Onayla', onConfirm: async () => {
+                    setConfirmModal(p => ({...p, open: false}))
+                    try {
+                      // Bütün group task-ları tamamla
+                      const groupTasks = task._groupTasks || [task]
+                      for (const gt of groupTasks) {
+                        await fetch(`${API}/tasks/${gt.id}/creator-approve`, { method: 'PATCH', headers: { Authorization: `Bearer ${getToken()}`, 'Content-Type': 'application/json' } })
+                      }
+                      onRefresh?.()
+                    } catch {}
+                  }})
+                }} className="flex-1 py-2.5 rounded-xl text-[12px] font-bold text-white flex items-center justify-center gap-1.5" style={{ backgroundColor: '#10B981' }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  Onayla
+                </button>
+              </div>
             )
           ) : (
             /* ═══ YETKİLİ FOOTER ═══ */
@@ -772,13 +807,18 @@ export default function ApproverTaskModal({ open, onClose, task, subTask, curren
     const a = chatAssignee
     const u = chatUser
     const sc = statusConfig[a.status] || statusConfig.PENDING
-    const isClosed = a.chatClosed || isFinalized
+    const isChatClosed = a.chatClosed
+    const isAssigneeFinished = a.status === 'COMPLETED' || a.status === 'DECLINED' || a.status === 'FORCE_COMPLETED'
+    const isClosed = isFinalized || isChatClosed || isAssigneeFinished
+    // Yetkili/yaradan söhbəti bağlasa da özü yaza bilər — yalnız finalized/assigneeFinished kilidləyir
+    const isApproverInputLocked = isFinalized || isAssigneeFinished
     const allMerged = getMergedMessages(a)
     const approverCount = getApproverNoteCount(a)
     const approverFull = approverCount >= MAX_APPROVER_NOTES
     const userId = u.id || a.userId
+    const inputKey = chatTaskId ? `${userId}_${chatTaskId}` : userId
     const initials = u.fullName?.split(' ').map((n: string) => n[0]).join('') || '?'
-    const pendingFile = pendingFiles[userId]
+    const pendingFile = pendingFiles[inputKey]
 
     return (
       <div className="flex flex-col h-full overflow-hidden">
@@ -809,31 +849,6 @@ export default function ApproverTaskModal({ open, onClose, task, subTask, curren
               {dropdownOpen && (
                 <div className="absolute right-0 top-9 rounded-xl overflow-hidden z-20 min-w-[190px]"
                   style={{ backgroundColor: '#fff', border: '1px solid #E2E8F0', boxShadow: '0 8px 24px rgba(0,0,0,0.08)' }}>
-                  {a.status === 'PENDING' && (
-                    <button onClick={() => { setDropdownOpen(false); setConfirmModal({ open: true, type: 'info', title: 'Başlat', message: `${u.fullName} üçün tapşırığı "Davam edir" statusuna keçirmək istəyirsiniz?`, confirmText: 'Başlat', onConfirm: () => { setConfirmModal(p => ({...p, open: false})); changeAssigneeStatus(userId, 'IN_PROGRESS') } }) }}
-                      className="w-full text-left px-3.5 py-2.5 text-[11px] font-medium flex items-center gap-2 hover:bg-gray-50" style={{ color: '#3B82F6' }}>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="5 3 19 12 5 21 5 3"/></svg> Başlat
-                    </button>
-                  )}
-                  {(a.status === 'IN_PROGRESS' || a.status === 'COMPLETED') && (
-                    <button onClick={() => { setDropdownOpen(false); setConfirmModal({ open: true, type: 'warning', title: 'Gözləyir-ə qaytar', message: `${u.fullName} üçün statusu "Gözləyir"-ə qaytarmaq istəyirsiniz?`, confirmText: 'Qaytar', onConfirm: () => { setConfirmModal(p => ({...p, open: false})); changeAssigneeStatus(userId, 'PENDING') } }) }}
-                      className="w-full text-left px-3.5 py-2.5 text-[11px] font-medium flex items-center gap-2 hover:bg-gray-50" style={{ color: '#64748B' }}>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="10" y1="15" x2="10" y2="9"/><line x1="14" y1="15" x2="14" y2="9"/></svg> Gözləyir-ə qaytar
-                    </button>
-                  )}
-                  {a.status !== 'COMPLETED' && (
-                    <button onClick={() => { setDropdownOpen(false); setConfirmModal({ open: true, type: 'info', title: 'Tamamlandı', message: `${u.fullName} üçün tapşırığı "Tamamlandı" olaraq işarələmək istəyirsiniz?`, confirmText: 'Tamamla', onConfirm: () => { setConfirmModal(p => ({...p, open: false})); changeAssigneeStatus(userId, 'COMPLETED') } }) }}
-                      className="w-full text-left px-3.5 py-2.5 text-[11px] font-medium flex items-center gap-2 hover:bg-gray-50" style={{ color: '#4F46E5' }}>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg> Tamamlandı
-                    </button>
-                  )}
-                  {a.status !== 'DECLINED' && (
-                    <button onClick={() => { setDropdownOpen(false); setConfirmModal({ open: true, type: 'danger', title: 'Rədd et', message: `${u.fullName} üçün tapşırığı rədd etmək istəyirsiniz? Bu geri alınmaz.`, confirmText: 'Rədd et', onConfirm: () => { setConfirmModal(p => ({...p, open: false})); changeAssigneeStatus(userId, 'DECLINED') } }) }}
-                      className="w-full text-left px-3.5 py-2.5 text-[11px] font-medium flex items-center gap-2 hover:bg-gray-50" style={{ color: '#EF4444' }}>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> Rədd et
-                    </button>
-                  )}
-                  <div style={{ height: 1, backgroundColor: '#E2E8F0' }} />
                   {a.chatClosed ? (
                     <button onClick={() => { setDropdownOpen(false); setConfirmModal({ open: true, type: 'info', title: 'Söhbəti aç', message: `${u.fullName} ilə söhbəti yenidən açmaq istəyirsiniz?`, confirmText: 'Aç', onConfirm: () => { setConfirmModal(p => ({...p, open: false})); toggleChatClosed(userId, false) } }) }}
                       className="w-full text-left px-3.5 py-2.5 text-[11px] font-medium flex items-center gap-2 hover:bg-gray-50" style={{ color: '#4F46E5' }}>
@@ -879,42 +894,48 @@ export default function ApproverTaskModal({ open, onClose, task, subTask, curren
               <span>✅</span>
               <span className="text-[11px] font-semibold" style={{ color: '#10B981' }}>Görev tamamlandı — bütün əməliyyatlar dayandırılıb</span>
             </div>
-          ) : isClosed ? (
+          ) : isAssigneeFinished ? (
             <div className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ backgroundColor: '#FEF2F2' }}>
               <span>🔒</span>
-              <span className="text-[11px] font-semibold" style={{ color: '#EF4444' }}>Söhbət bağlıdır — işçi mesaj yaza bilməz</span>
+              <span className="text-[11px] font-semibold" style={{ color: '#EF4444' }}>{a.status === 'DECLINED' ? 'İşçi görevi rədd edib' : 'İşçi görevi tamamlayıb'}</span>
             </div>
           ) : (
             <>
+              {/* İşçinin söhbəti bağlıdır — yaradan/yetkili yaza bilər */}
+              {isChatClosed && (
+                <div className="flex items-center gap-1.5 mb-2 px-2.5 py-1.5 rounded-lg text-[9px] font-semibold" style={{ backgroundColor: '#FFF7ED', border: '1px solid #FED7AA', color: '#D97706' }}>
+                  <span>🔒</span> İşçinin söhbəti bağlıdır — siz hələ yaza bilərsiniz
+                </div>
+              )}
               {/* Pending file preview */}
               {pendingFile && (
                 <div className="flex items-center gap-2 mb-2 px-2.5 py-1.5 rounded-lg" style={{ backgroundColor: '#EEF2FF', border: '1px solid #C7D2FE' }}>
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" strokeWidth="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
                   <span className="text-[9px] font-semibold truncate flex-1" style={{ color: '#4338CA' }}>{pendingFile.name}</span>
-                  <button onClick={() => removePendingFile(userId)} className="w-4 h-4 rounded-full flex items-center justify-center" style={{ color: '#EF4444' }}>
+                  <button onClick={() => removePendingFile(inputKey)} className="w-4 h-4 rounded-full flex items-center justify-center" style={{ color: '#EF4444' }}>
                     <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                   </button>
                 </div>
               )}
               <div className="flex items-center gap-2">
-                <button onClick={() => handleFileSelect(userId)}
+                <button onClick={() => handleFileSelect(inputKey)}
                   className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition hover:bg-gray-100"
                   style={{ backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0' }}
                   title="Fayl əlavə et (max 1.5 MB)">
                   <span className="text-[13px]">📎</span>
                 </button>
-                <input type="text" value={noteInputs[userId] || ''} maxLength={MAX_CHARS}
-                  onChange={e => setNoteInputs(prev => ({ ...prev, [userId]: e.target.value }))}
-                  onKeyDown={e => { if (e.key === 'Enter' && (noteInputs[userId]?.trim() || pendingFile)) { e.preventDefault(); sendApproverNote(userId) } }}
+                <input type="text" value={noteInputs[inputKey] || ''} maxLength={MAX_CHARS}
+                  onChange={e => setNoteInputs(prev => ({ ...prev, [inputKey]: e.target.value }))}
+                  onKeyDown={e => { if (e.key === 'Enter' && (noteInputs[inputKey]?.trim() || pendingFile)) { e.preventDefault(); sendApproverNote(userId) } }}
                   placeholder="Mesaj yazın..."
                   className="flex-1 text-[12px] outline-none rounded-xl px-3 py-2 transition"
                   style={{ backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', fontFamily: 'Inter, sans-serif' }}
                   onFocus={(e: any) => e.target.style.borderColor = '#4F46E5'}
                   onBlur={(e: any) => e.target.style.borderColor = '#E2E8F0'} />
                 <button onClick={() => sendApproverNote(userId)}
-                  disabled={savingNote === userId || (!noteInputs[userId]?.trim() && !pendingFile)}
+                  disabled={savingNote === inputKey || (!noteInputs[inputKey]?.trim() && !pendingFile)}
                   className="w-8 h-8 rounded-lg flex items-center justify-center text-white shrink-0 transition"
-                  style={{ backgroundColor: savingNote === userId || (!noteInputs[userId]?.trim() && !pendingFile) ? '#A5B4FC' : '#4F46E5' }}>
+                  style={{ backgroundColor: savingNote === inputKey || (!noteInputs[inputKey]?.trim() && !pendingFile) ? '#A5B4FC' : '#4F46E5' }}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
                 </button>
               </div>
@@ -1022,7 +1043,7 @@ export default function ApproverTaskModal({ open, onClose, task, subTask, curren
           </div>
           {/* Sağ panel — işçi chat YAXUD toplu mesaj */}
           {(chatUserId || bulkNoteOpen) && screen !== 'finalize' && (
-            <div className="flex-1 min-w-0 flex flex-col" style={{ borderLeft: '1px solid #E2E8F0', maxWidth: '50%', height: '80vh', maxHeight: '80vh' }}>
+            <div key={`chat-${chatUserId}-${chatTaskId}`} className="flex-1 min-w-0 flex flex-col" style={{ borderLeft: '1px solid #E2E8F0', maxWidth: '50%', height: '80vh', maxHeight: '80vh' }}>
               {chatUserId ? renderScreen2() : renderBulkChatPanel()}
             </div>
           )}

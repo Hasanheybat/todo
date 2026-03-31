@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>WorkFlow Pro — Tapşırıqlar</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#fafafa;--surface:#fff;--surface-2:#f5f5f5;--surface-3:#ebebeb;--text:#111;--text-2:#555;--text-3:#999;--text-4:#bbb;--accent:#111;--blue:#2563eb;--blue-soft:#eff6ff;--green:#059669;--green-soft:#ecfdf5;--amber:#d97706;--amber-soft:#fffbeb;--red:#dc2626;--red-soft:#fef2f2;--purple:#7c3aed;--purple-soft:#f5f3ff;--radius:10px;--sidebar-w:240px}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;-webkit-font-smoothing:antialiased}
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 20;font-size:20px;vertical-align:middle}
+.filled{font-variation-settings:'FILL' 1,'wght' 300}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:var(--sidebar-w);background:#fafafa;display:flex;flex-direction:column;padding:20px 12px;z-index:40;border-right:1px solid var(--surface-3)}
+.sidebar .logo{display:flex;align-items:center;gap:10px;padding:0 8px;margin-bottom:28px}
+.sidebar .logo-icon{width:28px;height:28px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff}
+.sidebar .logo-icon .material-symbols-outlined{font-size:16px;font-variation-settings:'FILL' 1,'wght' 500}
+.sidebar .logo-text{font-weight:700;font-size:15px;letter-spacing:-0.3px}
+.sidebar nav{flex:1;display:flex;flex-direction:column;gap:1px}
+.sidebar a{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:8px;text-decoration:none;color:var(--text-2);font-size:13px;font-weight:500;transition:all .15s}
+.sidebar a:hover{background:var(--surface-3);color:var(--text)}
+.sidebar a.active{background:var(--surface);color:var(--text);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.sidebar .section-label{font-size:11px;font-weight:600;color:var(--text-4);text-transform:uppercase;letter-spacing:0.5px;padding:16px 10px 6px}
+.sidebar .new-btn{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;background:var(--accent);color:#fff;font-size:13px;font-weight:600;border:none;cursor:pointer;margin-bottom:16px;text-decoration:none;justify-content:center}
+.main{margin-left:var(--sidebar-w);padding:24px 32px 48px}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+.search-box{position:relative;width:320px}
+.search-box input{width:100%;padding:8px 12px 8px 36px;border-radius:8px;border:1px solid var(--surface-3);background:var(--surface);font-size:13px;outline:none}
+.search-box input:focus{border-color:var(--text-4)}
+.search-box .material-symbols-outlined{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-4);font-size:18px}
+.icon-btn{width:36px;height:36px;border-radius:8px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-3)}
+.icon-btn:hover{background:var(--surface-2);color:var(--text)}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600}
+
+/* Filters */
+.filter-row{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.pill{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;border:1px solid var(--surface-3);background:var(--surface);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:5px}
+.pill:hover{border-color:var(--text-4)}
+.pill.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.pill .dot{width:7px;height:7px;border-radius:50%;display:inline-block}
+.pill .count{font-size:10px;opacity:.6;margin-left:2px}
+.chip-row{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
+.chip{padding:4px 12px;border-radius:6px;font-size:11px;font-weight:600;background:var(--surface-2);color:var(--text-2);cursor:pointer;transition:all .15s}
+.chip:hover{background:var(--surface-3)}
+.chip.active{background:var(--accent);color:#fff}
+.divider{width:1px;height:20px;background:var(--surface-3);margin:0 4px}
+
+/* View toggle */
+.view-toggle{display:flex;border-radius:8px;overflow:hidden;border:1px solid var(--surface-3)}
+.view-toggle button{padding:6px 14px;border:none;background:var(--surface);font-size:12px;font-weight:500;cursor:pointer;color:var(--text-2);transition:all .15s}
+.view-toggle button.active{background:var(--accent);color:#fff}
+.view-toggle button+button{border-left:1px solid var(--surface-3)}
+
+/* Kanban */
+.kanban{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;align-items:start}
+.kanban-col{display:flex;flex-direction:column;gap:8px}
+.col-header{display:flex;align-items:center;gap:8px;padding:0 4px;margin-bottom:4px}
+.col-header .dot{width:8px;height:8px;border-radius:50%}
+.col-header .col-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-2)}
+.col-header .col-count{font-size:10px;font-weight:600;color:var(--text-4);background:var(--surface-2);padding:1px 7px;border-radius:10px}
+.k-card{background:var(--surface);border-radius:var(--radius);padding:14px 16px;cursor:pointer;transition:all .2s;border:1px solid transparent}
+.k-card:hover{border-color:var(--surface-3);box-shadow:0 4px 16px rgba(0,0,0,0.04)}
+.k-card .k-tag{font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;display:inline-block;margin-bottom:8px}
+.k-card .k-title{font-size:13px;font-weight:600;line-height:1.4;margin-bottom:8px}
+.k-card .k-desc{font-size:12px;color:var(--text-3);line-height:1.5;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.k-card .k-footer{display:flex;justify-content:space-between;align-items:center}
+.k-card .k-meta{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text-3)}
+.k-card .k-meta .material-symbols-outlined{font-size:14px}
+.k-card .k-avatars{display:flex}
+.k-card .k-avatar{width:22px;height:22px;border-radius:50%;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;color:#fff;margin-left:-4px;border:1.5px solid var(--surface)}
+.k-card .k-avatar:first-child{margin-left:0}
+.k-card .k-progress{width:100%;height:3px;background:var(--surface-2);border-radius:2px;margin-bottom:8px;overflow:hidden}
+.k-card .k-progress-fill{height:100%;border-radius:2px}
+.k-card.done{opacity:.5}
+.k-card.done .k-title{text-decoration:line-through;color:var(--text-3)}
+.k-card .k-flag{float:right}
+.k-card .k-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;background:var(--green-soft);color:var(--green)}
+
+/* List view */
+.list-view{display:none;flex-direction:column}
+.list-view.visible{display:flex}
+.list-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;cursor:pointer;transition:background .1s}
+.list-item:hover{background:var(--surface)}
+.list-item+.list-item{border-top:1px solid var(--surface-2)}
+.list-check{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--text-4);flex-shrink:0}
+.list-check.done{background:var(--green);border-color:var(--green)}
+.list-title{flex:1;font-size:13px;font-weight:500;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.list-item.done .list-title{text-decoration:line-through;color:var(--text-4)}
+.list-tag{font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px}
+.list-meta{font-size:11px;color:var(--text-3);white-space:nowrap}
+.list-status{font-size:10px;font-weight:600;padding:3px 8px;border-radius:4px}
+
+/* Panel */
+.panel-overlay{position:fixed;inset:0;background:rgba(0,0,0,.04);z-index:45;display:none}.panel-overlay.open{display:block}
+.detail-panel{position:fixed;right:0;top:0;bottom:0;width:400px;background:var(--surface);z-index:50;transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;border-left:1px solid var(--surface-3)}.detail-panel.open{transform:translateX(0)}
+.panel-header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--surface-2)}
+.panel-header h3{font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:0.5px}
+.panel-body{flex:1;overflow-y:auto;padding:20px}
+.panel-footer{padding:14px 20px;border-top:1px solid var(--surface-2)}
+.panel-footer input{width:100%;padding:9px 12px;border-radius:8px;border:1px solid var(--surface-3);font-size:13px;outline:none}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="logo"><div class="logo-icon"><span class="material-symbols-outlined">stacks</span></div><span class="logo-text">WorkFlow Pro</span></div>
+  <a href="#" class="new-btn"><span class="material-symbols-outlined" style="font-size:18px">add</span> Yeni tapşırıq</a>
+  <nav>
+    <a href="design-v3-dashboard.html"><span class="material-symbols-outlined">today</span> Bugün</a>
+    <a href="design-v3-inbox.html"><span class="material-symbols-outlined">inbox</span> Gələnlər</a>
+    <a href="#"><span class="material-symbols-outlined">calendar_month</span> Gələcək</a>
+    <div class="section-label">İş sahəsi</div>
+    <a href="design-v3-tasks.html" class="active"><span class="material-symbols-outlined">assignment</span> Tapşırıqlar</a>
+    <a href="#"><span class="material-symbols-outlined">check_circle</span> Todo</a>
+    <a href="#"><span class="material-symbols-outlined">repeat</span> Şablonlar</a>
+    <div class="section-label">İdarəetmə</div>
+    <a href="#"><span class="material-symbols-outlined">group</span> İşçilər</a>
+    <a href="#"><span class="material-symbols-outlined">shield</span> Rollar</a>
+    <a href="#"><span class="material-symbols-outlined">account_balance</span> Maliyyə</a>
+  </nav>
+  <a href="#" style="margin-top:auto"><span class="material-symbols-outlined">settings</span> Ayarlar</a>
+</aside>
+
+<div class="main">
+  <div class="header">
+    <div class="search-box"><span class="material-symbols-outlined">search</span><input placeholder="Axtar..."/></div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <button class="icon-btn"><span class="material-symbols-outlined">notifications</span></button>
+      <div class="avatar">HƏ</div>
+    </div>
+  </div>
+
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+    <div>
+      <div style="font-size:22px;font-weight:700;letter-spacing:-0.5px">Tapşırıqlar</div>
+      <div style="font-size:13px;color:var(--text-3);margin-top:2px">45 tapşırıq · 4 komanda üzvü</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <div style="display:flex;gap:-4px">
+        <div class="avatar" style="width:28px;height:28px;font-size:10px;background:var(--blue)">LH</div>
+        <div class="avatar" style="width:28px;height:28px;font-size:10px;background:var(--green);margin-left:-6px;border:2px solid var(--bg)">AN</div>
+        <div class="avatar" style="width:28px;height:28px;font-size:10px;background:var(--purple);margin-left:-6px;border:2px solid var(--bg)">TQ</div>
+        <div class="avatar" style="width:28px;height:28px;font-size:10px;background:var(--surface-3);color:var(--text-3);margin-left:-6px;border:2px solid var(--bg)">+16</div>
+      </div>
+      <div class="view-toggle">
+        <button class="active" id="btn-kanban" onclick="setView('kanban')">Kanban</button>
+        <button id="btn-list" onclick="setView('list')">Siyahı</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status pills -->
+  <div class="filter-row">
+    <div class="pill active">Hamısı <span class="count">45</span></div>
+    <div class="pill"><span class="dot" style="background:var(--text-4)"></span> Gözləyir <span class="count">12</span></div>
+    <div class="pill"><span class="dot" style="background:var(--blue)"></span> Davam edir <span class="count">8</span></div>
+    <div class="pill"><span class="dot" style="background:var(--amber)"></span> Onay <span class="count">3</span></div>
+    <div class="pill"><span class="dot" style="background:var(--green)"></span> Tamamlandı <span class="count">18</span></div>
+    <div class="pill"><span class="dot" style="background:var(--red)"></span> Rədd <span class="count">4</span></div>
+  </div>
+
+  <!-- Chip filters -->
+  <div class="chip-row">
+    <div class="chip active">Bütün filiallar</div>
+    <div class="chip">Bakı</div>
+    <div class="chip">Gəncə</div>
+    <div class="divider"></div>
+    <div class="chip"><span class="dot" style="background:var(--red);width:6px;height:6px;border-radius:50%;display:inline-block"></span> Kritik</div>
+    <div class="chip"><span class="dot" style="background:var(--amber);width:6px;height:6px;border-radius:50%;display:inline-block"></span> Yüksək</div>
+    <div class="chip"><span class="dot" style="background:var(--blue);width:6px;height:6px;border-radius:50%;display:inline-block"></span> Orta</div>
+    <div class="chip"><span class="dot" style="background:var(--text-4);width:6px;height:6px;border-radius:50%;display:inline-block"></span> Aşağı</div>
+  </div>
+
+  <!-- KANBAN -->
+  <div class="kanban" id="view-kanban">
+    <div class="kanban-col">
+      <div class="col-header"><span class="dot" style="background:var(--text-4)"></span><span class="col-title">Gözləyir</span><span class="col-count">12</span></div>
+      <div class="k-card" onclick="openPanel()">
+        <span class="k-tag" style="background:var(--amber-soft);color:var(--amber)">Dizayn</span>
+        <span class="k-flag"><span class="material-symbols-outlined filled" style="font-size:16px;color:var(--red)">flag</span></span>
+        <div class="k-title">Müştəri rəyləri analizi</div>
+        <div class="k-desc">Mobil beta qrupunun 12 müsahibə qeydini analiz edin.</div>
+        <div class="k-footer"><div class="k-meta"><span class="material-symbols-outlined">calendar_today</span> 31 Mar</div><div class="k-avatar" style="background:var(--blue)">NƏ</div></div>
+      </div>
+      <div class="k-card" onclick="openPanel()">
+        <span class="k-tag" style="background:var(--blue-soft);color:var(--blue)">Mühəndislik</span>
+        <div class="k-title">Dark Mode yeniləmə</div>
+        <div class="k-footer"><div class="k-meta"><span class="material-symbols-outlined">chat_bubble</span> 3 · <span class="material-symbols-outlined">attach_file</span> 1</div><div class="k-avatars"><div class="k-avatar" style="background:var(--purple)">Rİ</div><div class="k-avatar" style="background:var(--green)">MƏ</div></div></div>
+      </div>
+      <div class="k-card" onclick="openPanel()">
+        <span class="k-tag" style="background:var(--purple-soft);color:var(--purple)">Maliyyə</span>
+        <div class="k-title">Maliyyə hesabatı hazırla</div>
+        <div class="k-footer"><div class="k-meta">Gəncə Filialı</div><div class="k-avatar" style="background:var(--amber)">AN</div></div>
+      </div>
+    </div>
+
+    <div class="kanban-col">
+      <div class="col-header"><span class="dot" style="background:var(--blue)"></span><span class="col-title">Davam edir</span><span class="col-count">8</span></div>
+      <div class="k-card" onclick="openPanel()" style="border-left:3px solid var(--green)">
+        <span class="k-tag" style="background:var(--amber-soft);color:var(--amber)">Mühəndislik</span>
+        <span class="k-flag"><span class="material-symbols-outlined filled" style="font-size:16px;color:var(--amber)">flag</span></span>
+        <div class="k-title">API İnteqrasiyası: Stripe</div>
+        <div class="k-desc">Yeni abunə təbəqələri və webhook handler-lər.</div>
+        <div class="k-progress"><div class="k-progress-fill" style="width:65%;background:var(--green)"></div></div>
+        <div class="k-footer"><div class="k-meta" style="color:var(--green);font-weight:600">Bugün</div><div class="k-avatar" style="background:var(--green)">TQ</div></div>
+      </div>
+      <div class="k-card" onclick="openPanel()" style="border-left:3px solid var(--green)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span class="k-tag" style="background:var(--blue-soft);color:var(--blue)">GÖREV</span>
+          <span class="k-badge">10 nəfər</span>
+        </div>
+        <div class="k-title">Aylıq Satış Hesabatı</div>
+        <div class="k-avatars" style="margin-bottom:8px"><div class="k-avatar" style="background:var(--blue)">NƏ</div><div class="k-avatar" style="background:var(--green)">Rİ</div><div class="k-avatar" style="background:var(--purple)">MƏ</div><div class="k-avatar" style="background:var(--surface-3);color:var(--text-3)">+7</div></div>
+        <div class="k-progress"><div class="k-progress-fill" style="width:40%;background:var(--green)"></div></div>
+        <div class="k-footer"><div class="k-meta" style="color:var(--green);font-weight:600">4/10</div><div class="k-meta">Bakı Filialı</div></div>
+      </div>
+    </div>
+
+    <div class="kanban-col" style="opacity:.6">
+      <div class="col-header"><span class="dot" style="background:var(--green)"></span><span class="col-title">Tamamlandı</span><span class="col-count">18</span></div>
+      <div class="k-card done">
+        <span class="k-tag" style="background:var(--surface-2);color:var(--text-3)">Məhsul</span>
+        <span class="k-flag"><span class="material-symbols-outlined filled" style="font-size:16px;color:var(--green)">check_circle</span></span>
+        <div class="k-title">V2.1 Sənədləşmə</div>
+        <div class="k-footer"><div class="k-meta">18 Mart</div><div class="k-avatar" style="background:var(--surface-3);color:var(--text-3)">LH</div></div>
+      </div>
+      <div class="k-card done">
+        <span class="k-tag" style="background:var(--surface-2);color:var(--text-3)">Dizayn</span>
+        <span class="k-flag"><span class="material-symbols-outlined filled" style="font-size:16px;color:var(--green)">check_circle</span></span>
+        <div class="k-title">Branding yeniləmə</div>
+        <div class="k-footer"><div class="k-meta">25 Mart</div><div class="k-avatar" style="background:var(--surface-3);color:var(--text-3)">NƏ</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIST VIEW -->
+  <div class="list-view" id="view-list">
+    <div class="list-item" onclick="openPanel()"><div class="list-check" style="border-color:var(--red)"></div><div class="list-title">Müştəri rəyləri analizi</div><span class="list-tag" style="background:var(--amber-soft);color:var(--amber)">Dizayn</span><span class="list-meta">NƏ · 31 Mar</span><span class="list-status" style="background:var(--surface-2);color:var(--text-3)">Gözləyir</span></div>
+    <div class="list-item" onclick="openPanel()" style="border-left:3px solid var(--green)"><div class="list-check" style="border-color:var(--blue)"></div><div class="list-title">API İnteqrasiyası: Stripe</div><span class="list-tag" style="background:var(--amber-soft);color:var(--amber)">Mühəndislik</span><span class="list-meta">TQ · Bugün</span><span class="list-status" style="background:var(--blue-soft);color:var(--blue)">Davam edir</span></div>
+    <div class="list-item done"><div class="list-check done"></div><div class="list-title">V2.1 Sənədləşmə</div><span class="list-tag" style="background:var(--surface-2);color:var(--text-3)">Məhsul</span><span class="list-meta">18 Mar</span><span class="list-status" style="background:var(--green-soft);color:var(--green)">Tamamlandı</span></div>
+  </div>
+</div>
+
+<!-- Panel -->
+<div class="panel-overlay" id="overlay" onclick="closePanel()"></div>
+<div class="detail-panel" id="panel">
+  <div class="panel-header"><h3>Detallar</h3><button class="icon-btn" onclick="closePanel()"><span class="material-symbols-outlined">close</span></button></div>
+  <div class="panel-body">
+    <div style="font-size:17px;font-weight:600;letter-spacing:-0.3px;margin-bottom:14px">API İnteqrasiyası: Stripe</div>
+    <div style="display:flex;gap:16px;margin-bottom:16px">
+      <div><div style="font-size:10px;font-weight:600;color:var(--text-4);text-transform:uppercase;margin-bottom:3px">Status</div><div style="font-size:12px;font-weight:500;display:flex;align-items:center;gap:4px"><span class="dot" style="background:var(--blue);width:7px;height:7px;border-radius:50%;display:inline-block"></span> Davam edir</div></div>
+      <div><div style="font-size:10px;font-weight:600;color:var(--text-4);text-transform:uppercase;margin-bottom:3px">Prioritet</div><div style="font-size:12px;font-weight:500;color:var(--amber)">Yüksək</div></div>
+      <div><div style="font-size:10px;font-weight:600;color:var(--text-4);text-transform:uppercase;margin-bottom:3px">Tarix</div><div style="font-size:12px;font-weight:500">31 Mar</div></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface-2);border-radius:8px;margin-bottom:16px"><div class="avatar" style="width:24px;height:24px;font-size:9px;background:var(--green)">TQ</div><div><div style="font-size:12px;font-weight:600">Tural Quliyev</div><div style="font-size:10px;color:var(--text-3)">Mühəndis · Bakı</div></div></div>
+    <div style="font-size:13px;color:var(--text-2);line-height:1.7;margin-bottom:20px">Əsas platformanı Stripe Billing API-yə qoşmaq. Aylıq/illik abunəliklər, uğursuz ödəmələr.</div>
+    <div style="font-size:10px;font-weight:600;color:var(--text-4);text-transform:uppercase;margin-bottom:8px">Alt görevlər · 2/4</div>
+    <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:20px">
+      <div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--surface-2);border-radius:6px;font-size:12px;opacity:.5;text-decoration:line-through"><span class="material-symbols-outlined filled" style="font-size:16px;color:var(--green)">check_circle</span> Stripe hesab yarat</div>
+      <div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--surface-2);border-radius:6px;font-size:12px;opacity:.5;text-decoration:line-through"><span class="material-symbols-outlined filled" style="font-size:16px;color:var(--green)">check_circle</span> Planları təyin et</div>
+      <div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--surface);border-radius:6px;font-size:12px"><span class="material-symbols-outlined" style="font-size:16px;color:var(--text-4)">radio_button_unchecked</span> Webhook handler-lər</div>
+      <div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--surface);border-radius:6px;font-size:12px"><span class="material-symbols-outlined" style="font-size:16px;color:var(--text-4)">radio_button_unchecked</span> Checkout test</div>
+    </div>
+  </div>
+  <div class="panel-footer"><input placeholder="Mesaj yaz..."/></div>
+</div>
+
+<script>
+function openPanel(){document.getElementById('panel').classList.add('open');document.getElementById('overlay').classList.add('open')}
+function closePanel(){document.getElementById('panel').classList.remove('open');document.getElementById('overlay').classList.remove('open')}
+function setView(v){document.getElementById('view-kanban').style.display=v==='kanban'?'grid':'none';document.getElementById('view-list').classList.toggle('visible',v==='list');document.getElementById('btn-kanban').classList.toggle('active',v==='kanban');document.getElementById('btn-list').classList.toggle('active',v==='list')}
+</script>
+</body>
+</html>

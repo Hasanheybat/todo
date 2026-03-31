@@ -24,6 +24,13 @@ type TaskData = {
   projectId: string;
   isRecurring: boolean;
   recurRule: string;
+  scheduleType: 'MONTHLY' | 'WEEKLY';
+  dayOfMonth: number;
+  dayOfWeek: number;
+  notificationDay: number;
+  deadlineDay: number;
+  hasEndDate: boolean;
+  endDate: string;
 }
 
 interface TaskFormModalProps {
@@ -56,6 +63,13 @@ function emptyTask(): TaskData {
     projectId: '',
     isRecurring: false,
     recurRule: '',
+    scheduleType: 'MONTHLY',
+    dayOfMonth: 10,
+    dayOfWeek: 1,
+    notificationDay: 13,
+    deadlineDay: 15,
+    hasEndDate: false,
+    endDate: '',
   }
 }
 
@@ -149,6 +163,7 @@ export default function TaskFormModal({ open, onClose, onSaved, editingTask, use
   if (open && editingTask && editingTask.id !== lastEditId) {
     setLastEditId(editingTask.id)
     setNewTask({
+      ...emptyTask(),
       title: editingTask.title || '',
       description: editingTask.description || '',
       type: editingTask.type || 'TASK',
@@ -430,7 +445,7 @@ export default function TaskFormModal({ open, onClose, onSaved, editingTask, use
         const groupId = crypto.randomUUID()
         const createdItems: { taskId: string; itemFiles: File[] }[] = []
         for (const item of taskData.taskItems) {
-          const result = await api.createTask({
+          const result: any = await api.createTask({
             title: taskData.title,
             description: item.content || undefined,
             type: 'TASK',
@@ -556,6 +571,29 @@ export default function TaskFormModal({ open, onClose, onSaved, editingTask, use
           await api.uploadFile(file, result.id)
         }
       }
+      // Təkrarlanan — şablon da yarat
+      if (taskData.isRecurring && !editingTask) {
+        try {
+          const allAssigneeIds = [...new Set([...(taskData.responsibleId ? [taskData.responsibleId] : []), ...taskData.assigneeIds])].filter(id => id !== taskData.approverId)
+          await api.createTemplate({
+            name: taskData.title,
+            description: taskData.description || undefined,
+            isRecurring: true,
+            scheduleType: taskData.scheduleType,
+            scheduleTime: '09:00',
+            dayOfMonth: taskData.scheduleType === 'MONTHLY' ? taskData.dayOfMonth : undefined,
+            dayOfWeek: taskData.scheduleType === 'WEEKLY' ? taskData.dayOfWeek : undefined,
+            businessId: taskData.businessIds[0] || undefined,
+            departmentId: taskData.departmentIds[0] || undefined,
+            notificationDay: taskData.notificationDay,
+            deadlineDay: taskData.deadlineDay,
+            endDate: taskData.hasEndDate && taskData.endDate ? new Date(taskData.endDate).toISOString() : undefined,
+            items: (taskData.type === 'GOREV' ? finalSubTasks : taskData.taskItems.map(i => ({ title: i.content, priority: i.priority || 'MEDIUM' }))).filter((i: any) => i.title?.trim()),
+            assigneeIds: allAssigneeIds,
+          })
+        } catch (e) { console.error('Şablon yaratma xətası:', e) }
+      }
+
       handleClose()
       onSaved()
     } catch (err: any) { alert(err.message) }
@@ -1186,39 +1224,16 @@ export default function TaskFormModal({ open, onClose, onSaved, editingTask, use
             </div>
 
             {/* Təkrarlanan seçimi */}
-            <div className="relative">
-              <button type="button" onClick={() => {
-                if (!newTask.isRecurring) {
-                  setNewTask(prev => ({ ...prev, isRecurring: true, recurRule: 'daily' }))
-                } else {
-                  setNewTask(prev => ({ ...prev, isRecurring: false, recurRule: '' }))
-                }
-              }}
-                className="rounded-md px-2.5 py-1 text-[11px] font-semibold flex items-center gap-1.5 outline-none transition"
-                style={{
-                  backgroundColor: newTask.isRecurring ? '#EEF2FF' : 'var(--todoist-hover)',
-                  border: `1px solid ${newTask.isRecurring ? '#C7D2FE' : 'var(--todoist-divider)'}`,
-                  color: newTask.isRecurring ? '#4F46E5' : 'var(--todoist-text-secondary)',
-                }}>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 014-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
-                {newTask.isRecurring ? (
-                  {daily:'Gündəlik',weekly:'Həftəlik',monthly:'Aylıq',weekdays:'İş günləri','custom:3d':'Hər 3 gün','custom:2w':'Hər 2 həftə'}[newTask.recurRule] || newTask.recurRule
-                ) : 'Təkrarla'}
-              </button>
-              {newTask.isRecurring && (
-                <select value={newTask.recurRule} onChange={e => setNewTask(prev => ({ ...prev, recurRule: e.target.value }))}
-                  className="ml-1 rounded-md px-1.5 py-1 text-[10px] outline-none"
-                  style={{ backgroundColor: 'var(--todoist-bg)', border: '1px solid var(--todoist-divider)', color: 'var(--todoist-text)' }}>
-                  <option value="daily">Gündəlik</option>
-                  <option value="weekly">Həftəlik</option>
-                  <option value="monthly">Aylıq</option>
-                  <option value="weekdays">İş günləri (B.e-Cümə)</option>
-                  <option value="custom:3d">Hər 3 gün</option>
-                  <option value="custom:2w">Hər 2 həftə</option>
-                  <option value="custom:1m">Hər 1 ay</option>
-                </select>
-              )}
-            </div>
+            <button type="button" onClick={() => setNewTask(prev => ({ ...prev, isRecurring: !prev.isRecurring }))}
+              className="rounded-md px-2.5 py-1 text-[11px] font-semibold flex items-center gap-1.5 outline-none transition"
+              style={{
+                backgroundColor: newTask.isRecurring ? '#EEF2FF' : 'var(--todoist-hover)',
+                border: `1px solid ${newTask.isRecurring ? '#C7D2FE' : 'var(--todoist-divider)'}`,
+                color: newTask.isRecurring ? '#4F46E5' : 'var(--todoist-text-secondary)',
+              }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 014-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
+              {newTask.isRecurring ? `🔁 ${newTask.scheduleType === 'MONTHLY' ? `Hər ayın ${newTask.dayOfMonth}-i` : `Hər ${['Bazar','B.e.','Ç.a.','Çərşənbə','C.a.','Cümə','Şənbə'][newTask.dayOfWeek]}`}` : 'Təkrarla'}
+            </button>
 
             <div className="flex gap-0.5">
               {(['CRITICAL','HIGH','MEDIUM','LOW'] as const).map(p => (
@@ -1796,6 +1811,62 @@ export default function TaskFormModal({ open, onClose, onSaved, editingTask, use
               )}
             </div>
           </>)}
+
+          {/* ═══ Təkrarlanan Bölmə ═══ */}
+          {newTask.isRecurring && !viewMode && (
+            <div className="px-5 pb-3 space-y-3">
+              <div className="rounded-xl p-3" style={{ backgroundColor: '#EEF2FF', border: '1px solid #C7D2FE' }}>
+                <div className="text-[10px] font-bold mb-2" style={{ color: '#4F46E5' }}>🔁 Təkrarlama qaydası — sistem avtomatik göndərəcək</div>
+                <div className="flex items-center gap-2 mb-3 p-2 rounded-lg" style={{ backgroundColor: '#fff', border: '1px solid #C7D2FE' }}>
+                  <span className="text-[11px] font-semibold" style={{ color: '#4F46E5' }}>Hər</span>
+                  <select value={newTask.scheduleType} onChange={e => setNewTask(prev => ({ ...prev, scheduleType: e.target.value as any }))}
+                    className="rounded px-2 py-1 text-[11px] font-semibold outline-none" style={{ border: '1px solid #C7D2FE', color: '#4F46E5', backgroundColor: '#F5F3FF' }}>
+                    <option value="MONTHLY">ayın</option>
+                    <option value="WEEKLY">həftənin</option>
+                  </select>
+                  {newTask.scheduleType === 'MONTHLY' ? (
+                    <input type="number" value={newTask.dayOfMonth} onChange={e => setNewTask(prev => ({ ...prev, dayOfMonth: Number(e.target.value) }))} min={1} max={31}
+                      className="w-[42px] text-center rounded px-1 py-1 text-[11px] font-bold outline-none" style={{ border: '1px solid #C7D2FE', color: '#4F46E5' }} />
+                  ) : (
+                    <select value={newTask.dayOfWeek} onChange={e => setNewTask(prev => ({ ...prev, dayOfWeek: Number(e.target.value) }))}
+                      className="rounded px-2 py-1 text-[11px] font-semibold outline-none" style={{ border: '1px solid #C7D2FE', color: '#4F46E5', backgroundColor: '#F5F3FF' }}>
+                      {['Bazar','B.e.','Ç.a.','Çərşənbə','C.a.','Cümə','Şənbə'].map((d, i) => <option key={i} value={i}>{d}</option>)}
+                    </select>
+                  )}
+                  {newTask.scheduleType === 'MONTHLY' && <span className="text-[11px] font-semibold" style={{ color: '#4F46E5' }}>-u/ı/si</span>}
+                </div>
+                <div className="grid grid-cols-3 gap-2 mb-3">
+                  <div className="rounded-lg p-2" style={{ border: '1.5px solid #C7D2FE', backgroundColor: '#F5F3FF' }}>
+                    <div className="text-[8px] font-bold uppercase tracking-wider mb-1" style={{ color: '#64748B' }}>📅 ATANMA</div>
+                    <div className="text-[8px] mb-1" style={{ color: '#94A3B8' }}>Nə vaxt göndərilsin?</div>
+                    <div className="text-[12px] font-bold" style={{ color: '#4F46E5' }}>{newTask.scheduleType === 'MONTHLY' ? `Ayın ${newTask.dayOfMonth}-i` : ['Bazar','B.e.','Ç.a.','Çərşənbə','C.a.','Cümə','Şənbə'][newTask.dayOfWeek]}</div>
+                  </div>
+                  <div className="rounded-lg p-2" style={{ border: '1.5px solid #FFE0B2', backgroundColor: '#FFF8F0' }}>
+                    <div className="text-[8px] font-bold uppercase tracking-wider mb-1" style={{ color: '#64748B' }}>🔔 BİLDİRİM</div>
+                    <div className="text-[8px] mb-1" style={{ color: '#94A3B8' }}>Xatırlatma günü</div>
+                    <input type="number" value={newTask.notificationDay} onChange={e => setNewTask(prev => ({ ...prev, notificationDay: Number(e.target.value) }))} min={1} max={31}
+                      className="w-[50px] text-center rounded px-1 py-0.5 text-[12px] font-bold outline-none" style={{ border: '1.5px solid #FFE0B2' }} />
+                  </div>
+                  <div className="rounded-lg p-2" style={{ border: '1.5px solid #FFCDD2', backgroundColor: '#FFF5F5' }}>
+                    <div className="text-[8px] font-bold uppercase tracking-wider mb-1" style={{ color: '#64748B' }}>⏰ SON TARİX</div>
+                    <div className="text-[8px] mb-1" style={{ color: '#94A3B8' }}>Nə vaxta tamamlanmalı?</div>
+                    <input type="number" value={newTask.deadlineDay} onChange={e => setNewTask(prev => ({ ...prev, deadlineDay: Number(e.target.value) }))} min={1} max={31}
+                      className="w-[50px] text-center rounded px-1 py-0.5 text-[12px] font-bold outline-none" style={{ border: '1.5px solid #FFCDD2' }} />
+                  </div>
+                </div>
+                <div className="rounded-lg p-2" style={{ backgroundColor: '#fff', border: '1px solid #E2E8F0' }}>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" checked={newTask.hasEndDate} onChange={e => setNewTask(prev => ({ ...prev, hasEndDate: e.target.checked }))} />
+                    <span className="text-[10px] font-semibold" style={{ color: '#64748B' }}>Bitiş tarixi qoy</span>
+                  </label>
+                  {newTask.hasEndDate && (
+                    <input type="date" value={newTask.endDate} onChange={e => setNewTask(prev => ({ ...prev, endDate: e.target.value }))}
+                      className="mt-2 rounded px-2 py-1 text-[11px] outline-none" style={{ border: '1.5px solid #E2E8F0' }} />
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* ── DÜYMƏLƏR ── */}
           <div className="border-t pt-3 mt-auto flex items-center justify-between" style={{ borderColor: 'var(--todoist-divider)' }}>

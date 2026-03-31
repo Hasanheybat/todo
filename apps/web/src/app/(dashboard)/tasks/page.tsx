@@ -14,29 +14,8 @@ import GlobalQuickAdd from '@/components/todoist/GlobalQuickAdd'
 import RecurringTrackModal from '@/components/templates/RecurringTrackModal'
 import WorkerRecurringTaskModal from '@/components/templates/WorkerRecurringTaskModal'
 import PageGuard from '@/components/PageGuard'
-
-// FocusFlow branding rəngləri
-const P = { CRITICAL: '#7C3AED', HIGH: '#EF4444', MEDIUM: '#F59E0B', LOW: '#10B981', INFO: '#64748B' }
-const PrioFlag = ({ color, size = 14 }: { color: string; size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill={color} stroke={color} strokeWidth="1.5"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
-)
-const S: Record<string, { label: string; color: string; bg: string }> = {
-  CREATED: { label: 'Yaradıldı', color: '#64748B', bg: '#F1F5F9' },
-  PENDING: { label: 'Gözləyir', color: '#64748B', bg: '#F1F5F9' },
-  IN_PROGRESS: { label: 'Davam edir', color: '#3B82F6', bg: '#EFF6FF' },
-  COMPLETED: { label: 'Tamamlandı', color: '#10B981', bg: '#ECFDF5' },
-  PENDING_APPROVAL: { label: 'Onay gözləyir', color: '#F59E0B', bg: '#FFFBEB' },
-  APPROVED: { label: 'Onaylandı', color: '#10B981', bg: '#ECFDF5' },
-  REJECTED: { label: 'Rədd', color: '#EF4444', bg: '#FEF2F2' },
-  DECLINED: { label: 'Rədd edildi', color: '#EF4444', bg: '#FEF2F2' },
-  FORCE_COMPLETED: { label: 'Bağlandı (donuq)', color: '#94A3B8', bg: '#F1F5F9' },
-}
-
-function daysDiff(d: string) {
-  const now = new Date(); now.setHours(0,0,0,0)
-  const due = new Date(d); due.setHours(0,0,0,0)
-  return Math.ceil((due.getTime() - now.getTime()) / 86400000)
-}
+import TaskCard, { P, S, PrioFlag, daysDiff } from '@/components/TaskCard'
+import FilterBar from '@/components/FilterBar'
 
 // Zaman qrupları — kəskin rənglər
 const timeGroups = [
@@ -84,6 +63,7 @@ export default function TasksPage() {
   const [approverModal, setApproverModal] = useState<{ open: boolean; task: any; subTask: any }>({ open: false, task: null, subTask: null })
   const [creatorModal, setCreatorModal] = useState<{ open: boolean; task: any; subTask: any }>({ open: false, task: null, subTask: null })
   const [groupViewModal, setGroupViewModal] = useState<{ open: boolean; groupId: string | null }>({ open: false, groupId: null })
+  const [pendingReopenTask, setPendingReopenTask] = useState<any>(null)
   const [recurringTrackModal, setRecurringTrackModal] = useState<{ open: boolean; task: any }>({ open: false, task: null })
   const [workerRecurringModal, setWorkerRecurringModal] = useState<{ open: boolean; task: any }>({ open: false, task: null })
   const groupViewTasks = groupViewModal.groupId ? tasks.filter((t: any) => t.groupId === groupViewModal.groupId) : []
@@ -121,6 +101,47 @@ export default function TasksPage() {
       .catch(() => {}).finally(() => setLoading(false))
   }
 
+  // approverModal açıqsa və tasks yeniləndikdə virtual task-ı yenilə
+  useEffect(() => {
+    if (!approverModal.open || !approverModal.task) return
+    const t = approverModal.task
+    if (t.groupId && t._groupTasks) {
+      // TASK group — virtual task yenidən yarat
+      const groupTasks = tasks.filter((x: any) => x.groupId === t.groupId)
+      if (groupTasks.length > 0) {
+        const mergedAssignees = groupTasks.flatMap((gt: any) =>
+          (gt.assignees || []).map((a: any) => ({ ...a, _taskId: gt.id, _taskTitle: gt.description || gt.title }))
+        )
+        const allBulkNotes: any[] = []
+        const seenNotes = new Set<string>()
+        for (const gt of groupTasks) {
+          for (const bn of (gt.bulkNotes || [])) {
+            const key = `${bn.date}_${bn.text}_${bn.senderId || ''}`
+            if (!seenNotes.has(key)) { seenNotes.add(key); allBulkNotes.push(bn) }
+          }
+        }
+        allBulkNotes.sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime())
+        setApproverModal(prev => ({ ...prev, task: { ...groupTasks[0], assignees: mergedAssignees, _groupTasks: groupTasks, bulkNotes: allBulkNotes } }))
+      }
+    } else if (!t.groupId) {
+      // Tək task — birbaşa yenilə
+      const updated = tasks.find((x: any) => x.id === t.id)
+      if (updated) {
+        setApproverModal(prev => ({ ...prev, task: { ...updated, _groupTasks: t._groupTasks } }))
+      }
+    }
+  }, [tasks]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // assigneeModal açıqsa və tasks yeniləndikdə task-ı yenilə
+  useEffect(() => {
+    if (!assigneeModal.open || !assigneeModal.task) return
+    const t = assigneeModal.task
+    const updated = tasks.find((x: any) => x.id === t.id)
+    if (updated) {
+      setAssigneeModal(prev => ({ ...prev, task: updated, subTask: prev.subTask ? updated.subTasks?.find((s: any) => s.id === prev.subTask.id) || prev.subTask : null }))
+    }
+  }, [tasks]) // eslint-disable-line react-hooks/exhaustive-deps
+
   // Task kartına basanda — routing məntiqi
   function handleTaskClick(task: any) {
     // Təkrarlanan görevdən dispatch olunmuşsa
@@ -148,7 +169,20 @@ export default function TasksPage() {
         const mergedAssignees = groupTasks.flatMap((t: any) =>
           (t.assignees || []).map((a: any) => ({ ...a, _taskId: t.id, _taskTitle: t.description || t.title }))
         )
-        const virtualTask = { ...task, assignees: mergedAssignees, _groupTasks: groupTasks }
+        // Bütün group task-ların bulkNotes-unu birləşdir (deduplicate by date+text)
+        const allBulkNotes: any[] = []
+        const seenNotes = new Set<string>()
+        for (const gt of groupTasks) {
+          for (const bn of (gt.bulkNotes || [])) {
+            const key = `${bn.date}_${bn.text}_${bn.senderId || ''}`
+            if (!seenNotes.has(key)) {
+              seenNotes.add(key)
+              allBulkNotes.push(bn)
+            }
+          }
+        }
+        allBulkNotes.sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime())
+        const virtualTask = { ...task, assignees: mergedAssignees, _groupTasks: groupTasks, bulkNotes: allBulkNotes }
         setApproverModal({ open: true, task: virtualTask, subTask: null })
         return
       }
@@ -221,6 +255,18 @@ export default function TasksPage() {
 
   function openEditModal(task: any) {
     setEditingTask(task)
+
+    // TASK+groupId — group task-lardan taskItems yarat
+    const groupTasks = task._groupTasks || (task.groupId ? tasks.filter((t: any) => t.groupId === task.groupId) : [])
+    const taskItems = task.type === 'TASK' && groupTasks.length > 0
+      ? groupTasks.map((gt: any) => ({
+          content: gt.description || '',
+          assigneeId: gt.assignees?.[0]?.user?.id || '',
+          dueDate: gt.dueDate ? new Date(gt.dueDate).toISOString().split('T')[0] : '',
+          priority: gt.priority || 'MEDIUM',
+        }))
+      : []
+
     setNewTask({
       title: task.title || '',
       description: task.description || '',
@@ -239,7 +285,7 @@ export default function TasksPage() {
         files: [] as File[],
       })) || [],
       files: [],
-    })
+    } as any)
     setAddOpen(true)
   }
 
@@ -522,23 +568,29 @@ export default function TasksPage() {
     })
   }, [tasksWithMyStatus, selectedBiz, selectedUser, selectedPriority, selectedStatus])
 
-  // groupId deduplikasiya — eyni groupId olan taskları bir kart olaraq göstər
+  // groupId deduplikasiya — yalnız yaradan üçün qruplaşdır, işçi hər task-ı ayrı görür
   const displayTasks = useMemo(() => {
     const seenGroups = new Set<string>()
     const result: any[] = []
     for (const t of filtered) {
       if (t.groupId) {
-        if (seenGroups.has(t.groupId)) continue
-        seenGroups.add(t.groupId)
-        // Qrup üçün bütün taskları tap
-        const groupTasks = filtered.filter((x: any) => x.groupId === t.groupId)
-        result.push({ ...t, _groupTasks: groupTasks, _groupCount: groupTasks.length })
+        const isCreator = t.creatorId === user?.id || t.creator?.id === user?.id
+        if (isCreator) {
+          // Yaradan: bütün group 1 kart
+          if (seenGroups.has(t.groupId)) continue
+          seenGroups.add(t.groupId)
+          const groupTasks = filtered.filter((x: any) => x.groupId === t.groupId)
+          result.push({ ...t, _groupTasks: groupTasks, _groupCount: groupTasks.length })
+        } else {
+          // İşçi: hər task ayrı kart
+          result.push(t)
+        }
       } else {
         result.push(t)
       }
     }
     return result
-  }, [filtered])
+  }, [filtered, user?.id])
 
   // Bugündə zaman qrupları lazım deyil — düz siyahı
   const grouped = useMemo(() => {
@@ -579,222 +631,44 @@ export default function TasksPage() {
         </button>
       </div>
 
-      {/* ───── STATUS TAB FİLTRLƏRİ ───── */}
-      <div className="flex gap-0 mb-3 border-b-2 border-[var(--todoist-divider)] overflow-x-auto">
-        {[
-          { key: 'PENDING', label: 'Gözləyir', dot: '#64748B' },
-          { key: 'IN_PROGRESS', label: 'Davam edir', dot: '#3B82F6' },
-          { key: 'PENDING_APPROVAL', label: 'Onay gözləyir', dot: '#F59E0B' },
-          { key: 'COMPLETED', label: 'Tamamlandı', dot: '#10B981' },
-          { key: 'REJECTED', label: 'Rədd', dot: '#EF4444' },
-        ].map(tab => {
-          const allWithMyStatus = tasksWithMyStatus.filter(t => {
+      {/* ───── STATUS TAB + CHİP FİLTRLƏR ───── */}
+      <FilterBar
+        statusTabs={(() => {
+          const base = tasksWithMyStatus.filter(t => {
             if (selectedBiz !== 'ALL' && t.business?.id !== selectedBiz) return false
             if (selectedUser !== 'ALL' && !t.assignees?.some((a: any) => a.user.id === selectedUser)) return false
             if (selectedPriority !== 'ALL' && t.priority !== selectedPriority) return false
             return true
           })
-          const count = tab.key === 'COMPLETED' ? allWithMyStatus.filter(t => ['COMPLETED', 'APPROVED', 'FORCE_COMPLETED'].includes(t.myStatus)).length
-            : tab.key === 'PENDING' ? allWithMyStatus.filter(t => ['PENDING', 'CREATED'].includes(t.myStatus)).length
-            : tab.key === 'REJECTED' ? allWithMyStatus.filter(t => ['REJECTED', 'DECLINED'].includes(t.myStatus)).length
-            : allWithMyStatus.filter(t => t.myStatus === tab.key).length
-          return (
-            <button key={tab.key} onClick={() => setSelectedStatus(tab.key)}
-              className={`px-4 py-2.5 text-[12px] font-semibold border-b-2 -mb-[2px] transition flex items-center gap-1.5 whitespace-nowrap
-                ${selectedStatus === tab.key ? 'border-[var(--todoist-red)] text-[var(--todoist-red)]' : 'border-transparent text-[var(--todoist-text-secondary)] hover:text-[var(--todoist-text)]'}`}>
-              {tab.dot && <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: tab.dot }} />}
-              {tab.label}
-              <span className={`text-[10px] px-1.5 py-px rounded-full font-bold ${selectedStatus === tab.key ? 'bg-[var(--todoist-red-light)] text-[var(--todoist-red)]' : 'bg-[var(--todoist-border)] text-[var(--todoist-text-tertiary)]'}`}>{count}</span>
-            </button>
-          )
-        })}
-      </div>
-
-      {/* ───── CHİP FİLTRLƏR (filial + prioritet + işçi) ───── */}
-      <div className="flex gap-1.5 mb-5 flex-wrap items-center">
-        {/* Filial chips */}
-        <button onClick={() => setSelectedBiz('ALL')}
-          className="px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition border-[1.5px]"
-          style={{ backgroundColor: selectedBiz === 'ALL' ? 'var(--todoist-red)' : 'var(--todoist-surface)', color: selectedBiz === 'ALL' ? 'var(--todoist-surface)' : 'var(--todoist-text)', borderColor: selectedBiz === 'ALL' ? 'var(--todoist-red)' : 'var(--todoist-divider)' }}>
-          Bütün filiallar
-        </button>
-        {businesses.map(b => (
-          <button key={b.id} onClick={() => setSelectedBiz(b.id)}
-            className="px-3 py-1.5 rounded-full text-[11px] font-semibold whitespace-nowrap transition border-[1.5px]"
-            style={{ backgroundColor: selectedBiz === b.id ? 'var(--todoist-red)' : 'var(--todoist-surface)', color: selectedBiz === b.id ? 'var(--todoist-surface)' : 'var(--todoist-text)', borderColor: selectedBiz === b.id ? 'var(--todoist-red)' : 'var(--todoist-divider)' }}>
-            {b.name}
-          </button>
-        ))}
-
-        <span className="w-px h-5 bg-[var(--todoist-divider)] mx-1" />
-
-        {/* Prioritet chips */}
-        {[
-          { key: 'ALL', label: 'Hamısı', dot: '#94A3B8' },
-          { key: 'CRITICAL', label: 'Kritik', dot: '#7C3AED' },
-          { key: 'HIGH', label: 'Yüksək', dot: '#EF4444' },
-          { key: 'MEDIUM', label: 'Orta', dot: '#F59E0B' },
-          { key: 'LOW', label: 'Aşağı', dot: '#10B981' },
-        ].map(p => (
-          <button key={p.key} onClick={() => setSelectedPriority(p.key)}
-            className="px-3 py-1.5 rounded-full text-[11px] font-semibold whitespace-nowrap transition border-[1.5px] flex items-center gap-1.5"
-            style={{ backgroundColor: selectedPriority === p.key ? '#4F46E5' : 'var(--todoist-surface)', color: selectedPriority === p.key ? '#fff' : 'var(--todoist-text)', borderColor: selectedPriority === p.key ? '#4F46E5' : 'var(--todoist-divider)' }}>
-            {p.key !== 'ALL' ? <PrioFlag color={selectedPriority === p.key ? '#fff' : p.dot} size={12} /> : selectedPriority !== p.key && <span className="w-2 h-2 rounded-full" style={{ backgroundColor: p.dot }} />}
-            {p.label}
-          </button>
-        ))}
-
-        <span className="w-px h-5 bg-[var(--todoist-divider)] mx-1" />
-
-        {/* İşçi dropdown */}
-        <select value={selectedUser} onChange={e => setSelectedUser(e.target.value)}
-          className="px-3 py-1.5 rounded-full text-[11px] font-semibold outline-none cursor-pointer border-[1.5px] border-[var(--todoist-divider)] bg-white text-[var(--todoist-text)]">
-          <option value="ALL">👤 Bütün işçilər</option>
-          {users.map(u => <option key={u.id} value={u.id}>{u.fullName}</option>)}
-        </select>
-
-        {(selectedBiz !== 'ALL' || selectedUser !== 'ALL' || selectedPriority !== 'ALL' || selectedStatus !== 'PENDING') && (
-          <button onClick={() => { setSelectedBiz('ALL'); setSelectedUser('ALL'); setSelectedPriority('ALL'); setSelectedStatus('PENDING') }}
-            className="px-3 py-1.5 rounded-full text-[11px] font-bold border-[1.5px] border-[var(--todoist-red-light)]"
-            style={{ color: 'var(--todoist-red)', backgroundColor: 'var(--todoist-red-light)' }}>
-            ✕ Sıfırla
-          </button>
-        )}
-      </div>
+          return [
+            { key: 'PENDING', label: 'Gözləyir', dot: '#64748B', count: base.filter(t => ['PENDING', 'CREATED'].includes(t.myStatus)).length },
+            { key: 'IN_PROGRESS', label: 'Davam edir', dot: '#3B82F6', count: base.filter(t => t.myStatus === 'IN_PROGRESS').length },
+            { key: 'PENDING_APPROVAL', label: 'Onay gözləyir', dot: '#F59E0B', count: base.filter(t => t.myStatus === 'PENDING_APPROVAL').length },
+            { key: 'COMPLETED', label: 'Tamamlandı', dot: '#10B981', count: base.filter(t => ['COMPLETED', 'APPROVED', 'FORCE_COMPLETED'].includes(t.myStatus)).length },
+            { key: 'REJECTED', label: 'Rədd', dot: '#EF4444', count: base.filter(t => ['REJECTED', 'DECLINED'].includes(t.myStatus)).length },
+          ]
+        })()}
+        selectedStatus={selectedStatus}
+        onStatusChange={setSelectedStatus}
+        businesses={businesses}
+        selectedBiz={selectedBiz}
+        onBizChange={setSelectedBiz}
+        selectedPriority={selectedPriority}
+        onPriorityChange={setSelectedPriority}
+        users={users}
+        selectedUser={selectedUser}
+        onUserChange={setSelectedUser}
+        onReset={() => { setSelectedBiz('ALL'); setSelectedUser('ALL'); setSelectedPriority('ALL'); setSelectedStatus('PENDING') }}
+        showReset={selectedBiz !== 'ALL' || selectedUser !== 'ALL' || selectedPriority !== 'ALL' || selectedStatus !== 'PENDING'}
+      />
 
       {/* ───── TAPŞIRIQ KARTLARI — 4-lü grid ───── */}
       {displayTasks.length > 0 && (
         <div className="mb-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5">
-              {displayTasks.map((task: any) => {
-                const pColor = P[task.priority as keyof typeof P] || '#808080'
-                // İstifadəçinin öz statusu (myStatus) — yaradıcıda görevin ümumi statusu
-                const effectiveStatus = task.myStatus || task.status
-                const sConfig = S[effectiveStatus] || S.CREATED
-                const diff = task.dueDate ? daysDiff(task.dueDate) : null
-                const done = ['COMPLETED', 'APPROVED', 'FORCE_COMPLETED'].includes(effectiveStatus)
-                const timeText = diff !== null ? (diff < 0 ? `${Math.abs(diff)} gün gecikmiş` : diff === 0 ? 'Bugün' : `${diff} gün qalıb`) : ''
-                const timeColor = diff !== null && diff < 0 ? '#EF4444' : diff === 0 ? '#F59E0B' : '#64748B'
-                const isGroup = !!task._groupCount && task._groupCount > 1
-
-                return (
-                  <div key={task.id} onClick={() => handleTaskClick(task)} className="rounded-xl hover:shadow-md transition cursor-pointer overflow-hidden"
-                    style={{ backgroundColor: 'var(--todoist-surface)', border: '1px solid var(--todoist-border)' }}>
-
-                    {/* Üst rəng xətti */}
-                    <div style={{ height: 3, backgroundColor: pColor }} />
-
-                    {/* Yaradıcı/Approver badge */}
-                    {task.isCreator && (
-                      <div className="px-3 pt-1.5 flex items-center gap-1">
-                        <span className="text-[8px] font-bold px-1.5 py-0.5 rounded" style={{ backgroundColor: '#EEF2FF', color: '#4F46E5' }}>Yaradıcı</span>
-                        {task.status !== effectiveStatus && <span className="text-[8px] px-1.5 py-0.5 rounded" style={{ backgroundColor: S[task.status]?.bg || '#F0F0F0', color: S[task.status]?.color || '#808080' }}>Görev: {S[task.status]?.label || task.status}</span>}
-                      </div>
-                    )}
-
-                    {/* Görev ismi + bayrak + qrup badge */}
-                    <div className={`px-3 ${task.isCreator ? 'pt-1' : 'pt-2.5'} pb-2 flex items-start justify-between gap-2`}>
-                      <div className="flex items-start gap-1.5 flex-1 min-w-0">
-                        <div className="shrink-0 mt-0.5"><PrioFlag color={pColor} size={14} /></div>
-                        <p className={`text-[13px] font-semibold leading-snug`}
-                          style={{ color: done ? 'var(--todoist-text-tertiary)' : 'var(--todoist-text)' }}>
-                          {task.title}
-                        </p>
-                      </div>
-                      {task.sourceTemplateId && (
-                        <span className="shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded-full"
-                          style={{ backgroundColor: '#E8F0FE', color: '#246FE0' }}>
-                          🔁 Təkrarlanan
-                        </span>
-                      )}
-                      {isGroup && !task.sourceTemplateId && (
-                        <span className="shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded-full"
-                          style={{ backgroundColor: '#E8F0FE', color: '#246FE0' }}>
-                          {task._groupCount} nəfər
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Etiketlər + Layihə */}
-                    {(task.labels?.length > 0 || task.project) && (
-                      <div className="px-3 pb-1 flex items-center gap-1 flex-wrap">
-                        {task.project && (
-                          <span className="text-[8px] font-semibold px-1.5 py-px rounded" style={{ backgroundColor: (task.project.color || '#808080') + '18', color: task.project.color || '#808080' }}>
-                            📂 {task.project.name}
-                          </span>
-                        )}
-                        {task.labels?.map((tl: any) => (
-                          <span key={tl.label?.id || tl.id} className="text-[8px] font-semibold px-1.5 py-px rounded-full" style={{ backgroundColor: ((tl.label?.color || tl.color || '#808080') + '20'), color: tl.label?.color || tl.color || '#808080' }}>
-                            {tl.label?.name || tl.name}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Kişi + filial */}
-                    <div className="px-3 pb-2 flex items-center gap-2">
-                      {isGroup ? (
-                        <div className="flex items-center gap-1">
-                          {task._groupTasks.slice(0, 3).map((gt: any, i: number) => (
-                            <div key={i} className="w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold"
-                              style={{ backgroundColor: pColor + '18', color: pColor, marginLeft: i > 0 ? -4 : 0 }}>
-                              {gt.assignees?.[0]?.user?.fullName?.split(' ').map((n: string) => n[0]).join('') || '?'}
-                            </div>
-                          ))}
-                          {task._groupCount > 3 && (
-                            <span className="text-[10px] font-medium ml-1" style={{ color: 'var(--todoist-text-secondary)' }}>+{task._groupCount - 3}</span>
-                          )}
-                        </div>
-                      ) : task.assignees?.length > 0 ? (
-                        <div className="flex items-center gap-1.5">
-                          <div className="w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold"
-                            style={{ backgroundColor: pColor + '18', color: pColor }}>
-                            {task.assignees[0].user.fullName.split(' ').map((n: string) => n[0]).join('')}
-                          </div>
-                          <span className="text-[11px]" style={{ color: 'var(--todoist-text)' }}>
-                            {task.assignees[0].user.fullName}{task.assignees.length > 1 ? ` +${task.assignees.length - 1}` : ''}
-                          </span>
-                        </div>
-                      ) : null}
-                      {task.business && (
-                        <>
-                          <span style={{ color: 'var(--todoist-divider)' }}>·</span>
-                          <span className="text-[10px] font-medium" style={{ color: '#7C3AED' }}>{task.business.name}</span>
-                        </>
-                      )}
-                    </div>
-
-                    {/* Durum + gün sayısı */}
-                    <div className="px-3 pb-2.5 flex items-center justify-between gap-2">
-                      {isGroup ? (() => {
-                        const completed = task._groupTasks.filter((gt: any) => gt.assignees?.[0]?.status === 'COMPLETED' || gt.status === 'COMPLETED' || gt.status === 'APPROVED').length
-                        const total = task._groupCount
-                        const pct = total > 0 ? (completed / total) * 100 : 0
-                        return (
-                          <div className="flex items-center gap-2 flex-1">
-                            <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: '#E8E8E8' }}>
-                              <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: pct === 100 ? '#058527' : '#246FE0' }} />
-                            </div>
-                            <span className="text-[10px] font-bold shrink-0" style={{ color: pct === 100 ? '#058527' : '#246FE0' }}>
-                              {completed}/{total}
-                            </span>
-                          </div>
-                        )
-                      })() : (
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-                          style={{ backgroundColor: sConfig.bg, color: sConfig.color }}>
-                          {sConfig.label}
-                        </span>
-                      )}
-                      {timeText && (
-                        <span className="text-[10px] font-bold" style={{ color: timeColor }}>
-                          {timeText}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                )
-              })}
+              {displayTasks.map((task: any) => (
+                <TaskCard key={task.id} task={task} onClick={handleTaskClick} />
+              ))}
             </div>
         </div>
       )}
@@ -813,8 +687,17 @@ export default function TasksPage() {
       {/* ───── TAPŞIRIQ ƏLAVƏ / DÜZƏNLƏ MODAL ───── */}
       <TaskFormModal
         open={addOpen}
-        onClose={() => { setAddOpen(false); setEditingTask(null) }}
-        onSaved={() => { setAddOpen(false); setEditingTask(null); loadData() }}
+        onClose={() => {
+          setAddOpen(false); setEditingTask(null)
+          if (pendingReopenTask) {
+            setTimeout(() => { handleTaskClick(pendingReopenTask); setPendingReopenTask(null) }, 100)
+          }
+        }}
+        onSaved={() => {
+          setAddOpen(false); setEditingTask(null)
+          loadData()
+          setPendingReopenTask(null)
+        }}
         editingTask={editingTask}
         users={assignableUsers.length > 0 ? assignableUsers : users}
         departments={departments}
@@ -1106,10 +989,21 @@ export default function TasksPage() {
         currentUserId={user?.id || ''}
         onRefresh={loadData}
         isCreator={approverModal.task?.creatorId === user?.id && approverModal.task?.approverId !== user?.id}
-        onEdit={(task) => { setApproverModal({ open: false, task: null, subTask: null }); setEditingTask(task); setFormOpen(true) }}
-        onApprove={async (subTaskId, note) => {
+        onEdit={(t) => {
+          const reopenTask = approverModal.task
+          setPendingReopenTask(reopenTask)
+          setApproverModal({ open: false, task: null, subTask: null })
+          const originalTask = t._groupTasks?.[0] || t
+          openEditModal({ ...originalTask, _groupTasks: t._groupTasks })
+        }}
+        onApprove={async (taskId, note) => {
           try {
-            await api.approveTask(subTaskId)
+            const t = approverModal.task
+            if (t?.type === 'GOREV') {
+              await api.approveTask(taskId)
+            } else {
+              await api.creatorApproveTask(taskId)
+            }
             setApproverModal({ open: false, task: null, subTask: null })
             loadData()
           } catch (err: any) {

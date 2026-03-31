@@ -1,0 +1,7 @@
+Q1 Maliyyə Hesabatı - Test Faylı
+Tarix: 2026-03-30
+IT Şöbəsi Məlumatları:
+- Yanvar: 45,200 AZN
+- Fevral: 52,800 AZN
+- Mart: 61,500 AZN
+Cəmi Q1: 159,500 AZN

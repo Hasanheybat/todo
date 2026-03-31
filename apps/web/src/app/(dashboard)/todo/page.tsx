@@ -252,7 +252,7 @@ export default function TodoPage() {
   const viewColor = activeProject?.color || activeLabel?.color || undefined
 
   return (
-    <PageGuard requires={['todo.access']}>
+    <PageGuard requires={[]}>
     <div className="pb-10">
       {/* Header */}
       <div className="flex items-center justify-between mt-2 mb-4">

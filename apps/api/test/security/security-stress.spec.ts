@@ -484,7 +484,7 @@ describe('2. AVTORIZASIYA / RBAC BYPASS HÜCUMLARI', () => {
       headers: authHeader(managerToken),
       body: JSON.stringify({
         name: 'Hacker Role',
-        permissions: ['tasks.read', 'tasks.create', 'users.delete'],
+        permissions: ['tasks.read', 'tasks.create', 'users.manage'],
       }),
     })
     assertNotServerError(res.status, 'Manager creating role')

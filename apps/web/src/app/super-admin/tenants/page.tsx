@@ -2,6 +2,10 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { api } from '@/lib/api'
+import { PERMISSION_GROUPS, ALL_PERMISSIONS } from '@/lib/permissions'
+
+const PERM_GROUPS = PERMISSION_GROUPS
+const ALL_PERM_LIST = ALL_PERMISSIONS
 
 type FilterType = 'all' | 'active' | 'passive' | 'Free' | 'Pro' | 'Enterprise'
 
@@ -224,6 +228,43 @@ export default function TenantsPage() {
                   </div>
                 </div>
 
+                {/* Yetkiler */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-[11px] font-semibold text-gray-500">İcazə verilən yetkiler ({(selectedTenant._permissions || selectedTenant.allowedPermissions || []).length}/{ALL_PERM_LIST.length})</label>
+                    <button onClick={() => {
+                      const current = selectedTenant._permissions || selectedTenant.allowedPermissions || []
+                      const allSelected = current.length === ALL_PERM_LIST.length
+                      setSelectedTenant({ ...selectedTenant, _permissions: allSelected ? [] : [...ALL_PERM_LIST] })
+                    }} className="text-[10px] font-bold px-2 py-0.5 rounded" style={{ color: '#4F46E5', backgroundColor: '#EEF2FF' }}>
+                      {(selectedTenant._permissions || selectedTenant.allowedPermissions || []).length === ALL_PERM_LIST.length ? 'Hamısını sil' : 'Hamısını seç'}
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {PERM_GROUPS.map(g => (
+                      <div key={g.key} className="bg-gray-50 rounded-lg p-2.5">
+                        <p className="text-[10px] font-bold text-gray-600 mb-1.5">{g.icon} {g.label}</p>
+                        <div className="space-y-1">
+                          {g.permissions.map(p => {
+                            const perms = selectedTenant._permissions || selectedTenant.allowedPermissions || []
+                            const checked = perms.includes(p.key)
+                            return (
+                              <label key={p.key} className="flex items-center gap-1.5 cursor-pointer">
+                                <input type="checkbox" checked={checked} onChange={() => {
+                                  const current = selectedTenant._permissions || selectedTenant.allowedPermissions || []
+                                  const updated = checked ? current.filter((k: string) => k !== p.key) : [...current, p.key]
+                                  setSelectedTenant({ ...selectedTenant, _permissions: updated })
+                                }} className="w-3.5 h-3.5 rounded accent-indigo-500" />
+                                <span className="text-[10px] text-gray-600">{p.label}</span>
+                              </label>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
                 {/* Məlumatlar */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -269,7 +310,15 @@ export default function TenantsPage() {
                 <button onClick={() => handleDeleteTenant(selectedTenant.id)} className="px-4 py-2 rounded-lg text-[12px] font-bold text-red-500 bg-red-50 hover:bg-red-100 transition">Sil</button>
                 <div className="flex gap-2">
                   <button onClick={() => setSelectedTenant(null)} className="px-5 py-2 rounded-lg text-[12px] font-semibold text-gray-500 hover:bg-gray-100 transition">Bağla</button>
-                  <button className="px-5 py-2 rounded-lg text-[12px] font-bold text-white transition hover:shadow-lg" style={{ background: 'linear-gradient(135deg, #4F46E5, #7C3AED)' }}>Yadda saxla</button>
+                  <button onClick={async () => {
+                    try {
+                      await api.updateAdminTenant(selectedTenant.id, {
+                        allowedPermissions: selectedTenant._permissions || selectedTenant.allowedPermissions || [],
+                      })
+                      loadTenants()
+                      setSelectedTenant(null)
+                    } catch (e: any) { alert(e.message) }
+                  }} className="px-5 py-2 rounded-lg text-[12px] font-bold text-white transition hover:shadow-lg" style={{ background: 'linear-gradient(135deg, #4F46E5, #7C3AED)' }}>Yadda saxla</button>
                 </div>
               </div>
             </div>

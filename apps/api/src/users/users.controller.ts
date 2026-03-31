@@ -11,7 +11,7 @@ export class UsersController {
   constructor(private usersService: UsersService) {}
 
   @Post()
-  @RequirePermissions('users.create')
+  @RequirePermissions('users.manage')
   create(@Body() dto: CreateUserDto, @Req() req: any) {
     return this.usersService.create(dto, req.user.tenantId)
   }
@@ -35,7 +35,7 @@ export class UsersController {
   }
 
   @Get('businesses')
-  @RequirePermissions('businesses.read')
+  @RequirePermissions('users.read')
   getBusinesses(@Req() req: any) {
     return this.usersService.getBusinesses(req.user.tenantId)
   }
@@ -53,13 +53,13 @@ export class UsersController {
   }
 
   @Put(':id')
-  @RequirePermissions('users.update')
+  @RequirePermissions('users.manage')
   update(@Param('id') id: string, @Body() dto: UpdateUserDto, @Req() req: any) {
     return this.usersService.update(id, dto, req.user.tenantId)
   }
 
   @Delete(':id')
-  @RequirePermissions('users.delete')
+  @RequirePermissions('users.manage')
   remove(@Param('id') id: string, @Req() req: any) {
     return this.usersService.remove(id, req.user.tenantId)
   }

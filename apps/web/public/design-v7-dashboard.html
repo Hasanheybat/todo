@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>WorkFlow Pro — Slate</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#f8fafc;
+  --surface:#ffffff;
+  --surface-2:#f1f5f9;
+  --surface-3:#e2e8f0;
+  --surface-4:#cbd5e1;
+  --text:#0f172a;
+  --text-2:#475569;
+  --text-3:#94a3b8;
+  --text-4:#cbd5e1;
+  --blue:#2563eb;
+  --blue-soft:#eff6ff;
+  --blue-mid:#dbeafe;
+  --green:#16a34a;
+  --green-soft:#f0fdf4;
+  --amber:#d97706;
+  --amber-soft:#fffbeb;
+  --red:#dc2626;
+  --red-soft:#fef2f2;
+  --violet:#7c3aed;
+  --violet-soft:#f5f3ff;
+  --sky:#0284c7;
+  --sky-soft:#e0f2fe;
+  --shadow-sm:0 1px 2px rgba(15,23,42,0.06);
+  --shadow:0 1px 3px rgba(15,23,42,0.08),0 1px 2px rgba(15,23,42,0.04);
+  --shadow-md:0 4px 6px rgba(15,23,42,0.05),0 2px 4px rgba(15,23,42,0.04);
+  --radius:8px;
+  --sidebar-w:232px;
+}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:13px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 300,'GRAD' -25,'opsz' 20;font-size:18px;vertical-align:middle;line-height:1}
+.filled{font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 20}
+
+/* ── Sidebar ─────────────────── */
+.sidebar{
+  position:fixed;left:0;top:0;bottom:0;width:var(--sidebar-w);
+  background:var(--surface);border-right:1px solid var(--surface-3);
+  display:flex;flex-direction:column;padding:0;z-index:40;
+}
+.sidebar-top{padding:16px 12px 8px}
+.logo{display:flex;align-items:center;gap:8px;padding:4px 8px;margin-bottom:12px;border-radius:6px;cursor:pointer}
+.logo:hover{background:var(--surface-2)}
+.logo-mark{width:22px;height:22px;border-radius:5px;background:var(--blue);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-mark .material-symbols-outlined{font-size:13px;color:#fff;font-variation-settings:'FILL' 1,'wght' 600}
+.logo-name{font-size:13px;font-weight:700;letter-spacing:-0.2px;color:var(--text)}
+.logo-plan{font-size:10px;font-weight:500;color:var(--text-3);margin-left:auto;background:var(--surface-2);padding:1px 6px;border-radius:4px}
+
+.nav-section{padding:0 8px;margin-bottom:4px}
+.nav-section-label{font-size:10px;font-weight:600;color:var(--text-4);text-transform:uppercase;letter-spacing:0.6px;padding:8px 6px 4px;display:block}
+.nav-item{display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:6px;text-decoration:none;color:var(--text-2);font-size:12.5px;font-weight:500;transition:all .12s;cursor:pointer;border:none;background:none;width:100%;text-align:left}
+.nav-item:hover{background:var(--surface-2);color:var(--text)}
+.nav-item.active{background:var(--blue-soft);color:var(--blue);font-weight:600}
+.nav-item.active .material-symbols-outlined{color:var(--blue)}
+.nav-item .material-symbols-outlined{color:var(--text-3);transition:color .12s;font-size:16px}
+.nav-item:hover .material-symbols-outlined{color:var(--text-2)}
+.nav-count{margin-left:auto;font-size:10px;font-weight:600;padding:0 5px;height:16px;min-width:16px;border-radius:8px;background:var(--surface-3);color:var(--text-3);display:flex;align-items:center;justify-content:center}
+.nav-item.active .nav-count{background:var(--blue-mid);color:var(--blue)}
+
+.new-task-btn{
+  display:flex;align-items:center;gap:6px;padding:6px 10px;
+  border-radius:6px;border:1px solid var(--surface-3);
+  background:var(--surface);color:var(--text-2);
+  font-size:12px;font-weight:500;cursor:pointer;
+  margin:0 8px 4px;width:calc(100% - 16px);
+  transition:all .12s;font-family:'Plus Jakarta Sans',sans-serif;
+  box-shadow:var(--shadow-sm);
+}
+.new-task-btn:hover{background:var(--surface-2);color:var(--text);border-color:var(--surface-4)}
+.new-task-btn .material-symbols-outlined{font-size:14px;color:var(--text-4)}
+.new-task-btn .shortcut{margin-left:auto;font-size:10px;color:var(--text-4);background:var(--surface-2);padding:1px 5px;border-radius:3px;font-family:monospace}
+
+.sidebar-footer{margin-top:auto;padding:8px 12px 12px;border-top:1px solid var(--surface-2)}
+.user-row{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;cursor:pointer;transition:background .12s}
+.user-row:hover{background:var(--surface-2)}
+.user-avatar{width:24px;height:24px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0}
+.user-name{font-size:12px;font-weight:600;color:var(--text)}
+.user-role{font-size:10px;color:var(--text-3)}
+
+/* ── Main ─────────────────── */
+.main{margin-left:var(--sidebar-w);min-height:100vh;display:flex;flex-direction:column}
+
+/* Top bar */
+.topbar{
+  display:flex;align-items:center;gap:8px;
+  padding:0 24px;height:44px;
+  border-bottom:1px solid var(--surface-2);
+  background:var(--surface);
+  position:sticky;top:0;z-index:30;
+  flex-shrink:0;
+}
+.breadcrumb{display:flex;align-items:center;gap:4px;flex:1}
+.breadcrumb span{font-size:12px;font-weight:500;color:var(--text-3)}
+.breadcrumb span.current{color:var(--text);font-weight:600}
+.breadcrumb .sep{color:var(--text-4)}
+.topbar-actions{display:flex;align-items:center;gap:6px}
+.search-trigger{display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:5px;border:1px solid var(--surface-3);background:var(--surface-2);color:var(--text-3);font-size:11.5px;cursor:pointer;transition:all .12s;font-family:'Plus Jakarta Sans',sans-serif}
+.search-trigger:hover{background:var(--surface-3);color:var(--text-2)}
+.search-trigger .shortcut{font-size:10px;background:var(--surface);border:1px solid var(--surface-3);padding:0 4px;border-radius:3px;font-family:monospace;color:var(--text-4)}
+.tb-icon{width:28px;height:28px;border-radius:5px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-3);transition:all .12s}
+.tb-icon:hover{background:var(--surface-2);color:var(--text-2)}
+.tb-icon .material-symbols-outlined{font-size:16px}
+.notif-btn{position:relative}
+.notif-btn::after{content:'3';position:absolute;top:2px;right:2px;width:14px;height:14px;border-radius:50%;background:var(--red);border:2px solid var(--surface);font-size:8px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;text-align:center;line-height:10px}
+
+/* Content */
+.content{padding:28px 32px 64px;max-width:1100px}
+
+/* Page header */
+.page-header{margin-bottom:24px}
+.page-title{font-size:20px;font-weight:700;letter-spacing:-0.4px;color:var(--text);margin-bottom:2px}
+.page-meta{font-size:12px;color:var(--text-3);font-weight:400}
+
+/* Metric row */
+.metric-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px}
+.metric{
+  background:var(--surface);border:1px solid var(--surface-3);
+  border-radius:var(--radius);padding:16px 18px;
+  box-shadow:var(--shadow-sm);position:relative;overflow:hidden;
+}
+.metric-label{font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px}
+.metric-value{font-size:28px;font-weight:800;letter-spacing:-1.5px;line-height:1}
+.metric-sub{font-size:11px;font-weight:500;margin-top:5px;display:flex;align-items:center;gap:3px}
+.metric-bar{position:absolute;bottom:0;left:0;right:0;height:3px}
+
+/* Two col */
+.layout{display:grid;grid-template-columns:1fr 320px;gap:16px;align-items:start}
+
+/* Card */
+.card{background:var(--surface);border:1px solid var(--surface-3);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden}
+.card-head{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--surface-2)}
+.card-head h2{font-size:12.5px;font-weight:600;color:var(--text);letter-spacing:-0.1px;flex:1}
+.card-head .count{font-size:11px;font-weight:600;padding:1px 6px;border-radius:10px;background:var(--surface-2);color:var(--text-3)}
+
+/* Priority banner */
+.priority-banner{
+  background:var(--surface);border:1px solid var(--surface-3);
+  border-radius:var(--radius);box-shadow:var(--shadow-sm);
+  padding:16px 18px;margin-bottom:12px;
+  border-left:3px solid var(--red);cursor:pointer;
+  transition:box-shadow .15s;
+}
+.priority-banner:hover{box-shadow:var(--shadow-md)}
+.pb-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
+.pb-badges{display:flex;align-items:center;gap:6px}
+.badge{font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;display:inline-flex;align-items:center;gap:3px}
+.badge .material-symbols-outlined{font-size:12px}
+.badge-red{background:var(--red-soft);color:var(--red)}
+.badge-amber{background:var(--amber-soft);color:var(--amber)}
+.badge-blue{background:var(--blue-soft);color:var(--blue)}
+.badge-green{background:var(--green-soft);color:var(--green)}
+.badge-violet{background:var(--violet-soft);color:var(--violet)}
+.badge-sky{background:var(--sky-soft);color:var(--sky)}
+.badge-surface{background:var(--surface-2);color:var(--text-3)}
+.pb-title{font-size:14px;font-weight:600;color:var(--text);letter-spacing:-0.2px;margin-bottom:8px;line-height:1.4}
+.pb-meta{display:flex;align-items:center;gap:12px;font-size:11px;color:var(--text-3);margin-bottom:14px}
+.pb-meta .material-symbols-outlined{font-size:14px}
+.pb-meta span{display:flex;align-items:center;gap:3px}
+.progress-track{height:4px;background:var(--surface-2);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;border-radius:2px;background:var(--blue)}
+.progress-caption{font-size:11px;color:var(--text-3);margin-top:5px;font-weight:500}
+
+/* Issue list (Linear style) */
+.issue-row{
+  display:flex;align-items:center;gap:10px;padding:8px 16px;
+  border-bottom:1px solid var(--surface-2);cursor:pointer;
+  transition:background .1s;position:relative;
+}
+.issue-row:last-child{border-bottom:none}
+.issue-row:hover{background:var(--surface-2)}
+.issue-id{font-size:10.5px;font-weight:600;color:var(--text-4);font-family:monospace;width:48px;flex-shrink:0;letter-spacing:0}
+.issue-priority{width:14px;height:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.issue-priority .material-symbols-outlined{font-size:14px}
+.issue-status{width:14px;height:14px;border-radius:50%;border:2px solid;flex-shrink:0}
+.issue-title{flex:1;font-size:12.5px;font-weight:500;color:var(--text);min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.issue-row.done .issue-title{color:var(--text-4);text-decoration:line-through}
+.issue-tags{display:flex;gap:4px;flex-shrink:0}
+.issue-assignee{width:20px;height:20px;border-radius:50%;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0}
+.issue-date{font-size:10.5px;color:var(--text-4);white-space:nowrap;flex-shrink:0;min-width:48px;text-align:right}
+.issue-date.overdue{color:var(--red);font-weight:600}
+
+/* Right column cards */
+.activity-item{display:flex;gap:10px;padding:10px 16px;border-bottom:1px solid var(--surface-2)}
+.activity-item:last-child{border-bottom:none}
+.act-dot{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8.5px;font-weight:700;color:#fff;flex-shrink:0;margin-top:1px}
+.act-body{flex:1}
+.act-msg{font-size:12px;color:var(--text-2);line-height:1.4}
+.act-msg strong{color:var(--text);font-weight:600}
+.act-time{font-size:10.5px;color:var(--text-4);margin-top:2px;font-weight:500}
+
+/* Inline stat row */
+.stat-inline{display:flex;justify-content:space-between;align-items:center;padding:9px 16px;border-bottom:1px solid var(--surface-2)}
+.stat-inline:last-child{border-bottom:none}
+.stat-inline-label{font-size:12px;font-weight:500;color:var(--text-2);display:flex;align-items:center;gap:6px}
+.stat-inline-label .dot{width:7px;height:7px;border-radius:50%}
+.stat-inline-right{display:flex;align-items:center;gap:10px}
+.stat-inline-val{font-size:13px;font-weight:700;color:var(--text)}
+.stat-inline-bar{width:64px;height:4px;background:var(--surface-3);border-radius:2px;overflow:hidden}
+.stat-inline-fill{height:100%;border-radius:2px}
+
+/* Detail Panel */
+.panel-overlay{position:fixed;inset:0;z-index:45;display:none}
+.panel-overlay.open{display:block}
+.detail-panel{
+  position:fixed;right:0;top:0;bottom:0;width:400px;
+  background:var(--surface);border-left:1px solid var(--surface-3);
+  z-index:50;transform:translateX(100%);
+  transition:transform .22s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column;
+  box-shadow:-8px 0 32px rgba(15,23,42,0.06);
+}
+.detail-panel.open{transform:translateX(0)}
+.dp-topbar{
+  display:flex;align-items:center;gap:6px;padding:0 12px;
+  height:44px;border-bottom:1px solid var(--surface-2);flex-shrink:0;
+}
+.dp-topbar .dp-id{font-size:11px;font-weight:600;color:var(--text-4);font-family:monospace}
+.dp-body{flex:1;overflow-y:auto;padding:20px}
+.dp-footer{padding:10px 16px;border-top:1px solid var(--surface-2);flex-shrink:0}
+.dp-footer-input{
+  display:flex;align-items:center;gap:8px;padding:7px 10px;
+  border-radius:6px;border:1px solid var(--surface-3);background:var(--surface-2);
+}
+.dp-footer-input input{flex:1;border:none;outline:none;font-size:12px;background:transparent;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif}
+.dp-footer-input input::placeholder{color:var(--text-4)}
+.dp-footer-input .material-symbols-outlined{font-size:16px;color:var(--text-4);cursor:pointer}
+.dp-footer-input .material-symbols-outlined:hover{color:var(--blue)}
+
+.dp-title{font-size:15px;font-weight:700;color:var(--text);letter-spacing:-0.3px;margin-bottom:16px;line-height:1.4}
+.dp-field-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;padding:12px;background:var(--surface-2);border-radius:6px}
+.dp-field .dp-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;color:var(--text-4);margin-bottom:3px}
+.dp-field .dp-val{font-size:12px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:4px}
+.dp-desc{font-size:12.5px;color:var(--text-2);line-height:1.7;margin-bottom:16px;padding:10px 12px;background:var(--surface-2);border-radius:6px;border-left:2px solid var(--surface-4)}
+.dp-section-title{font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;margin-top:16px;display:flex;align-items:center;justify-content:space-between}
+.dp-section-title span{font-size:10px;font-weight:500;color:var(--text-4);text-transform:none;letter-spacing:0}
+.sub-task{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:5px;transition:background .1s;cursor:pointer}
+.sub-task:hover{background:var(--surface-2)}
+.sub-check{width:14px;height:14px;border-radius:3px;border:1.5px solid var(--surface-4);flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.sub-check.done{background:var(--green);border-color:var(--green)}
+.sub-check.done .material-symbols-outlined{font-size:11px;color:#fff;font-variation-settings:'FILL' 1,'wght' 700}
+.sub-text{font-size:12px;color:var(--text-2)}
+.sub-task.done .sub-text{text-decoration:line-through;color:var(--text-4)}
+.dp-btn-row{display:flex;gap:6px;margin-bottom:16px}
+.dp-btn{
+  padding:6px 12px;border-radius:5px;font-size:11.5px;font-weight:600;
+  border:1px solid var(--surface-3);background:var(--surface);color:var(--text-2);
+  cursor:pointer;display:flex;align-items:center;gap:4px;
+  transition:all .12s;font-family:'Plus Jakarta Sans',sans-serif;
+  box-shadow:var(--shadow-sm);
+}
+.dp-btn:hover{background:var(--surface-2);border-color:var(--surface-4);color:var(--text)}
+.dp-btn .material-symbols-outlined{font-size:14px}
+.dp-btn.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+.dp-btn.primary:hover{background:#1d4ed8}
+</style>
+</head>
+<body>
+
+<!-- ── Sidebar ── -->
+<aside class="sidebar">
+  <div class="sidebar-top">
+    <div class="logo">
+      <div class="logo-mark"><span class="material-symbols-outlined">stacks</span></div>
+      <span class="logo-name">WorkFlow Pro</span>
+      <span class="logo-plan">Pro</span>
+    </div>
+
+    <button class="new-task-btn" onclick="openPanel()">
+      <span class="material-symbols-outlined">add</span>
+      Yeni tapşırıq
+      <span class="shortcut">⌘K</span>
+    </button>
+
+    <div class="nav-section">
+      <nav>
+        <a class="nav-item active">
+          <span class="material-symbols-outlined">today</span>
+          Bugün
+          <span class="nav-count">5</span>
+        </a>
+        <a class="nav-item">
+          <span class="material-symbols-outlined">inbox</span>
+          Gələnlər
+          <span class="nav-count">12</span>
+        </a>
+        <a class="nav-item">
+          <span class="material-symbols-outlined">event_upcoming</span>
+          Gələcək
+        </a>
+      </nav>
+    </div>
+
+    <div class="nav-section">
+      <span class="nav-section-label">İş sahəsi</span>
+      <nav>
+        <a class="nav-item">
+          <span class="material-symbols-outlined">assignment</span>
+          Tapşırıqlar
+        </a>
+        <a class="nav-item">
+          <span class="material-symbols-outlined">check_box</span>
+          Todo
+        </a>
+        <a class="nav-item">
+          <span class="material-symbols-outlined">repeat</span>
+          Şablonlar
+        </a>
+      </nav>
+    </div>
+
+    <div class="nav-section">
+      <span class="nav-section-label">İdarəetmə</span>
+      <nav>
+        <a class="nav-item">
+          <span class="material-symbols-outlined">group</span>
+          İşçilər
+        </a>
+        <a class="nav-item">
+          <span class="material-symbols-outlined">shield</span>
+          Rollar
+        </a>
+        <a class="nav-item">
+          <span class="material-symbols-outlined">account_balance</span>
+          Maliyyə
+        </a>
+        <a class="nav-item">
+          <span class="material-symbols-outlined">settings</span>
+          Ayarlar
+        </a>
+      </nav>
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="user-row">
+      <div class="user-avatar">HƏ</div>
+      <div>
+        <div class="user-name">Həsən Əliyev</div>
+        <div class="user-role">Müdir · Bakı Filialı</div>
+      </div>
+      <span class="material-symbols-outlined" style="font-size:14px;color:var(--text-4);margin-left:auto">unfold_more</span>
+    </div>
+  </div>
+</aside>
+
+<!-- ── Main ── -->
+<div class="main">
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="breadcrumb">
+      <span>WorkFlow Pro</span>
+      <span class="sep">/</span>
+      <span class="current">Bugün</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="search-trigger">
+        <span class="material-symbols-outlined" style="font-size:14px">search</span>
+        Axtar...
+        <span class="shortcut">⌘F</span>
+      </button>
+      <button class="tb-icon notif-btn"><span class="material-symbols-outlined">notifications</span></button>
+      <button class="tb-icon"><span class="material-symbols-outlined">help_outline</span></button>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- Page header -->
+    <div class="page-header">
+      <div class="page-title">Bugün</div>
+      <div class="page-meta">31 Mart 2026, Çərşənbə axşamı · 5 aktiv tapşırıq</div>
+    </div>
+
+    <!-- Metrics -->
+    <div class="metric-row">
+      <div class="metric">
+        <div class="metric-label">Gözləyir</div>
+        <div class="metric-value" style="color:var(--sky)">12</div>
+        <div class="metric-sub" style="color:var(--text-3)">
+          <span class="material-symbols-outlined" style="font-size:12px;color:var(--amber)">trending_up</span>
+          +3 bu həftə
+        </div>
+        <div class="metric-bar" style="background:var(--sky-soft)"><div style="width:55%;height:100%;background:var(--sky);border-radius:2px"></div></div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Davam edir</div>
+        <div class="metric-value" style="color:var(--amber)">5</div>
+        <div class="metric-sub" style="color:var(--amber)">
+          <span class="material-symbols-outlined" style="font-size:12px">circle</span>
+          Aktiv
+        </div>
+        <div class="metric-bar" style="background:var(--amber-soft)"><div style="width:25%;height:100%;background:var(--amber);border-radius:2px"></div></div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Onay gözlənir</div>
+        <div class="metric-value" style="color:var(--violet)">3</div>
+        <div class="metric-sub" style="color:var(--text-3)">
+          <span class="material-symbols-outlined" style="font-size:12px;color:var(--violet)">hourglass_top</span>
+          Rəhbər onayı
+        </div>
+        <div class="metric-bar" style="background:var(--violet-soft)"><div style="width:18%;height:100%;background:var(--violet);border-radius:2px"></div></div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Tamamlandı</div>
+        <div class="metric-value" style="color:var(--green)">18</div>
+        <div class="metric-sub" style="color:var(--green)">
+          <span class="material-symbols-outlined" style="font-size:12px">arrow_upward</span>
+          +5 bu həftə
+        </div>
+        <div class="metric-bar" style="background:var(--green-soft)"><div style="width:72%;height:100%;background:var(--green);border-radius:2px"></div></div>
+      </div>
+    </div>
+
+    <div class="layout">
+      <!-- Left -->
+      <div>
+        <!-- Priority banner -->
+        <div class="priority-banner" onclick="openPanel()">
+          <div class="pb-top">
+            <div class="pb-badges">
+              <span class="badge badge-red"><span class="material-symbols-outlined">flag</span>Kritik</span>
+              <span class="badge badge-amber"><span class="material-symbols-outlined">event_busy</span>Gecikmiş</span>
+              <span class="badge badge-surface">WF-041</span>
+            </div>
+            <span class="badge badge-amber">Davam edir</span>
+          </div>
+          <div class="pb-title">Aylıq satış hesabatını hazırla</div>
+          <div class="pb-meta">
+            <span><span class="material-symbols-outlined">group</span>10 nəfər</span>
+            <span><span class="material-symbols-outlined">location_on</span>Bakı Filialı</span>
+            <span><span class="material-symbols-outlined">schedule</span>28 Mar 2026</span>
+          </div>
+          <div class="progress-track"><div class="progress-fill" style="width:35%"></div></div>
+          <div class="progress-caption">3 / 10 alt tapşırıq · 35%</div>
+        </div>
+
+        <!-- Issue list -->
+        <div class="card">
+          <div class="card-head">
+            <h2>Tapşırıqlar</h2>
+            <span class="count">8</span>
+            <button class="tb-icon" style="width:24px;height:24px"><span class="material-symbols-outlined" style="font-size:14px">tune</span></button>
+            <button class="tb-icon" style="width:24px;height:24px"><span class="material-symbols-outlined" style="font-size:14px">sort</span></button>
+          </div>
+
+          <!-- Issue rows -->
+          <div class="issue-row" onclick="openPanel()">
+            <span class="issue-id">WF-042</span>
+            <span class="issue-priority"><span class="material-symbols-outlined" style="color:var(--red)">keyboard_double_arrow_up</span></span>
+            <span class="issue-status" style="border-color:var(--amber);background:transparent"></span>
+            <span class="issue-title">Müştəri geri bildirimlərini yoxla</span>
+            <div class="issue-tags">
+              <span class="badge badge-sky" style="font-size:10px">Gözləyir</span>
+            </div>
+            <div class="issue-assignee" style="background:#8b5cf6;font-size:8px">NƏ</div>
+            <span class="issue-date">31 Mar</span>
+          </div>
+
+          <div class="issue-row" onclick="openPanel()">
+            <span class="issue-id">WF-043</span>
+            <span class="issue-priority"><span class="material-symbols-outlined" style="color:var(--amber)">keyboard_arrow_up</span></span>
+            <span class="issue-status" style="border-color:var(--amber);background:var(--amber)"></span>
+            <span class="issue-title">API sənədləşməsini yenilə (v2)</span>
+            <div class="issue-tags">
+              <span class="badge badge-amber" style="font-size:10px">Davam edir</span>
+            </div>
+            <div class="issue-assignee" style="background:#0ea5e9;font-size:8px">TQ</div>
+            <span class="issue-date overdue">29 Mar</span>
+          </div>
+
+          <div class="issue-row done">
+            <span class="issue-id" style="text-decoration:line-through">WF-038</span>
+            <span class="issue-priority"><span class="material-symbols-outlined" style="color:var(--text-4)">remove</span></span>
+            <span class="issue-status" style="border-color:var(--green);background:var(--green)"></span>
+            <span class="issue-title">Təqdimat slaydlarını hazırla</span>
+            <div class="issue-tags">
+              <span class="badge badge-green" style="font-size:10px">Tamamlandı</span>
+            </div>
+            <div class="issue-assignee" style="background:#f59e0b;font-size:8px">LM</div>
+            <span class="issue-date">29 Mar</span>
+          </div>
+
+          <div class="issue-row" onclick="openPanel()">
+            <span class="issue-id">WF-044</span>
+            <span class="issue-priority"><span class="material-symbols-outlined" style="color:var(--text-3)">drag_handle</span></span>
+            <span class="issue-status" style="border-color:var(--surface-4);background:transparent"></span>
+            <span class="issue-title">Maliyyə hesabatı hazırla</span>
+            <div class="issue-tags">
+              <span class="badge badge-surface" style="font-size:10px">Gözləyir</span>
+            </div>
+            <div class="issue-assignee" style="background:#16a34a;font-size:8px">RQ</div>
+            <span class="issue-date">5 Apr</span>
+          </div>
+
+          <div class="issue-row" onclick="openPanel()">
+            <span class="issue-id">WF-045</span>
+            <span class="issue-priority"><span class="material-symbols-outlined" style="color:var(--red)">keyboard_double_arrow_up</span></span>
+            <span class="issue-status" style="border-color:var(--surface-4);background:transparent"></span>
+            <span class="issue-title">Gəncə filialı stok sayımı</span>
+            <div class="issue-tags">
+              <span class="badge badge-violet" style="font-size:10px">🔄 Aylıq</span>
+            </div>
+            <div class="issue-assignee" style="background:#ec4899;font-size:8px">AH</div>
+            <span class="issue-date">10 Apr</span>
+          </div>
+
+          <div class="issue-row" onclick="openPanel()">
+            <span class="issue-id">WF-046</span>
+            <span class="issue-priority"><span class="material-symbols-outlined" style="color:var(--sky)">keyboard_arrow_down</span></span>
+            <span class="issue-status" style="border-color:var(--surface-4);background:transparent"></span>
+            <span class="issue-title">Yeni işçi onboarding sənədi</span>
+            <div class="issue-tags">
+              <span class="badge badge-sky" style="font-size:10px">Gözləyir</span>
+            </div>
+            <div class="issue-assignee" style="background:#7c3aed;font-size:8px">HƏ</div>
+            <span class="issue-date">15 Apr</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right -->
+      <div style="display:flex;flex-direction:column;gap:12px">
+
+        <!-- Completion progress -->
+        <div class="card">
+          <div class="card-head"><h2>Bu həftə</h2></div>
+          <div class="stat-inline">
+            <div class="stat-inline-label"><span class="dot" style="background:var(--green)"></span>Tamamlandı</div>
+            <div class="stat-inline-right">
+              <span class="stat-inline-val">18</span>
+              <div class="stat-inline-bar"><div class="stat-inline-fill" style="width:72%;background:var(--green)"></div></div>
+            </div>
+          </div>
+          <div class="stat-inline">
+            <div class="stat-inline-label"><span class="dot" style="background:var(--amber)"></span>Davam edir</div>
+            <div class="stat-inline-right">
+              <span class="stat-inline-val">5</span>
+              <div class="stat-inline-bar"><div class="stat-inline-fill" style="width:20%;background:var(--amber)"></div></div>
+            </div>
+          </div>
+          <div class="stat-inline">
+            <div class="stat-inline-label"><span class="dot" style="background:var(--red)"></span>Gecikmiş</div>
+            <div class="stat-inline-right">
+              <span class="stat-inline-val">2</span>
+              <div class="stat-inline-bar"><div class="stat-inline-fill" style="width:8%;background:var(--red)"></div></div>
+            </div>
+          </div>
+          <div style="padding:10px 16px;border-top:1px solid var(--surface-2)">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <span style="font-size:11px;font-weight:600;color:var(--text-3)">Tamamlanma faizi</span>
+              <span style="font-size:12px;font-weight:700;color:var(--green)">72%</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill" style="width:72%;background:var(--green)"></div></div>
+          </div>
+        </div>
+
+        <!-- Activity -->
+        <div class="card">
+          <div class="card-head">
+            <h2>Son aktivlik</h2>
+            <span style="width:6px;height:6px;border-radius:50%;background:var(--green);margin-left:auto"></span>
+          </div>
+          <div class="activity-item">
+            <div class="act-dot" style="background:#8b5cf6">NƏ</div>
+            <div class="act-body">
+              <div class="act-msg"><strong>Nigar Ə.</strong> tapşırığı tamamladı</div>
+              <div class="act-time">5 dəq · WF-039</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="act-dot" style="background:#0ea5e9">TQ</div>
+            <div class="act-body">
+              <div class="act-msg"><strong>Tural Q.</strong> şərh əlavə etdi</div>
+              <div class="act-time">23 dəq · WF-043</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="act-dot" style="background:#16a34a">RQ</div>
+            <div class="act-body">
+              <div class="act-msg"><strong>Rəşad Q.</strong> fayl yüklədi</div>
+              <div class="act-time">1 saat · maliyye_mart.xlsx</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="act-dot" style="background:#f59e0b">AH</div>
+            <div class="act-body">
+              <div class="act-msg"><strong>Aynur H.</strong> tapşırıq yaratdı</div>
+              <div class="act-time">2 saat · WF-046</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Detail Panel ── -->
+<div class="panel-overlay" id="overlay" onclick="closePanel()"></div>
+<div class="detail-panel" id="panel">
+  <div class="dp-topbar">
+    <span class="dp-id">WF-042</span>
+    <div style="display:flex;gap:4px;margin-left:6px">
+      <span class="badge badge-sky">Gözləyir</span>
+      <span class="badge badge-red">Kritik</span>
+    </div>
+    <div style="margin-left:auto;display:flex;gap:2px">
+      <button class="tb-icon"><span class="material-symbols-outlined" style="font-size:15px">open_in_new</span></button>
+      <button class="tb-icon"><span class="material-symbols-outlined" style="font-size:15px">more_horiz</span></button>
+      <button class="tb-icon" onclick="closePanel()"><span class="material-symbols-outlined" style="font-size:15px">close</span></button>
+    </div>
+  </div>
+  <div class="dp-body">
+    <div class="dp-title">Müştəri geri bildirimlərini yoxla</div>
+
+    <div class="dp-btn-row">
+      <button class="dp-btn"><span class="material-symbols-outlined">play_arrow</span>Başla</button>
+      <button class="dp-btn primary"><span class="material-symbols-outlined">check</span>Tamamla</button>
+      <button class="dp-btn"><span class="material-symbols-outlined">person_add</span>Təyin et</button>
+    </div>
+
+    <div class="dp-field-grid">
+      <div class="dp-field">
+        <div class="dp-label">İcraçı</div>
+        <div class="dp-val">
+          <div style="width:16px;height:16px;border-radius:50%;background:#8b5cf6;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;color:#fff">NƏ</div>
+          Nigar Əhmədova
+        </div>
+      </div>
+      <div class="dp-field">
+        <div class="dp-label">Son tarix</div>
+        <div class="dp-val" style="color:var(--red)">
+          <span class="material-symbols-outlined" style="font-size:13px">event_busy</span>
+          31 Mar 2026
+        </div>
+      </div>
+      <div class="dp-field">
+        <div class="dp-label">Prioritet</div>
+        <div class="dp-val" style="color:var(--red)">
+          <span class="material-symbols-outlined" style="font-size:13px">keyboard_double_arrow_up</span>
+          Kritik
+        </div>
+      </div>
+      <div class="dp-field">
+        <div class="dp-label">Filial</div>
+        <div class="dp-val">Bakı Filialı</div>
+      </div>
+    </div>
+
+    <div class="dp-desc">App Store rəylərini analiz edin. Premium istifadəçilərin ən çox qeyd etdiyi 3 problem nöqtəsini müəyyən edin və prioritet sırasına görə hesabat hazırlayın.</div>
+
+    <div class="dp-section-title">
+      Alt tapşırıqlar
+      <span>2 / 4 tamamlandı</span>
+    </div>
+    <div>
+      <div class="sub-task done">
+        <div class="sub-check done"><span class="material-symbols-outlined">check</span></div>
+        <span class="sub-text">CSV faylını yüklə</span>
+      </div>
+      <div class="sub-task done">
+        <div class="sub-check done"><span class="material-symbols-outlined">check</span></div>
+        <span class="sub-text">1-3 ulduzlu rəyləri filtrlə</span>
+      </div>
+      <div class="sub-task">
+        <div class="sub-check"></div>
+        <span class="sub-text">Kateqoriyalara ayır</span>
+      </div>
+      <div class="sub-task">
+        <div class="sub-check"></div>
+        <span class="sub-text">Xülasə hesabatı hazırla</span>
+      </div>
+    </div>
+
+    <div class="dp-section-title">Mesajlar</div>
+    <div class="activity-item" style="padding:6px 0">
+      <div class="act-dot" style="background:#16a34a">HƏ</div>
+      <div class="act-body">
+        <div class="act-msg"><strong>Həsən Əliyev</strong> — Rəyləri prioritet sırasına düz, əvvəl 1-ulduzluları al.</div>
+        <div class="act-time">1 saat əvvəl</div>
+      </div>
+    </div>
+    <div class="activity-item" style="padding:6px 0">
+      <div class="act-dot" style="background:#8b5cf6">NƏ</div>
+      <div class="act-body">
+        <div class="act-msg"><strong>Nigar Əhmədova</strong> — CSV hazırdır, filtrlərə başlayıram.</div>
+        <div class="act-time">30 dəq əvvəl</div>
+      </div>
+    </div>
+  </div>
+  <div class="dp-footer">
+    <div class="dp-footer-input">
+      <input type="text" placeholder="Şərh əlavə et..."/>
+      <span class="material-symbols-outlined">attach_file</span>
+      <span class="material-symbols-outlined">send</span>
+    </div>
+  </div>
+</div>
+
+<script>
+function openPanel(){
+  document.getElementById('panel').classList.add('open');
+  document.getElementById('overlay').classList.add('open');
+}
+function closePanel(){
+  document.getElementById('panel').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+}
+</script>
+</body>
+</html>

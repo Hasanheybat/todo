@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WorkFlow Pro — Design v11 (Deccount Flow Split)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+:root {
+  --primary: #4F46E5;
+  --primary-dark: #3730A3;
+  --primary-glow: rgba(79,70,229,0.35);
+  --secondary: #06B6D4;
+  --accent: #F59E0B;
+  --success: #10B981;
+  --danger: #EF4444;
+
+  /* SIDEBAR — dark */
+  --sb-bg: #0F172A;
+  --sb-surface: #1E293B;
+  --sb-border: rgba(255,255,255,0.07);
+  --sb-text: #94A3B8;
+  --sb-text-active: #F1F5F9;
+  --sb-hover: rgba(255,255,255,0.05);
+  --sb-active: rgba(79,70,229,0.2);
+
+  /* CONTENT — light */
+  --bg: #F1F5F9;
+  --surface: #FFFFFF;
+  --surface-2: #F8FAFC;
+  --border: #E2E8F0;
+  --border-light: #F1F5F9;
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #94A3B8;
+  --text-on-primary: #FFFFFF;
+
+  /* HEADER — dark variant */
+  --hdr-bg: #0F172A;
+  --hdr-border: rgba(255,255,255,0.07);
+
+  --sidebar-width: 250px;
+  --header-height: 60px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+
+  --shadow-sm: 0 2px 8px rgba(15,23,42,0.08);
+  --shadow-md: 0 4px 20px rgba(15,23,42,0.10);
+  --shadow-lg: 0 8px 32px rgba(15,23,42,0.12);
+  --shadow-primary: 0 4px 20px rgba(79,70,229,0.3);
+  --shadow-colored: 0 4px 20px rgba(6,182,212,0.25);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ── SIDEBAR (DARK) ── */
+.sidebar {
+  width: var(--sidebar-width);
+  height: 100vh;
+  background: var(--sb-bg);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  left: 0; top: 0;
+  z-index: 100;
+  border-right: 1px solid var(--sb-border);
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 20px 18px;
+  border-bottom: 1px solid var(--sb-border);
+}
+.logo-mark {
+  width: 38px; height: 38px;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-primary);
+}
+.logo-mark [data-lucide] { width: 18px; height: 18px; color: #fff; }
+.logo-text {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  color: #F1F5F9;
+}
+.logo-badge {
+  font-size: 9px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  display: block;
+  margin-top: 1px;
+}
+
+.sb-section { padding: 16px 12px 6px; }
+.sb-section-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.25);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0 10px;
+  margin-bottom: 6px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  color: var(--sb-text);
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-bottom: 1px;
+  position: relative;
+  text-decoration: none;
+}
+.nav-item:hover { background: var(--sb-hover); color: var(--sb-text-active); }
+.nav-item.active {
+  background: var(--sb-active);
+  color: #fff;
+}
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 18px;
+  background: var(--primary);
+  border-radius: 0 3px 3px 0;
+}
+.nav-item [data-lucide] { width: 16px; height: 16px; flex-shrink: 0; }
+.nav-badge {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 20px;
+  min-width: 20px;
+  text-align: center;
+}
+.nav-badge.indigo { background: rgba(79,70,229,0.3); color: #A5B4FC; }
+.nav-badge.cyan { background: rgba(6,182,212,0.25); color: #67E8F9; }
+.nav-badge.amber { background: rgba(245,158,11,0.25); color: #FCD34D; }
+.nav-badge.red { background: rgba(239,68,68,0.25); color: #FCA5A5; }
+
+.sb-footer {
+  margin-top: auto;
+  padding: 14px 12px;
+  border-top: 1px solid var(--sb-border);
+}
+.sb-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.sb-user:hover { background: var(--sb-hover); }
+.sb-avatar {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 12px; font-weight: 700;
+  flex-shrink: 0;
+  position: relative;
+}
+.sb-avatar::after {
+  content: '';
+  position: absolute;
+  bottom: 0; right: 0;
+  width: 9px; height: 9px;
+  background: var(--success);
+  border-radius: 50%;
+  border: 2px solid var(--sb-bg);
+}
+.sb-user-name { font-size: 13px; font-weight: 600; color: #CBD5E1; }
+.sb-user-role { font-size: 11px; color: rgba(255,255,255,0.3); }
+.sb-user [data-lucide] { width: 14px; height: 14px; color: rgba(255,255,255,0.2); margin-left: auto; }
+
+/* ── HEADER (DARK) ── */
+.header {
+  height: var(--header-height);
+  background: var(--hdr-bg);
+  border-bottom: 1px solid var(--hdr-border);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  gap: 16px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.header-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+.hb-root { color: rgba(255,255,255,0.35); }
+.hb-sep { color: rgba(255,255,255,0.2); }
+.hb-current {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  color: #F1F5F9;
+  font-size: 14px;
+}
+
+.header-search {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius-sm);
+  padding: 8px 14px;
+  width: 220px;
+  transition: all 0.15s;
+}
+.header-search:focus-within {
+  border-color: rgba(79,70,229,0.6);
+  background: rgba(79,70,229,0.08);
+  box-shadow: 0 0 0 3px rgba(79,70,229,0.12);
+}
+.header-search [data-lucide] { width: 14px; height: 14px; color: rgba(255,255,255,0.35); }
+.header-search input {
+  border: none; background: transparent;
+  font-size: 13px; color: #F1F5F9; width: 100%; outline: none;
+  font-family: 'Inter', sans-serif;
+}
+.header-search input::placeholder { color: rgba(255,255,255,0.25); }
+
+.header-actions { display: flex; align-items: center; gap: 8px; }
+.icon-btn {
+  width: 34px; height: 34px;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius-sm);
+  background: rgba(255,255,255,0.05);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: rgba(255,255,255,0.5);
+  position: relative;
+}
+.icon-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.icon-btn [data-lucide] { width: 15px; height: 15px; }
+.notif-dot {
+  position: absolute; top: 5px; right: 5px;
+  width: 7px; height: 7px;
+  background: var(--danger);
+  border-radius: 50%;
+  border: 2px solid var(--hdr-bg);
+}
+
+.header-avatar {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 12px; font-weight: 700;
+  cursor: pointer;
+  border: 2px solid rgba(255,255,255,0.15);
+  transition: border-color 0.15s;
+}
+.header-avatar:hover { border-color: var(--primary); }
+
+.new-task-btn {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.2s;
+  box-shadow: var(--shadow-primary);
+}
+.new-task-btn:hover {
+  background: var(--primary-dark);
+  box-shadow: 0 6px 24px var(--primary-glow);
+  transform: translateY(-1px);
+}
+.new-task-btn [data-lucide] { width: 14px; height: 14px; }
+
+/* ── MAIN LAYOUT ── */
+.main {
+  margin-left: var(--sidebar-width);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  background: var(--bg);
+}
+.content::-webkit-scrollbar { width: 5px; }
+.content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+/* ── SECTION HEADER ── */
+.section-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 20px;
+}
+.section-title {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--text-primary);
+}
+.section-sub { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+.section-actions { display: flex; align-items: center; gap: 8px; }
+
+/* ── KPI ROW ── */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.kpi-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.kpi-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+.kpi-card.indigo::after { background: linear-gradient(90deg, var(--primary), #818CF8); }
+.kpi-card.cyan::after { background: linear-gradient(90deg, var(--secondary), #67E8F9); }
+.kpi-card.amber::after { background: linear-gradient(90deg, var(--accent), #FCD34D); }
+.kpi-card.green::after { background: linear-gradient(90deg, var(--success), #34D399); }
+
+.kpi-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.kpi-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.kpi-icon {
+  width: 38px; height: 38px;
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+}
+.kpi-icon [data-lucide] { width: 17px; height: 17px; }
+.kpi-icon.indigo { background: #EEF2FF; color: var(--primary); }
+.kpi-icon.cyan { background: #ECFEFF; color: var(--secondary); }
+.kpi-icon.amber { background: #FFFBEB; color: var(--accent); }
+.kpi-icon.green { background: #ECFDF5; color: var(--success); }
+
+.kpi-trend {
+  font-size: 11px; font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 20px;
+  display: flex; align-items: center; gap: 3px;
+}
+.kpi-trend [data-lucide] { width: 10px; height: 10px; }
+.kpi-trend.up { background: #ECFDF5; color: var(--success); }
+.kpi-trend.down { background: #FEF2F2; color: var(--danger); }
+
+.kpi-value {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 800;
+  font-size: 28px;
+  color: var(--text-primary);
+  line-height: 1;
+  margin-bottom: 3px;
+}
+.kpi-label { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+
+/* ── MAIN GRID ── */
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 16px;
+}
+
+/* ── CARD ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+}
+.card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.card-title {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600; font-size: 14px;
+  color: var(--text-primary);
+  display: flex; align-items: center; gap: 8px;
+}
+.card-title [data-lucide] { width: 15px; height: 15px; color: var(--primary); }
+.card-action {
+  font-size: 12px; color: var(--primary);
+  cursor: pointer; font-weight: 500;
+  display: flex; align-items: center; gap: 4px;
+}
+.card-action [data-lucide] { width: 12px; height: 12px; }
+
+/* ── PRIORITY TASK (featured) ── */
+.priority-task {
+  background: linear-gradient(135deg, var(--primary) 0%, #6366F1 50%, #818CF8 100%);
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  margin-bottom: 14px;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s;
+  box-shadow: var(--shadow-primary);
+}
+.priority-task:hover { transform: translateY(-2px); }
+.priority-task::after {
+  content: '';
+  position: absolute;
+  top: -30px; right: -30px;
+  width: 120px; height: 120px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 50%;
+}
+.pt-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.7);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: flex; align-items: center; gap: 5px;
+}
+.pt-label [data-lucide] { width: 11px; height: 11px; }
+.pt-name {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  color: #fff;
+  margin-bottom: 14px;
+  line-height: 1.4;
+}
+.pt-bottom { display: flex; align-items: center; justify-content: space-between; }
+.pt-meta { display: flex; gap: 12px; }
+.pt-meta-item {
+  font-size: 12px;
+  color: rgba(255,255,255,0.7);
+  display: flex; align-items: center; gap: 5px;
+}
+.pt-meta-item [data-lucide] { width: 12px; height: 12px; }
+.pt-progress-wrap { margin-bottom: 14px; }
+.pt-progress-label {
+  display: flex; justify-content: space-between;
+  font-size: 12px; color: rgba(255,255,255,0.7);
+  margin-bottom: 6px;
+}
+.pt-progress-bar { height: 5px; background: rgba(255,255,255,0.2); border-radius: 3px; }
+.pt-progress-fill { height: 100%; background: rgba(255,255,255,0.9); border-radius: 3px; width: 50%; }
+
+/* TASK LIST */
+.task-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.1s;
+  margin-bottom: 2px;
+}
+.task-row:hover { background: var(--bg); }
+.task-cb {
+  width: 18px; height: 18px;
+  border-radius: 5px;
+  border: 2px solid var(--border);
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.task-cb.checked { background: var(--primary); border-color: var(--primary); }
+.task-cb.checked [data-lucide] { display: block; }
+.task-cb [data-lucide] { display: none; width: 10px; height: 10px; color: #fff; }
+
+.task-info { flex: 1; min-width: 0; }
+.task-name {
+  font-size: 13px; font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+.task-name.done { text-decoration: line-through; color: var(--text-muted); }
+.task-tags { display: flex; align-items: center; gap: 6px; }
+
+.pdot {
+  width: 7px; height: 7px;
+  border-radius: 50%; flex-shrink: 0;
+}
+.pdot.h { background: var(--danger); }
+.pdot.m { background: var(--accent); }
+.pdot.l { background: var(--success); }
+
+.task-av {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 9px; font-weight: 700;
+  flex-shrink: 0;
+  border: 2px solid var(--surface);
+}
+
+.task-date {
+  font-size: 11px; color: var(--text-muted);
+  white-space: nowrap;
+  display: flex; align-items: center; gap: 3px;
+}
+.task-date [data-lucide] { width: 10px; height: 10px; }
+.task-date.overdue { color: var(--danger); }
+
+/* TAG */
+.tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10px; font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 20px;
+}
+.tag.indigo { background: #EEF2FF; color: var(--primary); }
+.tag.cyan { background: #ECFEFF; color: var(--secondary); }
+.tag.amber { background: #FFFBEB; color: var(--accent); }
+.tag.green { background: #ECFDF5; color: var(--success); }
+.tag.red { background: #FEF2F2; color: var(--danger); }
+
+/* PROGRESS */
+.progress-wrap { margin-bottom: 13px; }
+.progress-head { display: flex; justify-content: space-between; margin-bottom: 5px; }
+.progress-label { font-size: 12px; font-weight: 500; color: var(--text-primary); }
+.progress-pct { font-size: 12px; font-weight: 600; color: var(--text-secondary); }
+.progress-bar { height: 6px; background: var(--bg); border-radius: 3px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 3px; }
+.progress-fill.indigo { background: linear-gradient(90deg, var(--primary), #818CF8); }
+.progress-fill.cyan { background: linear-gradient(90deg, var(--secondary), #67E8F9); }
+.progress-fill.amber { background: linear-gradient(90deg, var(--accent), #FCD34D); }
+.progress-fill.green { background: linear-gradient(90deg, var(--success), #34D399); }
+
+/* MINI ACTIVITY */
+.act-item {
+  display: flex; gap: 10px; padding: 8px 0;
+  position: relative;
+}
+.act-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 12px; top: 30px;
+  width: 1px; height: calc(100% - 14px);
+  background: var(--border);
+}
+.act-dot {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; z-index: 1;
+}
+.act-dot [data-lucide] { width: 11px; height: 11px; }
+.act-dot.indigo { background: #EEF2FF; color: var(--primary); }
+.act-dot.cyan { background: #ECFEFF; color: var(--secondary); }
+.act-dot.amber { background: #FFFBEB; color: var(--accent); }
+.act-dot.green { background: #ECFDF5; color: var(--success); }
+.act-text { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+.act-text strong { color: var(--text-primary); font-weight: 600; }
+.act-time { font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+
+/* DIVIDER */
+.divider { height: 1px; background: var(--border); margin: 10px 0; }
+
+/* TEAM MEMBER */
+.member-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  transition: background 0.12s;
+  cursor: pointer;
+  margin-bottom: 4px;
+}
+.member-item:hover { background: var(--bg); }
+.member-av {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 11px; font-weight: 700;
+  flex-shrink: 0;
+}
+.member-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.member-role { font-size: 11px; color: var(--text-muted); }
+.member-status {
+  margin-left: auto;
+  font-size: 10px; font-weight: 600;
+  padding: 3px 7px; border-radius: 20px;
+}
+.member-status.online { background: #ECFDF5; color: var(--success); }
+.member-status.busy { background: #FFFBEB; color: var(--accent); }
+.member-status.away { background: var(--bg); color: var(--text-muted); }
+
+/* ── DETAIL PANEL ── */
+.detail-panel {
+  position: fixed;
+  right: -420px;
+  top: 0; bottom: 0;
+  width: 400px;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  z-index: 500;
+  transition: right 0.3s cubic-bezier(0.4,0,0.2,1);
+  display: flex;
+  flex-direction: column;
+  box-shadow: -8px 0 40px rgba(15,23,42,0.12);
+}
+.detail-panel.open { right: 0; }
+
+.dp-header {
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.dp-close-row { display: flex; justify-content: flex-end; margin-bottom: 12px; }
+.dp-close {
+  width: 28px; height: 28px;
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--text-muted);
+  transition: all 0.15s;
+}
+.dp-close:hover { background: var(--surface-2); color: var(--text-primary); }
+.dp-close [data-lucide] { width: 13px; height: 13px; }
+.dp-chip-row { display: flex; gap: 6px; margin-bottom: 10px; }
+.dp-title {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700; font-size: 15px;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+.dp-body { flex: 1; overflow-y: auto; padding: 20px; }
+.dp-body::-webkit-scrollbar { width: 4px; }
+.dp-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+.dp-section { margin-bottom: 20px; }
+.dp-section-title {
+  font-size: 10px; font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.08em;
+  margin-bottom: 10px;
+}
+
+.dp-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+.dp-row-label { font-size: 12px; color: var(--text-muted); width: 80px; flex-shrink: 0; }
+.dp-row-value {
+  font-size: 13px; font-weight: 500;
+  color: var(--text-primary);
+  display: flex; align-items: center; gap: 6px;
+}
+.dp-row-value [data-lucide] { width: 12px; height: 12px; color: var(--text-muted); }
+
+.dp-sub {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  border: 1px solid var(--border-light);
+  margin-bottom: 5px;
+}
+.dp-sub-cb {
+  width: 16px; height: 16px;
+  border-radius: 4px;
+  border: 2px solid var(--border);
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+}
+.dp-sub-cb.done { background: var(--success); border-color: var(--success); }
+.dp-sub-cb.done [data-lucide] { display: block; }
+.dp-sub-cb [data-lucide] { display: none; width: 9px; height: 9px; color: #fff; }
+.dp-sub-text { font-size: 12px; color: var(--text-primary); flex: 1; }
+.dp-sub-text.done { text-decoration: line-through; color: var(--text-muted); }
+
+.dp-footer {
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  display: flex; gap: 8px;
+}
+.dp-btn {
+  flex: 1; padding: 9px;
+  border-radius: var(--radius-sm);
+  font-size: 13px; font-weight: 600;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.15s;
+  border: none;
+  text-align: center;
+}
+.dp-btn.primary {
+  background: var(--primary); color: #fff;
+  box-shadow: var(--shadow-primary);
+}
+.dp-btn.primary:hover { background: var(--primary-dark); }
+.dp-btn.ghost {
+  background: var(--bg); color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+.dp-btn.ghost:hover { background: var(--surface-2); }
+
+/* OVERLAY */
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(15,23,42,0.2);
+  backdrop-filter: blur(2px);
+  z-index: 400;
+  display: none;
+}
+.overlay.show { display: block; }
+
+/* MINI BADGE */
+.mini-badge {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 10px; font-weight: 600;
+  padding: 2px 7px; border-radius: 20px;
+}
+
+/* QUICK ADD BAR */
+.quick-add {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px;
+  background: var(--bg);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+  margin-top: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.quick-add:hover { border-color: var(--primary); background: #EEF2FF; }
+.quick-add [data-lucide] { width: 14px; height: 14px; color: var(--primary); }
+.quick-add span { font-size: 13px; color: var(--text-muted); }
+.quick-add:hover span { color: var(--primary); }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR (DARK) -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark"><i data-lucide="zap"></i></div>
+    <div>
+      <div class="logo-text">WorkFlow Pro</div>
+      <div class="logo-badge">Enterprise · v2.4</div>
+    </div>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-label">Naviqasiya</div>
+    <a class="nav-item active"><i data-lucide="layout-dashboard"></i> Bugün <span class="nav-badge indigo">5</span></a>
+    <a class="nav-item"><i data-lucide="check-square"></i> Tapşırıqlar <span class="nav-badge cyan">12</span></a>
+    <a class="nav-item"><i data-lucide="inbox"></i> Gələnlər <span class="nav-badge amber">3</span></a>
+    <a class="nav-item"><i data-lucide="calendar"></i> Gündəlik</a>
+    <a class="nav-item"><i data-lucide="git-branch"></i> Kanbord</a>
+    <a class="nav-item"><i data-lucide="clock"></i> Zaman cədvəli</a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-label">İdarəetmə</div>
+    <a class="nav-item"><i data-lucide="users"></i> İstifadəçilər</a>
+    <a class="nav-item"><i data-lucide="building-2"></i> Şöbələr</a>
+    <a class="nav-item"><i data-lucide="wallet"></i> Maliyyə</a>
+    <a class="nav-item"><i data-lucide="bar-chart-2"></i> Analitika</a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-label">Sistem</div>
+    <a class="nav-item"><i data-lucide="settings"></i> Parametrlər</a>
+    <a class="nav-item"><i data-lucide="shield"></i> Təhlükəsizlik</a>
+  </div>
+
+  <!-- QUICK STATS in sidebar -->
+  <div style="margin: 12px; padding: 14px; background: rgba(255,255,255,0.04); border: 1px solid var(--sb-border); border-radius: var(--radius-md);">
+    <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.25);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px;">Bu Gün</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <span style="font-size:12px;color:var(--sb-text);">Tamamlanan</span>
+      <span style="font-family:'Poppins',sans-serif;font-weight:700;font-size:14px;color:#A5B4FC">3/8</span>
+    </div>
+    <div style="height:4px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden;">
+      <div style="width:37.5%;height:100%;background:linear-gradient(90deg,var(--primary),#818CF8);border-radius:2px;"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-top:10px;">
+      <div style="text-align:center">
+        <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:16px;color:#67E8F9">7</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.3)">Seriya</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:16px;color:#FCD34D">84%</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.3)">Hədəf</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:16px;color:#6EE7B7">14</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.3)">Üzv</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sb-footer">
+    <div class="sb-user">
+      <div class="sb-avatar">H</div>
+      <div>
+        <div class="sb-user-name">Hasan B.</div>
+        <div class="sb-user-role">Administrator</div>
+      </div>
+      <i data-lucide="chevrons-up-down"></i>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- HEADER (DARK) -->
+  <header class="header">
+    <div class="header-breadcrumb">
+      <span class="hb-root">WorkFlow Pro</span>
+      <span class="hb-sep">/</span>
+      <span class="hb-current">Bugün</span>
+    </div>
+
+    <div class="header-search">
+      <i data-lucide="search"></i>
+      <input type="text" placeholder="Axtar...">
+    </div>
+
+    <div class="header-actions">
+      <div class="icon-btn"><i data-lucide="command"></i></div>
+      <div class="icon-btn">
+        <i data-lucide="bell"></i>
+        <div class="notif-dot"></div>
+      </div>
+      <div class="icon-btn"><i data-lucide="help-circle"></i></div>
+      <div class="header-avatar">H</div>
+      <button class="new-task-btn"><i data-lucide="plus"></i> Tapşırıq</button>
+    </div>
+  </header>
+
+  <!-- CONTENT (LIGHT) -->
+  <div class="content">
+
+    <!-- SECTION HEADER -->
+    <div class="section-head">
+      <div>
+        <div class="section-title">Günün İcmalı</div>
+        <div class="section-sub">Çərşənbə axşamı, 31 Mart 2026 · Xoş gəlmisiniz, Hasan!</div>
+      </div>
+      <div class="section-actions">
+        <div class="tag indigo" style="padding:6px 12px;font-size:12px;"><i data-lucide="flame" style="width:12px;height:12px;"></i> 7 gün seriya</div>
+        <div class="tag green" style="padding:6px 12px;font-size:12px;"><i data-lucide="target" style="width:12px;height:12px;"></i> Hədəf: 84%</div>
+      </div>
+    </div>
+
+    <!-- KPI ROW -->
+    <div class="kpi-row">
+      <div class="kpi-card indigo">
+        <div class="kpi-top">
+          <div class="kpi-icon indigo"><i data-lucide="list-checks"></i></div>
+          <div class="kpi-trend up"><i data-lucide="trending-up"></i>+18%</div>
+        </div>
+        <div class="kpi-value">28</div>
+        <div class="kpi-label">Aktiv tapşırıq</div>
+      </div>
+      <div class="kpi-card cyan">
+        <div class="kpi-top">
+          <div class="kpi-icon cyan"><i data-lucide="check-circle-2"></i></div>
+          <div class="kpi-trend up"><i data-lucide="trending-up"></i>+12%</div>
+        </div>
+        <div class="kpi-value">142</div>
+        <div class="kpi-label">Tamamlanan</div>
+      </div>
+      <div class="kpi-card amber">
+        <div class="kpi-top">
+          <div class="kpi-icon amber"><i data-lucide="clock"></i></div>
+          <div class="kpi-trend down"><i data-lucide="trending-down"></i>-5%</div>
+        </div>
+        <div class="kpi-value">7</div>
+        <div class="kpi-label">Gecikən</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-top">
+          <div class="kpi-icon green"><i data-lucide="users"></i></div>
+          <div class="kpi-trend up"><i data-lucide="trending-up"></i>+2</div>
+        </div>
+        <div class="kpi-value">14</div>
+        <div class="kpi-label">Aktiv üzv</div>
+      </div>
+    </div>
+
+    <!-- MAIN GRID -->
+    <div class="main-grid">
+
+      <!-- LEFT COLUMN -->
+      <div style="display:flex;flex-direction:column;gap:16px;">
+
+        <!-- PRIORITY TASK -->
+        <div class="priority-task" onclick="openPanel()">
+          <div class="pt-label"><i data-lucide="flame"></i> Ən Prioritet Tapşırıq</div>
+          <div class="pt-name">Q1 büdcə hesabatını tamamla — Maliyyə Şöbəsi üçün</div>
+          <div class="pt-progress-wrap">
+            <div class="pt-progress-label">
+              <span>İrəliləyiş</span>
+              <span>50%</span>
+            </div>
+            <div class="pt-progress-bar"><div class="pt-progress-fill"></div></div>
+          </div>
+          <div class="pt-bottom">
+            <div class="pt-meta">
+              <div class="pt-meta-item"><i data-lucide="calendar"></i> Dün (gecikmiş)</div>
+              <div class="pt-meta-item"><i data-lucide="user"></i> Hasan B.</div>
+              <div class="pt-meta-item"><i data-lucide="paperclip"></i> 3 fayl</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.2);border-radius:var(--radius-sm);padding:6px 12px;color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;gap:5px;">
+              <i data-lucide="arrow-right" style="width:13px;height:13px;"></i> Aç
+            </div>
+          </div>
+        </div>
+
+        <!-- TODAY'S TASKS -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><i data-lucide="sun"></i> Bu Günün Tapşırıqları</div>
+            <div class="card-action">Hamısını gör <i data-lucide="arrow-right"></i></div>
+          </div>
+
+          <div class="task-row" onclick="openPanel()">
+            <div class="pdot h"></div>
+            <div class="task-cb"><i data-lucide="check"></i></div>
+            <div class="task-info">
+              <div class="task-name">Q1 büdcə hesabatını tamamla</div>
+              <div class="task-tags"><div class="tag cyan">Maliyyə</div></div>
+            </div>
+            <div class="task-av">H</div>
+            <div class="task-date overdue"><i data-lucide="calendar"></i> Dün</div>
+          </div>
+
+          <div class="task-row" onclick="openPanel()">
+            <div class="pdot h"></div>
+            <div class="task-cb"><i data-lucide="check"></i></div>
+            <div class="task-info">
+              <div class="task-name">Yeni işçi onboarding sənədlərini hazırla</div>
+              <div class="task-tags"><div class="tag amber">HR</div></div>
+            </div>
+            <div class="task-av" style="background:linear-gradient(135deg,#06B6D4,#10B981)">L</div>
+            <div class="task-date"><i data-lucide="calendar"></i> Bu gün</div>
+          </div>
+
+          <div class="task-row" onclick="openPanel()">
+            <div class="pdot m"></div>
+            <div class="task-cb"><i data-lucide="check"></i></div>
+            <div class="task-info">
+              <div class="task-name">API inteqrasiyasını test et</div>
+              <div class="task-tags"><div class="tag indigo">Texniki</div></div>
+            </div>
+            <div class="task-av" style="background:linear-gradient(135deg,#F59E0B,#EF4444)">A</div>
+            <div class="task-date"><i data-lucide="calendar"></i> Bu gün</div>
+          </div>
+
+          <div class="task-row" onclick="openPanel()">
+            <div class="pdot m"></div>
+            <div class="task-cb checked"><i data-lucide="check"></i></div>
+            <div class="task-info">
+              <div class="task-name done">Həftəlik team meeting keçir</div>
+              <div class="task-tags"><div class="tag green">Toplantı</div></div>
+            </div>
+            <div class="task-av">H</div>
+            <div class="task-date"><i data-lucide="calendar"></i> Bu gün</div>
+          </div>
+
+          <div class="task-row" onclick="openPanel()">
+            <div class="pdot l"></div>
+            <div class="task-cb"><i data-lucide="check"></i></div>
+            <div class="task-info">
+              <div class="task-name">Müştəri təqdimatı üçün slaylar hazırla</div>
+              <div class="task-tags"><div class="tag amber">Satış</div></div>
+            </div>
+            <div class="task-av" style="background:linear-gradient(135deg,#8B5CF6,#EC4899)">N</div>
+            <div class="task-date"><i data-lucide="calendar"></i> 2 Aprel</div>
+          </div>
+
+          <div class="quick-add">
+            <i data-lucide="plus-circle"></i>
+            <span>Tapşırıq əlavə et...</span>
+          </div>
+        </div>
+
+        <!-- PERFORMANCE -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><i data-lucide="bar-chart-3"></i> Şöbə Performansı — Mart 2026</div>
+            <div class="card-action">Hesabat <i data-lucide="arrow-right"></i></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;">
+            <div class="progress-wrap" style="margin-bottom:0">
+              <div class="progress-head">
+                <span class="progress-label">Texniki</span>
+                <span class="progress-pct">92%</span>
+              </div>
+              <div class="progress-bar"><div class="progress-fill indigo" style="width:92%"></div></div>
+            </div>
+            <div class="progress-wrap" style="margin-bottom:0">
+              <div class="progress-head">
+                <span class="progress-label">Maliyyə</span>
+                <span class="progress-pct">78%</span>
+              </div>
+              <div class="progress-bar"><div class="progress-fill cyan" style="width:78%"></div></div>
+            </div>
+            <div class="progress-wrap" style="margin-bottom:0">
+              <div class="progress-head">
+                <span class="progress-label">HR</span>
+                <span class="progress-pct">65%</span>
+              </div>
+              <div class="progress-bar"><div class="progress-fill amber" style="width:65%"></div></div>
+            </div>
+            <div class="progress-wrap" style="margin-bottom:0">
+              <div class="progress-head">
+                <span class="progress-label">Satış</span>
+                <span class="progress-pct">84%</span>
+              </div>
+              <div class="progress-bar"><div class="progress-fill green" style="width:84%"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div style="display:flex;flex-direction:column;gap:16px;">
+
+        <!-- ACTIVITY FEED -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><i data-lucide="activity"></i> Son Aktivlər</div>
+            <div class="card-action">Hamısı <i data-lucide="arrow-right"></i></div>
+          </div>
+          <div class="act-item">
+            <div class="act-dot indigo"><i data-lucide="check-circle-2"></i></div>
+            <div>
+              <div class="act-text"><strong>Aynur X.</strong> tapşırığı tamamladı</div>
+              <div class="act-time">14 dəq. əvvəl</div>
+            </div>
+          </div>
+          <div class="act-item">
+            <div class="act-dot cyan"><i data-lucide="user-plus"></i></div>
+            <div>
+              <div class="act-text"><strong>Leyla M.</strong> yeni üzv əlavə etdi</div>
+              <div class="act-time">1 saat əvvəl</div>
+            </div>
+          </div>
+          <div class="act-item">
+            <div class="act-dot amber"><i data-lucide="upload"></i></div>
+            <div>
+              <div class="act-text"><strong>Nigar R.</strong> Excel yüklədi</div>
+              <div class="act-time">2 saat əvvəl</div>
+            </div>
+          </div>
+          <div class="act-item">
+            <div class="act-dot green"><i data-lucide="message-circle"></i></div>
+            <div>
+              <div class="act-text"><strong>Rashad A.</strong> şərh əlavə etdi</div>
+              <div class="act-time">3 saat əvvəl</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TEAM -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><i data-lucide="users"></i> Komanda</div>
+            <div class="card-action">Hamısı <i data-lucide="arrow-right"></i></div>
+          </div>
+          <div class="member-item">
+            <div class="member-av" style="background:linear-gradient(135deg,#4F46E5,#06B6D4)">H</div>
+            <div>
+              <div class="member-name">Hasan B.</div>
+              <div class="member-role">Administrator</div>
+            </div>
+            <div class="member-status online">Online</div>
+          </div>
+          <div class="member-item">
+            <div class="member-av" style="background:linear-gradient(135deg,#06B6D4,#10B981)">L</div>
+            <div>
+              <div class="member-name">Leyla M.</div>
+              <div class="member-role">HR Meneceri</div>
+            </div>
+            <div class="member-status online">Online</div>
+          </div>
+          <div class="member-item">
+            <div class="member-av" style="background:linear-gradient(135deg,#F59E0B,#EF4444)">A</div>
+            <div>
+              <div class="member-name">Aynur X.</div>
+              <div class="member-role">Mühasib</div>
+            </div>
+            <div class="member-status busy">Məşğul</div>
+          </div>
+          <div class="member-item">
+            <div class="member-av" style="background:linear-gradient(135deg,#8B5CF6,#EC4899)">N</div>
+            <div>
+              <div class="member-name">Nigar R.</div>
+              <div class="member-role">Satış Mütəxəssisi</div>
+            </div>
+            <div class="member-status away">Uzaqda</div>
+          </div>
+        </div>
+
+        <!-- UPCOMING -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><i data-lucide="calendar-clock"></i> Gələn Hadisələr</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;gap:10px;align-items:flex-start;padding:8px 10px;background:var(--bg);border-radius:var(--radius-sm);border:1px solid var(--border-light);">
+              <div style="width:36px;height:36px;background:#EEF2FF;border-radius:var(--radius-sm);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;">
+                <div style="font-size:10px;color:var(--primary);font-weight:700;line-height:1">APR</div>
+                <div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:14px;color:var(--primary);line-height:1">1</div>
+              </div>
+              <div style="flex:1;">
+                <div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:2px">Hesab-Kitab Toplantısı</div>
+                <div style="font-size:11px;color:var(--text-muted)">09:00 — Maliyyə Şöbəsi</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start;padding:8px 10px;background:var(--bg);border-radius:var(--radius-sm);border:1px solid var(--border-light);">
+              <div style="width:36px;height:36px;background:#ECFEFF;border-radius:var(--radius-sm);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;">
+                <div style="font-size:10px;color:var(--secondary);font-weight:700;line-height:1">APR</div>
+                <div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:14px;color:var(--secondary);line-height:1">3</div>
+              </div>
+              <div style="flex:1;">
+                <div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:2px">Q1 Hesabat Təqdimatı</div>
+                <div style="font-size:11px;color:var(--text-muted)">14:00 — Rəhbərlik</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL PANEL -->
+<div class="overlay" id="overlay" onclick="closePanel()"></div>
+<div class="detail-panel" id="detailPanel">
+  <div class="dp-header">
+    <div class="dp-close-row">
+      <div class="dp-close" onclick="closePanel()"><i data-lucide="x"></i></div>
+    </div>
+    <div class="dp-chip-row">
+      <div class="tag red">Yüksək Prioritet</div>
+      <div class="tag cyan">Maliyyə</div>
+    </div>
+    <div class="dp-title">Q1 büdcə hesabatını tamamla</div>
+  </div>
+
+  <div class="dp-body">
+    <div class="dp-section">
+      <div class="dp-section-title">Detallar</div>
+      <div class="dp-row">
+        <div class="dp-row-label">Status</div>
+        <div class="dp-row-value"><div class="tag amber">Davam edir</div></div>
+      </div>
+      <div class="dp-row">
+        <div class="dp-row-label">Son tarix</div>
+        <div class="dp-row-value"><i data-lucide="calendar"></i> 30 Mart 2026</div>
+      </div>
+      <div class="dp-row">
+        <div class="dp-row-label">İcraçı</div>
+        <div class="dp-row-value">
+          <div class="task-av" style="width:20px;height:20px;font-size:8px;border:none;">H</div>
+          Hasan Bəylər
+        </div>
+      </div>
+      <div class="dp-row">
+        <div class="dp-row-label">Şöbə</div>
+        <div class="dp-row-value"><i data-lucide="building-2"></i> Maliyyə</div>
+      </div>
+    </div>
+
+    <div class="dp-section">
+      <div class="dp-section-title">Alt Tapşırıqlar (2/4)</div>
+      <div class="dp-sub">
+        <div class="dp-sub-cb done"><i data-lucide="check"></i></div>
+        <span class="dp-sub-text done">Yanvar-Fevral məlumatlarını topla</span>
+      </div>
+      <div class="dp-sub">
+        <div class="dp-sub-cb done"><i data-lucide="check"></i></div>
+        <span class="dp-sub-text done">Mart ayı xərclərini hesabla</span>
+      </div>
+      <div class="dp-sub">
+        <div class="dp-sub-cb"></div>
+        <span class="dp-sub-text">Hesabat sənədini hazırla</span>
+      </div>
+      <div class="dp-sub">
+        <div class="dp-sub-cb"></div>
+        <span class="dp-sub-text">Rəhbərlik üçün slaydlar hazırla</span>
+      </div>
+    </div>
+
+    <div class="dp-section">
+      <div class="dp-section-title">Şərhlər (2)</div>
+      <div style="display:flex;gap:8px;margin-bottom:10px;">
+        <div class="task-av" style="background:linear-gradient(135deg,#06B6D4,#10B981);border:none;flex-shrink:0;">L</div>
+        <div style="background:var(--bg);border:1px solid var(--border-light);border-radius:0 var(--radius-sm) var(--radius-sm);padding:8px 10px;flex:1;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+            <span style="font-size:12px;font-weight:600;color:var(--text-primary)">Leyla M.</span>
+            <span style="font-size:11px;color:var(--text-muted)">2 saat əvvəl</span>
+          </div>
+          <div style="font-size:12px;color:var(--text-secondary)">Mart məlumatları hazırdır, yükləyə bilərsiniz.</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <div class="task-av" style="border:none;flex-shrink:0;">H</div>
+        <div style="background:var(--bg);border:1px solid var(--border-light);border-radius:0 var(--radius-sm) var(--radius-sm);padding:8px 10px;flex:1;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+            <span style="font-size:12px;font-weight:600;color:var(--text-primary)">Hasan B.</span>
+            <span style="font-size:11px;color:var(--text-muted)">1 saat əvvəl</span>
+          </div>
+          <div style="font-size:12px;color:var(--text-secondary)">Sağ olun, bu gün tamamlayacağam!</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dp-section">
+      <div class="dp-section-title">Fayllar (2)</div>
+      <div style="display:flex;flex-direction:column;gap:5px;">
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg);border:1px solid var(--border-light);border-radius:var(--radius-sm);">
+          <i data-lucide="file-spreadsheet" style="width:14px;height:14px;color:var(--success)"></i>
+          <span style="font-size:12px;color:var(--text-primary);flex:1;">Maliyyə_Yanvar.xlsx</span>
+          <i data-lucide="download" style="width:12px;height:12px;color:var(--text-muted)"></i>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg);border:1px solid var(--border-light);border-radius:var(--radius-sm);">
+          <i data-lucide="file-spreadsheet" style="width:14px;height:14px;color:var(--success)"></i>
+          <span style="font-size:12px;color:var(--text-primary);flex:1;">Maliyyə_Fevral.xlsx</span>
+          <i data-lucide="download" style="width:12px;height:12px;color:var(--text-muted)"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dp-footer">
+    <button class="dp-btn ghost">Redaktə Et</button>
+    <button class="dp-btn primary">Tamamlandı ✓</button>
+  </div>
+</div>
+
+<script>
+function openPanel() {
+  document.getElementById('detailPanel').classList.add('open');
+  document.getElementById('overlay').classList.add('show');
+}
+function closePanel() {
+  document.getElementById('detailPanel').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+lucide.createIcons();
+</script>
+</body>
+</html>

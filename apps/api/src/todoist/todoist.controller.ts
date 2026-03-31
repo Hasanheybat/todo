@@ -6,14 +6,12 @@ import { CreateProjectDto } from './dto/create-project.dto'
 import { CreateTaskDto, UpdateTaskDto } from './dto/create-task.dto'
 import { CreateSectionDto } from './dto/create-section.dto'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
-import { PermissionsGuard, RequirePermissions } from '../auth/guards/permissions.guard'
 import * as path from 'path'
 import * as crypto from 'crypto'
 import { secureFileFilter } from '../common/file-filter'
 
 @Controller('todoist')
-@UseGuards(JwtAuthGuard, PermissionsGuard)
-@RequirePermissions('todo.access')
+@UseGuards(JwtAuthGuard)
 export class TodoistController {
   constructor(private service: TodoistService) {}
 
@@ -86,7 +84,6 @@ export class TodoistController {
   }
 
   @Post('tasks')
-  @RequirePermissions('todo.access', 'todo.create')
   createTask(@Body() dto: CreateTaskDto, @Req() req: any) {
     return this.service.createTask(dto, req.user.sub, req.user.tenantId)
   }

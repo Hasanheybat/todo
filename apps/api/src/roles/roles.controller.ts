@@ -10,43 +10,43 @@ export class RolesController {
   constructor(private rolesService: RolesService) {}
 
   @Get('permissions')
-  @RequirePermissions('roles.read')
-  getPermissions() {
-    return this.rolesService.getPermissions()
+  @RequirePermissions('users.manage')
+  getPermissions(@Req() req: any) {
+    return this.rolesService.getAllowedPermissions(req.user.tenantId)
   }
 
   @Post()
-  @RequirePermissions('roles.create')
+  @RequirePermissions('users.manage')
   create(@Body() dto: CreateRoleDto, @Req() req: any) {
     return this.rolesService.create(dto, req.user.tenantId)
   }
 
   @Get()
-  @RequirePermissions('roles.read')
+  @RequirePermissions('users.manage')
   findAll(@Req() req: any) {
     return this.rolesService.findAll(req.user.tenantId)
   }
 
   @Get(':id')
-  @RequirePermissions('roles.read')
+  @RequirePermissions('users.manage')
   findOne(@Param('id') id: string, @Req() req: any) {
     return this.rolesService.findOne(id, req.user.tenantId)
   }
 
   @Put(':id')
-  @RequirePermissions('roles.update')
+  @RequirePermissions('users.manage')
   update(@Param('id') id: string, @Body() dto: Partial<CreateRoleDto>, @Req() req: any) {
     return this.rolesService.update(id, dto, req.user.tenantId)
   }
 
   @Delete(':id')
-  @RequirePermissions('roles.delete')
+  @RequirePermissions('users.manage')
   remove(@Param('id') id: string, @Req() req: any) {
     return this.rolesService.remove(id, req.user.tenantId)
   }
 
   @Post(':id/assign/:userId')
-  @RequirePermissions('roles.assign')
+  @RequirePermissions('users.manage')
   assignRole(@Param('id') roleId: string, @Param('userId') userId: string, @Req() req: any) {
     return this.rolesService.assignRole(userId, roleId, req.user.tenantId)
   }

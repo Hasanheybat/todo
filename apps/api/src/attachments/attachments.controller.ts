@@ -4,18 +4,16 @@ import { diskStorage } from 'multer'
 import { Response } from 'express'
 import { AttachmentsService } from './attachments.service'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
-import { PermissionsGuard, RequirePermissions } from '../auth/guards/permissions.guard'
 import * as path from 'path'
 import * as crypto from 'crypto'
 import { secureFileFilter } from '../common/file-filter'
 
 @Controller('attachments')
-@UseGuards(JwtAuthGuard, PermissionsGuard)
+@UseGuards(JwtAuthGuard)
 export class AttachmentsController {
   constructor(private attachmentsService: AttachmentsService) {}
 
   @Post('upload')
-  @RequirePermissions('files.upload')
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
@@ -39,7 +37,6 @@ export class AttachmentsController {
   }
 
   @Get('task/:taskId')
-  @RequirePermissions('files.download')
   findByTask(@Param('taskId') taskId: string, @Req() req: any) {
     return this.attachmentsService.findByTask(taskId, req.user.tenantId)
   }
@@ -50,7 +47,6 @@ export class AttachmentsController {
   }
 
   @Get(':id/download')
-  @RequirePermissions('files.download')
   async download(@Param('id') id: string, @Req() req: any, @Res() res: Response) {
     const attachments = await this.attachmentsService.findByTask(id, req.user.tenantId)
     const att = await (this.attachmentsService as any).prisma.attachment.findFirst({
@@ -62,7 +58,6 @@ export class AttachmentsController {
   }
 
   @Delete(':id')
-  @RequirePermissions('files.delete')
   remove(@Param('id') id: string, @Req() req: any) {
     return this.attachmentsService.remove(id, req.user.tenantId)
   }

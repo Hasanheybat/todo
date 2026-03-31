@@ -104,11 +104,16 @@ export default function LoginPage() {
         <p className="text-center text-[11px] font-semibold mb-3" style={{ color: '#94A3B8' }}>Sürətli giriş</p>
         <div className="grid grid-cols-3 gap-2">
           {[
-            { name: 'Hasan', email: 'hasan@techflow.az', color: '#4F46E5', role: 'Müdir' },
-            { name: 'Leyla', email: 'leyla@techflow.az', color: '#10B981', role: 'Müdir' },
-            { name: 'Rəşad', email: 'rashad@techflow.az', color: '#F59E0B', role: 'İşçi' },
-            { name: 'Nigar', email: 'nigar@techflow.az', color: '#EF4444', role: 'İşçi' },
-            { name: 'Fərid', email: 'e1@techflow.az', color: '#8B5CF6', role: 'Müdir' },
+            { name: 'Həsən', email: 'hasan@techflow.az', color: '#4F46E5', role: 'Sahibi' },
+            { name: 'Leyla', email: 'leyla@techflow.az', color: '#10B981', role: 'Müdir/Bakı' },
+            { name: 'Aynur', email: 'aynur@techflow.az', color: '#F59E0B', role: 'Müdir/Gəncə' },
+            { name: 'Tural', email: 'tural@techflow.az', color: '#3B82F6', role: 'Lider/Bakı' },
+            { name: 'Kamran', email: 'kamran@techflow.az', color: '#8B5CF6', role: 'Lider/Gəncə' },
+            { name: 'Nigar', email: 'nigar@techflow.az', color: '#059669', role: 'İşçi/Bakı' },
+            { name: 'Rəşad', email: 'rashad@techflow.az', color: '#D946EF', role: 'İşçi/Bakı' },
+            { name: 'Zaur', email: 'zaur@techflow.az', color: '#EF4444', role: 'İşçi/Gəncə' },
+            { name: 'Murad', email: 'murad@techflow.az', color: '#0EA5E9', role: 'İşçi/Bakı' },
+            { name: 'Nərmin', email: 'nermin@techflow.az', color: '#F97316', role: 'İşçi/Gəncə' },
             { name: 'Admin', email: 'admin@techflow.az', color: '#0F172A', role: 'Admin' },
           ].map(u => (
             <button key={u.email} disabled={loading}

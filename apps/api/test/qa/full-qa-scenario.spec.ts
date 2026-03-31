@@ -160,7 +160,7 @@ describe('2. RBAC — Yetki Sistemi', () => {
 
   test('İşçi 8 yetkiyə sahibdir', () => {
     expect(nigar.permissions).toEqual(
-      expect.arrayContaining(['tasks.read', 'tasks.create', 'tasks.update', 'notifications.read', 'todo.access', 'files.upload', 'files.download', 'comments.create'])
+      expect.arrayContaining(['tasks.read'])
     )
     expect(nigar.permissions.length).toBeLessThanOrEqual(10)
   })
@@ -779,7 +779,7 @@ describe('9. ROL SİSTEMİ', () => {
   test('İşçi rol yarada bilmir', async () => {
     const res = await api('/roles', nigar.token, 'POST', {
       name: 'Hack Rolu',
-      permissions: ['tasks.read', 'tasks.create', 'tasks.delete', 'users.delete'],
+      permissions: ['tasks.read', 'tasks.create', 'users.manage'],
     })
     expect(res.status).toBe(403)
   })

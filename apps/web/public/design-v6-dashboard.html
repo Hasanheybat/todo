@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>WorkFlow Pro — Aurora Pastel</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#f0edfb;
+  --surface:rgba(255,255,255,0.7);
+  --surface-solid:#fff;
+  --surface-2:rgba(255,255,255,0.45);
+  --surface-3:rgba(255,255,255,0.3);
+  --border:rgba(255,255,255,0.7);
+  --border-soft:rgba(180,160,255,0.2);
+  --text:#2d1f6e;
+  --text-2:#7366a0;
+  --text-3:#b0a8d0;
+  --lavender:#8b5cf6;
+  --lavender-soft:rgba(139,92,246,0.12);
+  --mint:#10b981;
+  --mint-soft:rgba(16,185,129,0.12);
+  --peach:#f97316;
+  --peach-soft:rgba(249,115,22,0.12);
+  --rose:#ec4899;
+  --rose-soft:rgba(236,72,153,0.12);
+  --sky:#0ea5e9;
+  --sky-soft:rgba(14,165,233,0.12);
+  --amber:#f59e0b;
+  --radius:16px;
+  --sidebar-w:240px;
+}
+body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden;min-height:100vh}
+
+/* Background gradient mesh */
+body::before{content:'';position:fixed;inset:0;background:
+  radial-gradient(ellipse at 0% 0%,rgba(196,181,253,0.4) 0%,transparent 50%),
+  radial-gradient(ellipse at 100% 0%,rgba(167,243,208,0.3) 0%,transparent 50%),
+  radial-gradient(ellipse at 50% 100%,rgba(251,207,232,0.4) 0%,transparent 50%),
+  radial-gradient(ellipse at 100% 100%,rgba(186,230,253,0.3) 0%,transparent 50%);
+pointer-events:none;z-index:0}
+
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 20;font-size:20px;vertical-align:middle}
+.filled{font-variation-settings:'FILL' 1,'wght' 400}
+
+/* Glass */
+.glass{background:rgba(255,255,255,0.6);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,0.75)}
+
+/* Sidebar */
+.sidebar{position:fixed;left:12px;top:12px;bottom:12px;width:var(--sidebar-w);border-radius:24px;display:flex;flex-direction:column;padding:22px 14px;z-index:40;background:rgba(255,255,255,0.65);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border:1px solid rgba(255,255,255,0.8);box-shadow:0 8px 40px rgba(139,92,246,0.1)}
+.logo{display:flex;align-items:center;gap:10px;padding:0 6px;margin-bottom:28px}
+.logo-icon{width:34px;height:34px;border-radius:12px;background:linear-gradient(135deg,#a78bfa,#34d399);display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 4px 16px rgba(167,139,250,0.4)}
+.logo-icon .material-symbols-outlined{font-size:18px;font-variation-settings:'FILL' 1,'wght' 500}
+.logo-text{font-weight:800;font-size:16px;letter-spacing:-0.4px;background:linear-gradient(90deg,var(--lavender),var(--mint));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.new-btn{display:flex;align-items:center;gap:8px;padding:11px 14px;border-radius:14px;background:linear-gradient(135deg,#a78bfa,#60a5fa);color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer;margin-bottom:20px;transition:all .2s;box-shadow:0 4px 24px rgba(167,139,250,0.4)}
+.new-btn:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(167,139,250,0.5)}
+nav{flex:1;display:flex;flex-direction:column;gap:3px}
+.nav-link{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:12px;text-decoration:none;color:var(--text-2);font-size:13px;font-weight:600;transition:all .2s}
+.nav-link:hover{background:rgba(255,255,255,0.5);color:var(--text)}
+.nav-link.active{background:rgba(255,255,255,0.75);color:var(--lavender);box-shadow:0 2px 12px rgba(139,92,246,0.1)}
+.nav-link.active .material-symbols-outlined{color:var(--lavender)}
+.section-label{font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:0.8px;padding:16px 12px 5px}
+.nav-badge{margin-left:auto;font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;background:linear-gradient(135deg,#a78bfa,#60a5fa);color:#fff}
+
+/* Main */
+.main{margin-left:calc(var(--sidebar-w) + 24px);padding:24px 28px 60px;position:relative;z-index:1}
+
+/* Header */
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:32px}
+.search-box{position:relative;width:300px}
+.search-box input{width:100%;padding:10px 14px 10px 40px;border-radius:14px;border:1px solid rgba(255,255,255,0.8);background:rgba(255,255,255,0.65);backdrop-filter:blur(16px);color:var(--text);font-size:13px;font-weight:500;outline:none;font-family:'Outfit',sans-serif;box-shadow:0 2px 12px rgba(139,92,246,0.06)}
+.search-box input::placeholder{color:var(--text-3)}
+.search-box input:focus{border-color:rgba(167,139,250,0.5);box-shadow:0 0 0 3px rgba(167,139,250,0.12)}
+.search-box .material-symbols-outlined{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-3);font-size:18px}
+.header-right{display:flex;align-items:center;gap:10px}
+.icon-btn{width:40px;height:40px;border-radius:12px;border:1px solid rgba(255,255,255,0.8);background:rgba(255,255,255,0.65);backdrop-filter:blur(16px);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-2);transition:all .2s;box-shadow:0 2px 12px rgba(139,92,246,0.06)}
+.icon-btn:hover{background:rgba(255,255,255,0.85);color:var(--text)}
+.avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#a78bfa,#34d399);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;box-shadow:0 4px 16px rgba(167,139,250,0.35)}
+.notif-dot{position:relative}
+.notif-dot::after{content:'';position:absolute;top:7px;right:7px;width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,#f97316,#ec4899);border:2px solid rgba(255,255,255,0.9)}
+
+/* Welcome bento */
+.welcome-grid{display:grid;grid-template-columns:1fr 1fr 200px;gap:14px;margin-bottom:24px}
+.welcome-card{border-radius:20px;padding:22px 24px;background:rgba(255,255,255,0.65);backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,0.8);box-shadow:0 4px 24px rgba(139,92,246,0.07);position:relative;overflow:hidden}
+.welcome-card h1{font-size:24px;font-weight:800;letter-spacing:-0.5px;color:var(--text);margin-bottom:6px;line-height:1.2}
+.welcome-card h1 em{font-style:normal;background:linear-gradient(90deg,#a78bfa,#34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.welcome-card p{font-size:13px;color:var(--text-2);font-weight:500}
+.welcome-card.gradient-card{background:linear-gradient(135deg,rgba(167,139,250,0.25),rgba(52,211,153,0.15));border-color:rgba(167,139,250,0.3)}
+.welcome-card.streak-card{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:linear-gradient(135deg,rgba(249,115,22,0.12),rgba(236,72,153,0.1));border-color:rgba(249,115,22,0.25)}
+.streak-num{font-size:42px;font-weight:800;background:linear-gradient(135deg,var(--peach),var(--rose));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
+.streak-label{font-size:11px;font-weight:600;color:var(--text-2);margin-top:6px;text-transform:uppercase;letter-spacing:0.5px}
+
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.stat-card{border-radius:18px;padding:18px 20px;background:rgba(255,255,255,0.6);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.8);box-shadow:0 2px 16px rgba(139,92,246,0.05)}
+.stat-dot{width:10px;height:10px;border-radius:50%;margin-bottom:12px}
+.stat-label{font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:4px}
+.stat-value{font-size:28px;font-weight:800;letter-spacing:-1px}
+
+/* Two col */
+.two-col{display:grid;grid-template-columns:1fr 360px;gap:14px;align-items:start}
+
+/* Panel glass */
+.panel{border-radius:20px;background:rgba(255,255,255,0.6);backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,0.8);overflow:hidden;box-shadow:0 4px 24px rgba(139,92,246,0.06)}
+.panel-head{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.6)}
+.panel-head h2{font-size:14px;font-weight:700;color:var(--text)}
+.panel-head .sub{font-size:11px;color:var(--text-3);font-weight:500;margin-top:1px}
+
+/* Priority card */
+.priority-card{border-radius:20px;padding:22px;margin-bottom:14px;background:linear-gradient(135deg,rgba(167,139,250,0.2),rgba(96,165,250,0.15));backdrop-filter:blur(24px);border:1px solid rgba(167,139,250,0.3);cursor:pointer;transition:all .2s;box-shadow:0 4px 20px rgba(167,139,250,0.12);position:relative;overflow:hidden}
+.priority-card::before{content:'';position:absolute;top:-40px;right:-40px;width:120px;height:120px;background:radial-gradient(circle,rgba(167,139,250,0.25),transparent);border-radius:50%}
+.priority-card:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(167,139,250,0.2)}
+.priority-tag{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--lavender);background:rgba(139,92,246,0.1);display:inline-block;padding:3px 10px;border-radius:6px;margin-bottom:10px;border:1px solid rgba(139,92,246,0.2)}
+.priority-title{font-size:17px;font-weight:700;margin-bottom:8px;color:var(--text);line-height:1.3}
+.priority-meta{font-size:12px;color:var(--text-2);font-weight:500;display:flex;gap:12px;margin-bottom:14px}
+.progress-bar{width:100%;height:6px;background:rgba(255,255,255,0.4);border-radius:4px;overflow:hidden}
+.progress-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#a78bfa,#60a5fa)}
+.progress-label{font-size:11px;color:var(--text-2);font-weight:500;margin-top:5px}
+
+/* Task item */
+.task-item{display:flex;align-items:center;gap:12px;padding:12px 20px;transition:background .15s;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.5)}
+.task-item:last-child{border-bottom:none}
+.task-item:hover{background:rgba(255,255,255,0.3)}
+.task-check{width:18px;height:18px;border-radius:50%;border:1.5px solid rgba(180,160,255,0.5);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.task-check.done{background:var(--mint);border-color:var(--mint)}
+.task-check.done .material-symbols-outlined{font-size:13px;font-variation-settings:'FILL' 1,'wght' 700;color:#fff}
+.task-check:hover{border-color:var(--mint)}
+.task-text{flex:1;min-width:0}
+.task-name{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.task-item.done .task-name{color:var(--text-3);text-decoration:line-through}
+.task-sub{display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap}
+.chip{font-size:10px;font-weight:700;padding:2px 9px;border-radius:8px}
+.chip-lavender{background:rgba(139,92,246,0.12);color:var(--lavender)}
+.chip-mint{background:rgba(16,185,129,0.12);color:var(--mint)}
+.chip-peach{background:rgba(249,115,22,0.12);color:var(--peach)}
+.chip-rose{background:rgba(236,72,153,0.12);color:var(--rose)}
+.chip-sky{background:rgba(14,165,233,0.12);color:var(--sky)}
+.task-status{font-size:10px;font-weight:700;padding:3px 10px;border-radius:8px}
+
+/* Activity */
+.act-item{display:flex;gap:10px;padding:12px 20px;border-bottom:1px solid rgba(255,255,255,0.5)}
+.act-item:last-child{border-bottom:none}
+.act-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#fff;flex-shrink:0}
+.act-text{font-size:12px;color:var(--text-2);font-weight:500;line-height:1.5}
+.act-text strong{color:var(--text);font-weight:700}
+.act-time{font-size:10px;color:var(--text-3);font-weight:500;margin-top:2px}
+
+/* Detail Panel */
+.panel-overlay{position:fixed;inset:0;background:rgba(45,31,110,0.08);backdrop-filter:blur(2px);z-index:45;display:none}
+.panel-overlay.open{display:block}
+.detail-panel{position:fixed;right:0;top:0;bottom:0;width:400px;background:rgba(248,246,255,0.95);backdrop-filter:blur(32px);border-left:1px solid rgba(255,255,255,0.8);z-index:50;transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;box-shadow:-8px 0 40px rgba(139,92,246,0.12)}
+.detail-panel.open{transform:translateX(0)}
+.dpanel-head{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;border-bottom:1px solid rgba(255,255,255,0.7)}
+.dpanel-head span{font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:0.5px}
+.dpanel-body{flex:1;overflow-y:auto;padding:20px}
+.dpanel-footer{padding:14px 20px;border-top:1px solid rgba(255,255,255,0.7)}
+.dpanel-footer input{width:100%;padding:10px 14px;border-radius:12px;border:1px solid rgba(167,139,250,0.2);background:rgba(255,255,255,0.7);color:var(--text);font-size:13px;outline:none;font-family:'Outfit',sans-serif}
+.dpanel-footer input:focus{border-color:rgba(167,139,250,0.5);background:rgba(255,255,255,0.9)}
+.dpanel-footer input::placeholder{color:var(--text-3)}
+.d-title{font-size:18px;font-weight:800;margin-bottom:14px;color:var(--text);line-height:1.3;letter-spacing:-0.3px}
+.d-row{display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap}
+.d-label{font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:4px}
+.d-val{font-size:13px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:5px}
+.d-desc{font-size:13px;color:var(--text-2);line-height:1.7;margin-bottom:16px;padding:12px 14px;background:rgba(255,255,255,0.6);border-radius:12px;border:1px solid rgba(167,139,250,0.15);font-weight:500}
+.sub-list{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.sub-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;background:rgba(255,255,255,0.6);border:1px solid rgba(255,255,255,0.8);font-size:12px;font-weight:600;color:var(--text-2)}
+.sub-item.done{opacity:.5}
+.sub-item.done .si-t{text-decoration:line-through}
+.btn-row{display:flex;gap:8px;margin-bottom:16px}
+.btn{padding:9px 16px;border-radius:12px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid rgba(255,255,255,0.8);background:rgba(255,255,255,0.6);color:var(--text-2);display:flex;align-items:center;gap:6px;transition:all .2s;font-family:'Outfit',sans-serif}
+.btn:hover{background:rgba(255,255,255,0.85);color:var(--text)}
+.btn.primary{background:linear-gradient(135deg,#a78bfa,#60a5fa);color:#fff;border:none;box-shadow:0 4px 20px rgba(167,139,250,0.4)}
+.btn.primary:hover{transform:translateY(-1px);box-shadow:0 8px 28px rgba(167,139,250,0.5)}
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-icon"><span class="material-symbols-outlined">stacks</span></div>
+    <span class="logo-text">WorkFlow Pro</span>
+  </div>
+  <button class="new-btn"><span class="material-symbols-outlined" style="font-size:18px">add</span> Yeni tapşırıq</button>
+  <nav>
+    <a href="#" class="nav-link active"><span class="material-symbols-outlined">today</span> Bugün <span class="nav-badge">5</span></a>
+    <a href="#" class="nav-link"><span class="material-symbols-outlined">inbox</span> Gələnlər <span class="nav-badge">12</span></a>
+    <a href="#" class="nav-link"><span class="material-symbols-outlined">calendar_month</span> Gələcək</a>
+    <div class="section-label">İş sahəsi</div>
+    <a href="#" class="nav-link"><span class="material-symbols-outlined">assignment</span> Tapşırıqlar</a>
+    <a href="#" class="nav-link"><span class="material-symbols-outlined">check_circle</span> Todo</a>
+    <a href="#" class="nav-link"><span class="material-symbols-outlined">repeat</span> Şablonlar</a>
+    <div class="section-label">İdarəetmə</div>
+    <a href="#" class="nav-link"><span class="material-symbols-outlined">group</span> İşçilər</a>
+    <a href="#" class="nav-link"><span class="material-symbols-outlined">shield</span> Rollar</a>
+    <a href="#" class="nav-link"><span class="material-symbols-outlined">account_balance</span> Maliyyə</a>
+  </nav>
+  <a href="#" class="nav-link" style="margin-top:auto"><span class="material-symbols-outlined">settings</span> Ayarlar</a>
+</aside>
+
+<!-- Main -->
+<div class="main">
+  <div class="header">
+    <div class="search-box">
+      <span class="material-symbols-outlined">search</span>
+      <input type="text" placeholder="Axtar..."/>
+    </div>
+    <div class="header-right">
+      <button class="icon-btn notif-dot"><span class="material-symbols-outlined">notifications</span></button>
+      <div class="avatar">HƏ</div>
+    </div>
+  </div>
+
+  <!-- Welcome bento -->
+  <div class="welcome-grid">
+    <div class="welcome-card gradient-card" style="grid-column:1/2">
+      <h1>Xoş gəldiniz,<br><em>Həsən!</em></h1>
+      <p style="margin-top:8px">31 Mart 2026 · 5 aktiv tapşırıq</p>
+      <div style="display:flex;gap:8px;margin-top:16px">
+        <div style="padding:6px 12px;border-radius:10px;background:rgba(255,255,255,0.6);font-size:11px;font-weight:600;color:var(--lavender)">✨ Uğurlu gün!</div>
+        <div style="padding:6px 12px;border-radius:10px;background:rgba(255,255,255,0.6);font-size:11px;font-weight:600;color:var(--mint)">📈 72% tamamlandı</div>
+      </div>
+    </div>
+    <div class="welcome-card" style="background:linear-gradient(135deg,rgba(52,211,153,0.15),rgba(96,165,250,0.1));border-color:rgba(52,211,153,0.25)">
+      <div style="font-size:11px;font-weight:700;color:var(--mint);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">Bu həftə</div>
+      <div style="display:flex;gap:20px">
+        <div><div style="font-size:30px;font-weight:800;color:var(--mint)">18</div><div style="font-size:11px;font-weight:600;color:var(--text-3)">Tamamlandı</div></div>
+        <div><div style="font-size:30px;font-weight:800;color:var(--peach)">2</div><div style="font-size:11px;font-weight:600;color:var(--text-3)">Gecikmiş</div></div>
+        <div><div style="font-size:30px;font-weight:800;color:var(--sky)">5</div><div style="font-size:11px;font-weight:600;color:var(--text-3)">Aktiv</div></div>
+      </div>
+      <div style="margin-top:14px;height:5px;background:rgba(255,255,255,0.4);border-radius:4px;overflow:hidden">
+        <div style="width:72%;height:100%;background:linear-gradient(90deg,#34d399,#60a5fa);border-radius:4px"></div>
+      </div>
+    </div>
+    <div class="welcome-card streak-card">
+      <div>🔥</div>
+      <div class="streak-num">12</div>
+      <div class="streak-label">Gün ardıcıl</div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-dot" style="background:linear-gradient(135deg,#a78bfa,#60a5fa)"></div>
+      <div class="stat-label">Gözləyir</div>
+      <div class="stat-value" style="color:var(--lavender)">12</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-dot" style="background:linear-gradient(135deg,#fb923c,#f97316)"></div>
+      <div class="stat-label">Davam edir</div>
+      <div class="stat-value" style="color:var(--peach)">5</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-dot" style="background:linear-gradient(135deg,#ec4899,#f43f5e)"></div>
+      <div class="stat-label">Onay</div>
+      <div class="stat-value" style="color:var(--rose)">3</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-dot" style="background:linear-gradient(135deg,#10b981,#34d399)"></div>
+      <div class="stat-label">Tamamlandı</div>
+      <div class="stat-value" style="color:var(--mint)">18</div>
+    </div>
+  </div>
+
+  <!-- Two col -->
+  <div class="two-col">
+    <div>
+      <div class="priority-card" onclick="openPanel()">
+        <div class="priority-tag">⚡ Prioritet tapşırıq</div>
+        <div class="priority-title">Aylıq satış hesabatını hazırla</div>
+        <div class="priority-meta">
+          <span>📅 Gecikmiş — 28 Mar</span>
+          <span>👥 10 nəfər</span>
+          <span>📍 Bakı Filialı</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:35%"></div></div>
+        <div class="progress-label">3/10 alt tapşırıq · 35% tamamlandı</div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>Tapşırıqlar</h2>
+            <div class="sub">Bu günün siyahısı</div>
+          </div>
+          <button class="icon-btn" style="width:32px;height:32px"><span class="material-symbols-outlined" style="font-size:16px">tune</span></button>
+        </div>
+
+        <div class="task-item" onclick="openPanel()">
+          <div class="task-check" style="border-color:rgba(236,72,153,0.4)"></div>
+          <div class="task-text">
+            <div class="task-name">Müştəri geri bildirimlərini yoxla</div>
+            <div class="task-sub">
+              <span class="chip chip-rose">Yüksək</span>
+              <span style="font-size:11px;color:var(--rose);font-weight:600">⚠️ Gecikmiş</span>
+              <span style="font-size:11px;color:var(--text-3)">Nigar Ə.</span>
+            </div>
+          </div>
+          <div class="task-status" style="background:rgba(14,165,233,0.1);color:var(--sky)">Gözləyir</div>
+        </div>
+
+        <div class="task-item" onclick="openPanel()">
+          <div class="task-check" style="border-color:rgba(249,115,22,0.4)"></div>
+          <div class="task-text">
+            <div class="task-name">API sənədləşməsini yenilə (v2)</div>
+            <div class="task-sub">
+              <span class="chip chip-peach">Orta</span>
+              <span style="font-size:11px;color:var(--text-3)">Tural Q.</span>
+            </div>
+          </div>
+          <div class="task-status" style="background:rgba(249,115,22,0.1);color:var(--peach)">Davam edir</div>
+        </div>
+
+        <div class="task-item done">
+          <div class="task-check done"><span class="material-symbols-outlined">check</span></div>
+          <div class="task-text">
+            <div class="task-name">Təqdimat slaydlarını hazırla</div>
+            <div class="task-sub"><span class="chip chip-lavender">Marketinq</span></div>
+          </div>
+        </div>
+
+        <div class="task-item" onclick="openPanel()">
+          <div class="task-check" style="border-color:rgba(139,92,246,0.4)"></div>
+          <div class="task-text">
+            <div class="task-name">Maliyyə hesabatı hazırla</div>
+            <div class="task-sub">
+              <span class="chip chip-lavender">Maliyyə</span>
+              <span style="font-size:11px;color:var(--text-3)">Rəşad İ.</span>
+            </div>
+          </div>
+          <div class="task-status" style="background:rgba(255,255,255,0.5);color:var(--text-3)">Gözləyir</div>
+        </div>
+
+        <div class="task-item" onclick="openPanel()">
+          <div class="task-check" style="border-color:rgba(16,185,129,0.4)"></div>
+          <div class="task-text">
+            <div class="task-name">Gəncə filialı stok sayımı</div>
+            <div class="task-sub">
+              <span class="chip chip-mint">Kritik</span>
+              <span style="font-size:11px;color:var(--text-3)">🔄 Aylıq</span>
+            </div>
+          </div>
+          <div class="task-status" style="background:rgba(255,255,255,0.5);color:var(--text-3)">Gözləyir</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right -->
+    <div>
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>Son aktivlik</h2>
+            <div class="sub">Real-time yenilik</div>
+          </div>
+          <span style="width:8px;height:8px;border-radius:50%;background:var(--mint);box-shadow:0 0 8px rgba(16,185,129,0.5);display:inline-block"></span>
+        </div>
+        <div class="act-item">
+          <div class="act-avatar" style="background:linear-gradient(135deg,#a78bfa,#ec4899)">NƏ</div>
+          <div><div class="act-text"><strong>Nigar Əhmədova</strong> tapşırığı tamamladı</div><div style="font-size:11px;color:var(--text-3);font-weight:500">CSV analizi</div><div class="act-time">5 dəq əvvəl</div></div>
+        </div>
+        <div class="act-item">
+          <div class="act-avatar" style="background:linear-gradient(135deg,#34d399,#60a5fa)">TQ</div>
+          <div><div class="act-text"><strong>Tural Quliyev</strong> şərh yazdı</div><div style="font-size:11px;color:var(--text-3);font-weight:500">API sənədləşməsi</div><div class="act-time">23 dəq əvvəl</div></div>
+        </div>
+        <div class="act-item">
+          <div class="act-avatar" style="background:linear-gradient(135deg,#fb923c,#f97316)">RQ</div>
+          <div><div class="act-text"><strong>Rəşad Quliyev</strong> fayl yüklədi</div><div style="font-size:11px;color:var(--text-3);font-weight:500">maliyye_mart.xlsx</div><div class="act-time">1 saat əvvəl</div></div>
+        </div>
+        <div class="act-item">
+          <div class="act-avatar" style="background:linear-gradient(135deg,#60a5fa,#a78bfa)">AH</div>
+          <div><div class="act-text"><strong>Aynur Həsənova</strong> tapşırıq yaratdı</div><div style="font-size:11px;color:var(--text-3);font-weight:500">Q2 planlaması</div><div class="act-time">2 saat əvvəl</div></div>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:14px;padding:20px">
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:14px">Şəxsi tapşırıqlar</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,255,255,0.55);border-radius:12px;border:1px solid rgba(255,255,255,0.8)">
+            <div style="width:16px;height:16px;border-radius:4px;border:1.5px solid rgba(167,139,250,0.4);flex-shrink:0"></div>
+            <span style="font-size:13px;font-weight:600;color:var(--text)">Görüş qeydlərini hazırla</span>
+            <span style="margin-left:auto;font-size:10px;font-weight:600;color:var(--peach)">Bugün</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,255,255,0.55);border-radius:12px;border:1px solid rgba(255,255,255,0.8)">
+            <div style="width:16px;height:16px;border-radius:4px;border:1.5px solid rgba(167,139,250,0.4);flex-shrink:0"></div>
+            <span style="font-size:13px;font-weight:600;color:var(--text)">Dizayn fayllarını yenilə</span>
+            <span style="margin-left:auto;font-size:10px;font-weight:600;color:var(--text-3)">Sabah</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,255,255,0.55);border-radius:12px;border:1px solid rgba(255,255,255,0.8);opacity:.5">
+            <div style="width:16px;height:16px;border-radius:4px;background:var(--mint);flex-shrink:0;display:flex;align-items:center;justify-content:center"><span class="material-symbols-outlined filled" style="font-size:12px;color:#fff">check</span></div>
+            <span style="font-size:13px;font-weight:600;color:var(--text-3);text-decoration:line-through">Həftəlik hesabat</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Detail Panel -->
+<div class="panel-overlay" id="overlay" onclick="closePanel()"></div>
+<div class="detail-panel" id="panel">
+  <div class="dpanel-head">
+    <span>Tapşırıq detalları</span>
+    <button class="icon-btn" onclick="closePanel()"><span class="material-symbols-outlined">close</span></button>
+  </div>
+  <div class="dpanel-body">
+    <div class="d-title">Müştəri geri bildirimlərini yoxla</div>
+    <div class="btn-row">
+      <button class="btn"><span class="material-symbols-outlined" style="font-size:16px">play_arrow</span> Başla</button>
+      <button class="btn primary"><span class="material-symbols-outlined" style="font-size:16px">check</span> Tamamla</button>
+    </div>
+    <div class="d-row">
+      <div><div class="d-label">Status</div><div class="d-val"><span style="width:8px;height:8px;background:var(--sky);border-radius:50%;display:inline-block"></span> Gözləyir</div></div>
+      <div><div class="d-label">Prioritet</div><div class="d-val" style="color:var(--rose)">Yüksək</div></div>
+      <div><div class="d-label">Son tarix</div><div class="d-val">31 Mar</div></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,255,255,0.6);border-radius:12px;border:1px solid rgba(255,255,255,0.8);margin-bottom:16px">
+      <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#a78bfa,#ec4899);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff">NƏ</div>
+      <div><div style="font-size:13px;font-weight:700">Nigar Əhmədova</div><div style="font-size:11px;color:var(--text-3);font-weight:500">İşçi · Bakı Filialı</div></div>
+    </div>
+    <div class="d-label">Açıqlama</div>
+    <div class="d-desc">App Store rəylərini analiz edin və premium istifadəçilərin ən çox qeyd etdiyi 3 problem nöqtəsini müəyyən edin.</div>
+    <div class="d-label" style="margin-bottom:8px">Alt tapşırıqlar · 2/4</div>
+    <div class="sub-list">
+      <div class="sub-item done"><span class="material-symbols-outlined filled" style="color:var(--mint);font-size:16px">check_circle</span><span class="si-t">CSV faylını yüklə</span></div>
+      <div class="sub-item done"><span class="material-symbols-outlined filled" style="color:var(--mint);font-size:16px">check_circle</span><span class="si-t">1-3 ulduzlu rəyləri filtrlə</span></div>
+      <div class="sub-item"><span class="material-symbols-outlined" style="color:var(--text-3);font-size:16px">radio_button_unchecked</span><span>Kateqoriyalara ayır</span></div>
+      <div class="sub-item"><span class="material-symbols-outlined" style="color:var(--text-3);font-size:16px">radio_button_unchecked</span><span>Xülasə hazırla</span></div>
+    </div>
+    <div class="d-label" style="margin-bottom:10px">Mesajlar</div>
+    <div class="act-item" style="padding:0 0 12px">
+      <div class="act-avatar" style="background:linear-gradient(135deg,#34d399,#60a5fa)">HƏ</div>
+      <div><div class="act-text"><strong>Həsən Əliyev</strong> — Rəyləri prioritet sırasına düz.</div><div class="act-time">1 saat əvvəl</div></div>
+    </div>
+    <div class="act-item" style="padding:0 0 12px">
+      <div class="act-avatar" style="background:linear-gradient(135deg,#a78bfa,#ec4899)">NƏ</div>
+      <div><div class="act-text"><strong>Nigar Əhmədova</strong> — CSV hazırdır.</div><div class="act-time">30 dəq əvvəl</div></div>
+    </div>
+  </div>
+  <div class="dpanel-footer">
+    <input type="text" placeholder="Mesaj yaz..."/>
+  </div>
+</div>
+
+<script>
+function openPanel(){document.getElementById('panel').classList.add('open');document.getElementById('overlay').classList.add('open')}
+function closePanel(){document.getElementById('panel').classList.remove('open');document.getElementById('overlay').classList.remove('open')}
+</script>
+</body>
+</html>

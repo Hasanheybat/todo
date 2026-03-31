@@ -216,9 +216,9 @@ export default function UsersPage() {
   const [submitError, setSubmitError] = useState('')
   const [saving, setSaving] = useState(false)
 
-  const canCreate = hasPermission('users.create')
-  const canUpdate = hasPermission('users.update')
-  const canAssignRole = hasPermission('roles.assign')
+  const canCreate = hasPermission('users.manage')
+  const canUpdate = hasPermission('users.manage')
+  const canAssignRole = hasPermission('users.manage')
 
   const loadData = useCallback(async () => {
     setLoading(true)

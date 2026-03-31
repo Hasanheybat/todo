@@ -20,14 +20,14 @@ const topNav = [
 
 const workNav = [
   { name: 'Tapşırıqlar', href: '/tasks', icon: 'tasks', perm: 'tasks.read' },
-  { name: 'Todo', href: '/todo', icon: 'todo', perm: 'todo.access' },
+  { name: 'Todo', href: '/todo', icon: 'todo' },
   { name: 'Şablonlar', href: '/templates', icon: 'templates', perm: 'tasks.read' },
 ]
 
 const manageNav = [
   { name: 'İşçilər', href: '/users', icon: 'users', perm: 'users.read' },
-  { name: 'Rollar', href: '/roles', icon: 'roles', perm: 'roles.create' },
-  { name: 'Maliyyə', href: '/finance', icon: 'finance', perm: 'finance.read' },
+  { name: 'Rollar', href: '/roles', icon: 'roles', perm: 'users.manage' },
+  { name: 'Maliyyə', href: '/finance', icon: 'finance', perm: 'finance.manage' },
 ]
 
 function NavIcon({ type, active }: { type: string; active: boolean }) {
@@ -134,8 +134,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         </div>
 
         <nav className="flex-1 overflow-y-auto px-3 py-1">
-          {/* Quick Add — Dropdown (yalnız todo.create və ya tasks.create yetkisi varsa göstər) */}
-          {(hasPermission('tasks.create') || hasPermission('todo.create')) && (
+          {/* Quick Add — Dropdown (hər kəs TODO yaza bilər, GÖREV üçün tasks.create lazımdır) */}
           <div className="relative mb-2">
             <button onClick={() => setAddDropdownOpen(!addDropdownOpen)}
               className="w-full flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-semibold transition"
@@ -153,15 +152,23 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                 <div className="absolute left-0 right-0 top-full mt-1 z-20 rounded-xl shadow-lg overflow-hidden"
                   style={{ backgroundColor: 'var(--todoist-surface)', border: '1px solid var(--todoist-divider)' }}>
                   {hasPermission('tasks.create') && (
-                  <button onClick={() => { window.dispatchEvent(new CustomEvent('open-add-gorev')); setAddDropdownOpen(false); onClose() }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2.5 text-[12px] font-semibold transition hover:opacity-80"
-                    style={{ color: '#246FE0', borderBottom: '1px solid var(--todoist-border)' }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#246FE0" strokeWidth="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-                    GÖREV yarat
-                    <span className="ml-auto text-[10px] font-normal" style={{ color: 'var(--todoist-sidebar-label)' }}>Şirkət tapşırığı</span>
-                  </button>
+                    <button onClick={() => { window.dispatchEvent(new CustomEvent('open-add-task')); setAddDropdownOpen(false); onClose() }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2.5 text-[12px] font-semibold transition hover:opacity-80"
+                      style={{ color: '#4F46E5', borderBottom: '1px solid var(--todoist-border)' }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" strokeWidth="2"><path d="M12 5v14M5 12h14"/></svg>
+                      TASK yarat
+                      <span className="ml-auto text-[10px] font-normal" style={{ color: 'var(--todoist-sidebar-label)' }}>Adi tapşırıq</span>
+                    </button>
                   )}
-                  {hasPermission('todo.create') && (
+                  {hasPermission('gorev.create') && (
+                    <button onClick={() => { window.dispatchEvent(new CustomEvent('open-add-gorev')); setAddDropdownOpen(false); onClose() }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2.5 text-[12px] font-semibold transition hover:opacity-80"
+                      style={{ color: '#246FE0', borderBottom: '1px solid var(--todoist-border)' }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#246FE0" strokeWidth="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                      GÖREV yarat
+                      <span className="ml-auto text-[10px] font-normal" style={{ color: 'var(--todoist-sidebar-label)' }}>Şirkət tapşırığı</span>
+                    </button>
+                  )}
                   <button onClick={() => { window.dispatchEvent(new CustomEvent('open-add-todo')); setAddDropdownOpen(false); onClose() }}
                     className="w-full flex items-center gap-2.5 px-3 py-2.5 text-[12px] font-semibold transition hover:opacity-80"
                     style={{ color: '#EB8909' }}>
@@ -169,12 +176,10 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                     TODO yarat
                     <span className="ml-auto text-[10px] font-normal" style={{ color: 'var(--todoist-sidebar-label)' }}>Şəxsi tapşırıq</span>
                   </button>
-                  )}
                 </div>
               </>
             )}
           </div>
-          )}
 
           {/* Bugün / Gələnlər / Gələcək */}
           <div className="space-y-0.5">

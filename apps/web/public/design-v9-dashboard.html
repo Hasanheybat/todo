@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>Deccount Flow — Dark</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --primary:#4F46E5;
+  --primary-hover:#4338CA;
+  --primary-dim:rgba(79,70,229,0.12);
+  --primary-glow:rgba(79,70,229,0.25);
+  --secondary:#06B6D4;
+  --secondary-dim:rgba(6,182,212,0.12);
+  --accent:#F59E0B;
+  --accent-dim:rgba(245,158,11,0.12);
+  --bg:#0F172A;
+  --surface:#1E293B;
+  --surface-2:#243447;
+  --surface-3:#334155;
+  --border:#334155;
+  --border-light:rgba(255,255,255,0.06);
+  --text:#E2E8F0;
+  --text-2:#94A3B8;
+  --text-3:#64748B;
+  --text-4:#475569;
+  --success:#22C55E;
+  --success-dim:rgba(34,197,94,0.12);
+  --warning:#F59E0B;
+  --warning-dim:rgba(245,158,11,0.12);
+  --error:#EF4444;
+  --error-dim:rgba(239,68,68,0.12);
+  --info:#3B82F6;
+  --info-dim:rgba(59,130,246,0.12);
+  --radius-sm:8px;
+  --radius-md:12px;
+  --radius-lg:16px;
+  --radius-xl:20px;
+  --shadow-soft:0 4px 12px rgba(0,0,0,0.25);
+  --shadow-medium:0 8px 20px rgba(0,0,0,0.35);
+  --sidebar-w:256px;
+  --topbar-h:64px;
+}
+
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+h1,h2,h3,h4,.heading{font-family:'Poppins',sans-serif}
+[data-lucide]{width:18px;height:18px;stroke-width:1.75;vertical-align:middle;flex-shrink:0}
+
+/* ── SIDEBAR ─────────────────────── */
+.sidebar{
+  position:fixed;left:0;top:0;bottom:0;width:var(--sidebar-w);
+  background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;z-index:50;padding:0;
+  box-shadow:4px 0 24px rgba(0,0,0,0.2);
+}
+
+.sidebar-header{padding:20px 20px 16px}
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+.brand-icon{
+  width:36px;height:36px;border-radius:10px;
+  background:linear-gradient(135deg,var(--primary),#818CF8);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 20px var(--primary-glow);
+}
+.brand-icon [data-lucide]{color:#fff;width:18px;height:18px}
+.brand-name{font-family:'Poppins',sans-serif;font-size:15px;font-weight:700;letter-spacing:-0.3px;color:var(--text)}
+.brand-version{font-size:10px;font-weight:500;color:var(--text-3);background:var(--surface-3);padding:1px 7px;border-radius:6px;margin-left:auto}
+
+.new-task-btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;height:40px;border-radius:var(--radius-md);
+  background:var(--primary);color:#fff;
+  font-family:'Inter',sans-serif;font-size:13.5px;font-weight:500;
+  border:none;cursor:pointer;
+  box-shadow:0 4px 16px var(--primary-glow);
+  transition:all 250ms ease-in-out;
+}
+.new-task-btn:hover{background:var(--primary-hover);transform:translateY(-1px);box-shadow:0 6px 20px var(--primary-glow)}
+.new-task-btn [data-lucide]{width:16px;height:16px}
+
+.sidebar-nav{flex:1;padding:8px 12px;overflow-y:auto}
+.nav-group{margin-bottom:4px}
+.nav-group-label{font-size:10px;font-weight:600;color:var(--text-4);text-transform:uppercase;letter-spacing:0.8px;padding:12px 8px 5px;display:block}
+.nav-link{
+  display:flex;align-items:center;gap:10px;padding:9px 10px;
+  border-radius:var(--radius-sm);text-decoration:none;
+  color:var(--text-2);font-size:13px;font-weight:500;
+  transition:all 150ms ease-in-out;cursor:pointer;
+  border:none;background:none;width:100%;text-align:left;
+  position:relative;
+}
+.nav-link:hover{background:var(--surface-2);color:var(--text)}
+.nav-link.active{background:var(--primary-dim);color:var(--primary);font-weight:600}
+.nav-link.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:60%;background:var(--primary);border-radius:2px}
+.nav-link [data-lucide]{color:var(--text-3);transition:color 150ms}
+.nav-link:hover [data-lucide]{color:var(--text-2)}
+.nav-link.active [data-lucide]{color:var(--primary)}
+.nav-count{margin-left:auto;font-size:10px;font-weight:600;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--surface-3);color:var(--text-3);display:flex;align-items:center;justify-content:center}
+.nav-link.active .nav-count{background:rgba(79,70,229,0.2);color:var(--primary)}
+
+.sidebar-footer{padding:14px 16px;border-top:1px solid var(--border)}
+.user-card{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--radius-md);cursor:pointer;transition:background 150ms}
+.user-card:hover{background:var(--surface-2)}
+.user-ava{
+  width:32px;height:32px;border-radius:10px;
+  background:linear-gradient(135deg,var(--secondary),var(--primary));
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;color:#fff;font-family:'Poppins',sans-serif;
+  flex-shrink:0;
+}
+.user-name{font-size:13px;font-weight:600;color:var(--text);font-family:'Poppins',sans-serif}
+.user-role{font-size:11px;color:var(--text-3)}
+.user-card [data-lucide]{width:14px;height:14px;color:var(--text-4);margin-left:auto}
+
+/* ── TOPBAR ─────────────────────── */
+.topbar{
+  position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--topbar-h);
+  background:var(--bg);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 28px;gap:12px;z-index:40;
+}
+.topbar-left{flex:1}
+.page-breadcrumb{font-size:12px;color:var(--text-3);margin-bottom:1px}
+.page-breadcrumb span{color:var(--text-2)}
+.page-heading{font-family:'Poppins',sans-serif;font-size:18px;font-weight:700;letter-spacing:-0.3px;line-height:1}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.topbar-search{
+  display:flex;align-items:center;gap:8px;padding:8px 14px;
+  border-radius:var(--radius-md);border:1px solid var(--border);
+  background:var(--surface);color:var(--text-2);font-size:13px;
+  cursor:text;width:220px;transition:all 250ms;font-family:'Inter',sans-serif;
+}
+.topbar-search:hover{border-color:var(--primary)}
+.topbar-search [data-lucide]{width:15px;height:15px;color:var(--text-3)}
+.topbar-search .kbd{margin-left:auto;font-size:10px;color:var(--text-4);background:var(--surface-3);padding:1px 5px;border-radius:4px}
+.tb-btn{
+  width:40px;height:40px;border-radius:var(--radius-md);
+  border:1px solid var(--border);background:var(--surface);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:var(--text-2);transition:all 150ms;position:relative;
+}
+.tb-btn:hover{background:var(--surface-2);color:var(--text)}
+.tb-btn [data-lucide]{width:17px;height:17px}
+.notif-badge::after{content:'3';position:absolute;top:5px;right:5px;width:14px;height:14px;border-radius:50%;background:var(--error);border:2px solid var(--bg);font-size:8px;font-weight:700;color:#fff;text-align:center;line-height:10px;font-family:'Inter',sans-serif}
+.topbar-ava{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--secondary),var(--primary));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;cursor:pointer;font-family:'Poppins',sans-serif}
+
+/* ── CONTENT ─────────────────────── */
+.content{margin-left:var(--sidebar-w);padding-top:var(--topbar-h)}
+.inner{padding:28px 32px 72px}
+
+/* ── KPI BENTO ─────────────────────── */
+.bento{display:grid;grid-template-columns:repeat(12,1fr);gap:16px;margin-bottom:24px}
+
+/* Welcome card */
+.bento-welcome{
+  grid-column:span 5;
+  background:linear-gradient(135deg,rgba(79,70,229,0.18) 0%,rgba(6,182,212,0.1) 100%);
+  border:1px solid rgba(79,70,229,0.25);
+  border-radius:var(--radius-xl);padding:24px 26px;
+  position:relative;overflow:hidden;
+}
+.bento-welcome::before{content:'';position:absolute;top:-40px;right:-40px;width:150px;height:150px;background:radial-gradient(circle,rgba(79,70,229,0.2),transparent);border-radius:50%}
+.bento-welcome::after{content:'';position:absolute;bottom:-20px;right:40px;width:80px;height:80px;background:radial-gradient(circle,rgba(6,182,212,0.15),transparent);border-radius:50%}
+.welcome-greeting{font-size:11px;font-weight:500;color:var(--secondary);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.welcome-name{font-family:'Poppins',sans-serif;font-size:22px;font-weight:700;letter-spacing:-0.5px;margin-bottom:6px}
+.welcome-name span{background:linear-gradient(90deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.welcome-sub{font-size:12.5px;color:var(--text-2);margin-bottom:16px}
+.streak-row{display:flex;align-items:center;gap:8px}
+.streak-pill{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.2);font-size:12px;font-weight:600;color:var(--accent)}
+.streak-pill [data-lucide]{width:14px;height:14px;color:var(--accent)}
+.done-pill{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2);font-size:12px;font-weight:600;color:var(--success)}
+.done-pill [data-lucide]{width:14px;height:14px;color:var(--success)}
+
+/* Stat cards */
+.bento-stat{
+  grid-column:span 2;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-lg);padding:18px 16px;
+  display:flex;flex-direction:column;gap:2px;
+  transition:all 250ms;cursor:default;position:relative;overflow:hidden;
+}
+.bento-stat:hover{transform:translateY(-2px);box-shadow:var(--shadow-soft);border-color:var(--surface-3)}
+.stat-icon{width:32px;height:32px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+.stat-icon [data-lucide]{width:16px;height:16px}
+.stat-label{font-size:11px;font-weight:500;color:var(--text-3);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:3px}
+.stat-val{font-family:'Poppins',sans-serif;font-size:26px;font-weight:700;letter-spacing:-1px;line-height:1}
+.stat-delta{font-size:11px;font-weight:500;margin-top:4px;display:flex;align-items:center;gap:3px}
+.stat-bar{position:absolute;bottom:0;left:0;right:0;height:3px;border-radius:0}
+
+/* Progress donut — simple SVG */
+.bento-donut{
+  grid-column:span 3;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-lg);padding:20px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+}
+.donut-title{font-family:'Poppins',sans-serif;font-size:12.5px;font-weight:600;color:var(--text);margin-bottom:16px;width:100%}
+.donut-wrap{position:relative;display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+.donut-wrap .donut-label{position:absolute;text-align:center}
+.donut-label-val{font-family:'Poppins',sans-serif;font-size:22px;font-weight:700;color:var(--text);line-height:1}
+.donut-label-sub{font-size:10px;color:var(--text-3);margin-top:2px}
+.donut-legend{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.dl-item{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text-3);font-weight:500}
+.dl-dot{width:7px;height:7px;border-radius:50%}
+
+/* ── MAIN GRID ─────────────────────── */
+.main-grid{display:grid;grid-template-columns:1fr 320px;gap:16px}
+
+/* ── TASK LIST ─────────────────────── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.card-header{display:flex;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border)}
+.card-header h2{font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;flex:1;letter-spacing:-0.1px}
+.card-header .card-meta{font-size:11.5px;color:var(--text-3);margin-right:10px}
+.card-header .ch-btn{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:transparent;color:var(--text-2);font-size:12px;cursor:pointer;transition:all 150ms;font-family:'Inter',sans-serif}
+.card-header .ch-btn:hover{background:var(--surface-2);color:var(--text)}
+.card-header .ch-btn [data-lucide]{width:14px;height:14px}
+
+/* Priority task */
+.priority-task{
+  margin:16px 20px;padding:16px;
+  border-radius:var(--radius-md);
+  background:linear-gradient(135deg,rgba(239,68,68,0.08),rgba(245,158,11,0.06));
+  border:1px solid rgba(239,68,68,0.2);
+  cursor:pointer;transition:all 250ms;
+}
+.priority-task:hover{border-color:rgba(239,68,68,0.4);background:linear-gradient(135deg,rgba(239,68,68,0.12),rgba(245,158,11,0.08))}
+.pt-badges{display:flex;align-items:center;gap:6px;margin-bottom:8px}
+.badge{font-size:10.5px;font-weight:500;padding:3px 9px;border-radius:6px;display:inline-flex;align-items:center;gap:4px}
+.badge [data-lucide]{width:11px;height:11px}
+.badge-error{background:var(--error-dim);color:var(--error)}
+.badge-warning{background:var(--warning-dim);color:var(--warning)}
+.badge-info{background:var(--info-dim);color:var(--info)}
+.badge-success{background:var(--success-dim);color:var(--success)}
+.badge-primary{background:var(--primary-dim);color:var(--primary)}
+.badge-secondary{background:var(--secondary-dim);color:var(--secondary)}
+.badge-muted{background:var(--surface-3);color:var(--text-3)}
+.pt-title{font-family:'Poppins',sans-serif;font-size:14.5px;font-weight:600;margin-bottom:6px;line-height:1.4}
+.pt-meta{display:flex;align-items:center;gap:12px;font-size:11.5px;color:var(--text-2);margin-bottom:12px}
+.pt-meta span{display:flex;align-items:center;gap:4px}
+.pt-meta [data-lucide]{width:13px;height:13px;color:var(--text-3)}
+.progress-bar{height:5px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--primary),var(--secondary))}
+.progress-label{font-size:11px;color:var(--text-3);margin-top:5px;font-weight:500}
+
+/* Task rows */
+.task-row{
+  display:flex;align-items:center;gap:12px;
+  padding:11px 20px;border-bottom:1px solid rgba(255,255,255,0.04);
+  cursor:pointer;transition:background 150ms;
+}
+.task-row:last-child{border-bottom:none}
+.task-row:hover{background:rgba(255,255,255,0.025)}
+.task-check{
+  width:18px;height:18px;border-radius:50%;
+  border:1.5px solid var(--surface-3);
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  transition:all 150ms;
+}
+.task-check:hover{border-color:var(--success)}
+.task-check.done{background:var(--success);border-color:var(--success)}
+.task-check.done [data-lucide]{width:11px;height:11px;color:#fff;stroke-width:2.5}
+.task-body{flex:1;min-width:0}
+.task-title{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.task-row.done .task-title{color:var(--text-3);text-decoration:line-through}
+.task-chips{display:flex;align-items:center;gap:5px;margin-top:3px;flex-wrap:wrap}
+.chip{font-size:10.5px;font-weight:500;padding:2px 8px;border-radius:5px}
+.task-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.task-av{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;font-family:'Poppins',sans-serif}
+.task-status{font-size:10.5px;font-weight:500;padding:3px 9px;border-radius:6px}
+
+/* ── RIGHT COLUMN ─────────────────────── */
+.right-col{display:flex;flex-direction:column;gap:16px}
+
+/* Activity feed */
+.activity-item{display:flex;gap:10px;padding:12px 20px;border-bottom:1px solid rgba(255,255,255,0.04)}
+.activity-item:last-child{border-bottom:none}
+.act-ava{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:700;color:#fff;flex-shrink:0;font-family:'Poppins',sans-serif}
+.act-body{flex:1}
+.act-msg{font-size:12.5px;color:var(--text-2);line-height:1.4}
+.act-msg strong{color:var(--text);font-weight:600}
+.act-time{font-size:10.5px;color:var(--text-4);margin-top:2px}
+
+/* Progress rows */
+.prog-row{display:flex;justify-content:space-between;align-items:center;padding:10px 20px;border-bottom:1px solid rgba(255,255,255,0.04)}
+.prog-row:last-child{border-bottom:none}
+.prog-label{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--text-2)}
+.prog-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.prog-right{display:flex;align-items:center;gap:10px}
+.prog-val{font-family:'Poppins',sans-serif;font-size:13px;font-weight:600;color:var(--text)}
+.prog-track{width:60px;height:4px;background:var(--surface-3);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;border-radius:2px}
+
+/* ── DETAIL PANEL ─────────────────────── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);backdrop-filter:blur(2px);z-index:60;display:none}
+.overlay.open{display:block}
+.dpanel{
+  position:fixed;right:0;top:0;bottom:0;width:420px;
+  background:var(--surface);border-left:1px solid var(--border);
+  z-index:70;transform:translateX(100%);
+  transition:transform 250ms ease-in-out;
+  display:flex;flex-direction:column;
+  box-shadow:-12px 0 40px rgba(0,0,0,0.3);
+}
+.dpanel.open{transform:translateX(0)}
+.dp-head{
+  display:flex;align-items:center;gap:8px;padding:0 20px;
+  height:var(--topbar-h);border-bottom:1px solid var(--border);flex-shrink:0;
+}
+.dp-head .dp-label{font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:0.5px}
+.dp-actions{display:flex;gap:4px;margin-left:auto}
+.dp-body{flex:1;overflow-y:auto;padding:22px}
+.dp-footer{padding:14px 20px;border-top:1px solid var(--border);flex-shrink:0}
+.dp-input{
+  display:flex;align-items:center;gap:8px;padding:10px 14px;
+  border-radius:var(--radius-md);border:1px solid var(--border);
+  background:var(--surface-2);
+}
+.dp-input input{flex:1;border:none;outline:none;font-size:13px;background:transparent;color:var(--text);font-family:'Inter',sans-serif}
+.dp-input input::placeholder{color:var(--text-4)}
+.dp-input [data-lucide]{width:16px;height:16px;color:var(--text-3);cursor:pointer;transition:color 150ms}
+.dp-input [data-lucide]:hover{color:var(--primary)}
+
+.dp-title{font-family:'Poppins',sans-serif;font-size:17px;font-weight:700;letter-spacing:-0.3px;margin-bottom:16px;line-height:1.4}
+.dp-btn-row{display:flex;gap:8px;margin-bottom:18px}
+.dp-btn{
+  display:flex;align-items:center;gap:6px;padding:0 16px;height:36px;
+  border-radius:var(--radius-md);font-size:12.5px;font-weight:500;
+  border:1px solid var(--border);background:var(--surface-2);color:var(--text-2);
+  cursor:pointer;transition:all 150ms;font-family:'Inter',sans-serif;
+}
+.dp-btn:hover{background:var(--surface-3);color:var(--text);border-color:var(--surface-3)}
+.dp-btn [data-lucide]{width:14px;height:14px}
+.dp-btn.primary{background:var(--primary);color:#fff;border-color:var(--primary);box-shadow:0 4px 16px var(--primary-glow)}
+.dp-btn.primary:hover{background:var(--primary-hover)}
+
+.dp-meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:14px;background:var(--surface-2);border-radius:var(--radius-md);margin-bottom:16px;border:1px solid var(--border)}
+.dp-field .dp-f-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-4);margin-bottom:4px}
+.dp-field .dp-f-val{font-size:12.5px;font-weight:500;color:var(--text);display:flex;align-items:center;gap:5px}
+
+.dp-desc{font-size:12.5px;color:var(--text-2);line-height:1.75;padding:12px 14px;background:var(--surface-2);border-radius:var(--radius-md);border-left:3px solid var(--primary);margin-bottom:18px}
+
+.dp-section{font-family:'Poppins',sans-serif;font-size:11.5px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.dp-section span{font-size:11px;font-weight:500;text-transform:none;letter-spacing:0;color:var(--text-4)}
+
+.sub-item{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:var(--radius-sm);transition:background 150ms;cursor:pointer}
+.sub-item:hover{background:var(--surface-2)}
+.sub-chk{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--surface-3);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 150ms}
+.sub-chk.done{background:var(--success);border-color:var(--success)}
+.sub-chk.done [data-lucide]{width:11px;height:11px;color:#fff;stroke-width:2.5}
+.sub-text{font-size:12.5px;color:var(--text-2)}
+.sub-item.done .sub-text{text-decoration:line-through;color:var(--text-4)}
+</style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="brand">
+      <div class="brand-icon"><i data-lucide="zap"></i></div>
+      <span class="brand-name">Deccount Flow</span>
+      <span class="brand-version">v1.0</span>
+    </div>
+    <button class="new-task-btn" onclick="openPanel()">
+      <i data-lucide="plus"></i>
+      Create Task
+    </button>
+  </div>
+
+  <div class="sidebar-nav">
+    <div class="nav-group">
+      <nav>
+        <a class="nav-link active"><i data-lucide="layout-dashboard"></i> Bugün <span class="nav-count">5</span></a>
+        <a class="nav-link"><i data-lucide="inbox"></i> Gələnlər <span class="nav-count">12</span></a>
+        <a class="nav-link"><i data-lucide="calendar"></i> Gələcək</a>
+      </nav>
+    </div>
+    <div class="nav-group">
+      <span class="nav-group-label">İş Sahəsi</span>
+      <nav>
+        <a class="nav-link"><i data-lucide="check-square"></i> Tapşırıqlar</a>
+        <a class="nav-link"><i data-lucide="circle-check"></i> Todo</a>
+        <a class="nav-link"><i data-lucide="git-branch"></i> Şablonlar</a>
+      </nav>
+    </div>
+    <div class="nav-group">
+      <span class="nav-group-label">İdarəetmə</span>
+      <nav>
+        <a class="nav-link"><i data-lucide="users"></i> İşçilər</a>
+        <a class="nav-link"><i data-lucide="shield"></i> Rollar</a>
+        <a class="nav-link"><i data-lucide="wallet"></i> Maliyyə</a>
+        <a class="nav-link"><i data-lucide="settings"></i> Ayarlar</a>
+      </nav>
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="user-ava">HƏ</div>
+      <div>
+        <div class="user-name">Həsən Əliyev</div>
+        <div class="user-role">Admin · Bakı Filialı</div>
+      </div>
+      <i data-lucide="chevrons-up-down"></i>
+    </div>
+  </div>
+</aside>
+
+<!-- ── TOPBAR ── -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="page-breadcrumb">Deccount Flow / <span>Dashboard</span></div>
+    <div class="page-heading">Bugün</div>
+  </div>
+  <div class="topbar-right">
+    <div class="topbar-search">
+      <i data-lucide="search"></i>
+      <span>Search anything...</span>
+      <span class="kbd">⌘K</span>
+    </div>
+    <button class="tb-btn notif-badge"><i data-lucide="bell"></i></button>
+    <button class="tb-btn"><i data-lucide="help-circle"></i></button>
+    <div class="topbar-ava">HƏ</div>
+  </div>
+</div>
+
+<!-- ── CONTENT ── -->
+<div class="content">
+  <div class="inner">
+
+    <!-- Bento Grid -->
+    <div class="bento">
+
+      <!-- Welcome -->
+      <div class="bento-welcome">
+        <div class="welcome-greeting">Good afternoon</div>
+        <div class="welcome-name">Xoş gəldiniz, <span>Həsən!</span></div>
+        <div class="welcome-sub">31 Mart 2026 · 5 aktiv tapşırıq sizi gözləyir</div>
+        <div class="streak-row">
+          <div class="streak-pill"><i data-lucide="flame"></i> 12 gün ardıcıl</div>
+          <div class="done-pill"><i data-lucide="trending-up"></i> 72% tamamlandı</div>
+        </div>
+      </div>
+
+      <!-- Stat: Gözləyir -->
+      <div class="bento-stat">
+        <div class="stat-icon" style="background:var(--info-dim)"><i data-lucide="circle-dot" style="color:var(--info)"></i></div>
+        <div class="stat-label">Gözləyir</div>
+        <div class="stat-val" style="color:var(--info)">12</div>
+        <div class="stat-delta" style="color:var(--text-3)"><i data-lucide="arrow-up" style="width:12px;height:12px;color:var(--warning)"></i> +3 bu həftə</div>
+        <div class="stat-bar" style="background:var(--info)"></div>
+      </div>
+
+      <!-- Stat: Davam edir -->
+      <div class="bento-stat">
+        <div class="stat-icon" style="background:var(--warning-dim)"><i data-lucide="loader" style="color:var(--warning)"></i></div>
+        <div class="stat-label">Davam edir</div>
+        <div class="stat-val" style="color:var(--warning)">5</div>
+        <div class="stat-delta" style="color:var(--warning)"><i data-lucide="circle" style="width:8px;height:8px;color:var(--warning);fill:currentColor"></i> Aktiv</div>
+        <div class="stat-bar" style="background:var(--warning)"></div>
+      </div>
+
+      <!-- Stat: Onay -->
+      <div class="bento-stat">
+        <div class="stat-icon" style="background:var(--primary-dim)"><i data-lucide="clock" style="color:var(--primary)"></i></div>
+        <div class="stat-label">Onay</div>
+        <div class="stat-val" style="color:var(--primary)">3</div>
+        <div class="stat-delta" style="color:var(--text-3)"><i data-lucide="alert-circle" style="width:12px;height:12px;color:var(--primary)"></i> Gözləyir</div>
+        <div class="stat-bar" style="background:var(--primary)"></div>
+      </div>
+
+      <!-- Stat: Tamamlandı -->
+      <div class="bento-stat">
+        <div class="stat-icon" style="background:var(--success-dim)"><i data-lucide="check-circle-2" style="color:var(--success)"></i></div>
+        <div class="stat-label">Tamamlandı</div>
+        <div class="stat-val" style="color:var(--success)">18</div>
+        <div class="stat-delta" style="color:var(--success)"><i data-lucide="arrow-up" style="width:12px;height:12px"></i> +5 bu həftə</div>
+        <div class="stat-bar" style="background:var(--success)"></div>
+      </div>
+
+      <!-- Donut -->
+      <div class="bento-donut">
+        <div class="donut-title">Tamamlanma faizi</div>
+        <div class="donut-wrap">
+          <svg width="88" height="88" viewBox="0 0 88 88">
+            <circle cx="44" cy="44" r="36" fill="none" stroke="#334155" stroke-width="8"/>
+            <circle cx="44" cy="44" r="36" fill="none" stroke="#4F46E5" stroke-width="8" stroke-dasharray="226" stroke-dashoffset="63" stroke-linecap="round" transform="rotate(-90 44 44)"/>
+            <circle cx="44" cy="44" r="36" fill="none" stroke="#06B6D4" stroke-width="8" stroke-dasharray="226" stroke-dashoffset="180" stroke-linecap="round" transform="rotate(-90 44 44)" opacity="0.5"/>
+          </svg>
+          <div class="donut-label">
+            <div class="donut-label-val">72%</div>
+            <div class="donut-label-sub">Bu həftə</div>
+          </div>
+        </div>
+        <div class="donut-legend">
+          <div class="dl-item"><div class="dl-dot" style="background:var(--primary)"></div>Tamamlandı</div>
+          <div class="dl-item"><div class="dl-dot" style="background:var(--secondary)"></div>Aktiv</div>
+          <div class="dl-item"><div class="dl-dot" style="background:var(--surface-3)"></div>Qalan</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Main grid -->
+    <div class="main-grid">
+
+      <!-- Left: Tasks -->
+      <div>
+        <div class="card">
+          <div class="card-header">
+            <h2>Tapşırıqlar</h2>
+            <span class="card-meta">31 Mart 2026</span>
+            <button class="ch-btn"><i data-lucide="sliders-horizontal"></i> Filter</button>
+            <button class="ch-btn" style="margin-left:6px"><i data-lucide="arrow-up-down"></i> Sort</button>
+          </div>
+
+          <!-- Priority task -->
+          <div class="priority-task" onclick="openPanel()">
+            <div class="pt-badges">
+              <span class="badge badge-error"><i data-lucide="flag"></i> Kritik</span>
+              <span class="badge badge-warning"><i data-lucide="calendar-x"></i> Gecikmiş</span>
+              <span class="badge badge-muted">WF-041</span>
+              <span class="badge badge-warning" style="margin-left:auto">Davam edir</span>
+            </div>
+            <div class="pt-title">Aylıq satış hesabatını hazırla</div>
+            <div class="pt-meta">
+              <span><i data-lucide="users"></i> 10 nəfər</span>
+              <span><i data-lucide="map-pin"></i> Bakı Filialı</span>
+              <span><i data-lucide="clock"></i> 28 Mar 2026</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" style="width:35%"></div></div>
+            <div class="progress-label">3 / 10 alt tapşırıq · 35% tamamlandı</div>
+          </div>
+
+          <!-- Task rows -->
+          <div class="task-row" onclick="openPanel()">
+            <div class="task-check"></div>
+            <div class="task-body">
+              <div class="task-title">Müştəri geri bildirimlərini yoxla</div>
+              <div class="task-chips">
+                <span class="chip badge-error">Yüksək</span>
+                <span style="font-size:11px;color:var(--error);font-weight:500;display:flex;align-items:center;gap:3px"><i data-lucide="alert-triangle" style="width:11px;height:11px"></i> Gecikmiş</span>
+                <span style="font-size:11px;color:var(--text-3)">Nigar Ə.</span>
+              </div>
+            </div>
+            <div class="task-right">
+              <div class="task-status badge-info" style="font-size:10.5px;padding:3px 9px;border-radius:6px;font-weight:500;background:var(--info-dim);color:var(--info)">Gözləyir</div>
+              <div class="task-av" style="background:linear-gradient(135deg,#818CF8,#4F46E5)">NƏ</div>
+            </div>
+          </div>
+
+          <div class="task-row" onclick="openPanel()">
+            <div class="task-check"></div>
+            <div class="task-body">
+              <div class="task-title">API sənədləşməsini yenilə (v2)</div>
+              <div class="task-chips">
+                <span class="chip badge-warning">Orta</span>
+                <span style="font-size:11px;color:var(--text-3)">Tural Q.</span>
+              </div>
+            </div>
+            <div class="task-right">
+              <div style="font-size:10.5px;padding:3px 9px;border-radius:6px;font-weight:500;background:var(--warning-dim);color:var(--warning)">Davam edir</div>
+              <div class="task-av" style="background:linear-gradient(135deg,var(--secondary),#0891B2)">TQ</div>
+            </div>
+          </div>
+
+          <div class="task-row done">
+            <div class="task-check done"><i data-lucide="check"></i></div>
+            <div class="task-body">
+              <div class="task-title">Təqdimat slaydlarını hazırla</div>
+              <div class="task-chips"><span class="chip badge-primary">Marketinq</span></div>
+            </div>
+            <div class="task-right">
+              <div style="font-size:10.5px;padding:3px 9px;border-radius:6px;font-weight:500;background:var(--success-dim);color:var(--success)">Tamamlandı</div>
+              <div class="task-av" style="background:linear-gradient(135deg,#F59E0B,#D97706)">LM</div>
+            </div>
+          </div>
+
+          <div class="task-row" onclick="openPanel()">
+            <div class="task-check"></div>
+            <div class="task-body">
+              <div class="task-title">Maliyyə hesabatı hazırla</div>
+              <div class="task-chips">
+                <span class="chip badge-primary">Maliyyə</span>
+                <span style="font-size:11px;color:var(--text-3)">Gəncə · Rəşad İ.</span>
+              </div>
+            </div>
+            <div class="task-right">
+              <div style="font-size:10.5px;padding:3px 9px;border-radius:6px;font-weight:500;background:var(--surface-3);color:var(--text-3)">Gözləyir</div>
+              <div class="task-av" style="background:linear-gradient(135deg,var(--success),#16A34A)">RQ</div>
+            </div>
+          </div>
+
+          <div class="task-row" onclick="openPanel()">
+            <div class="task-check"></div>
+            <div class="task-body">
+              <div class="task-title">Gəncə filialı stok sayımı</div>
+              <div class="task-chips">
+                <span class="chip badge-error">Kritik</span>
+                <span style="font-size:11px;color:var(--text-3);display:flex;align-items:center;gap:3px"><i data-lucide="repeat-2" style="width:11px;height:11px"></i> Aylıq</span>
+              </div>
+            </div>
+            <div class="task-right">
+              <div style="font-size:10.5px;padding:3px 9px;border-radius:6px;font-weight:500;background:var(--surface-3);color:var(--text-3)">Gözləyir</div>
+              <div class="task-av" style="background:linear-gradient(135deg,#EC4899,#BE185D)">AH</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Right column -->
+      <div class="right-col">
+
+        <!-- Performance -->
+        <div class="card">
+          <div class="card-header"><h2>Bu həftə</h2></div>
+          <div style="padding:16px 20px">
+            <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:8px">
+              <div>
+                <div style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.4px;font-weight:500;margin-bottom:3px">Tamamlanma faizi</div>
+                <div style="font-family:'Poppins',sans-serif;font-size:28px;font-weight:700;color:var(--success);letter-spacing:-1px">72%</div>
+              </div>
+              <div style="text-align:right;padding-bottom:4px">
+                <div style="font-size:11px;color:var(--text-3);margin-bottom:2px">Hədəf</div>
+                <div style="font-family:'Poppins',sans-serif;font-size:16px;font-weight:600;color:var(--text-2)">80%</div>
+              </div>
+            </div>
+            <div class="progress-bar" style="height:6px;margin-bottom:0"><div class="progress-fill" style="width:72%;background:linear-gradient(90deg,var(--success),#4ADE80)"></div></div>
+          </div>
+          <div class="prog-row">
+            <div class="prog-label"><div class="prog-dot" style="background:var(--success)"></div>Tamamlandı</div>
+            <div class="prog-right"><div class="prog-val">18</div><div class="prog-track"><div class="prog-fill" style="width:72%;background:var(--success)"></div></div></div>
+          </div>
+          <div class="prog-row">
+            <div class="prog-label"><div class="prog-dot" style="background:var(--warning)"></div>Davam edir</div>
+            <div class="prog-right"><div class="prog-val">5</div><div class="prog-track"><div class="prog-fill" style="width:20%;background:var(--warning)"></div></div></div>
+          </div>
+          <div class="prog-row">
+            <div class="prog-label"><div class="prog-dot" style="background:var(--info)"></div>Gözləyir</div>
+            <div class="prog-right"><div class="prog-val">12</div><div class="prog-track"><div class="prog-fill" style="width:48%;background:var(--info)"></div></div></div>
+          </div>
+          <div class="prog-row">
+            <div class="prog-label"><div class="prog-dot" style="background:var(--error)"></div>Gecikmiş</div>
+            <div class="prog-right"><div class="prog-val">2</div><div class="prog-track"><div class="prog-fill" style="width:8%;background:var(--error)"></div></div></div>
+          </div>
+        </div>
+
+        <!-- Activity -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Son aktivlik</h2>
+            <span style="width:8px;height:8px;border-radius:50%;background:var(--success);box-shadow:0 0 8px rgba(34,197,94,0.5);margin-left:auto"></span>
+          </div>
+          <div class="activity-item">
+            <div class="act-ava" style="background:linear-gradient(135deg,#818CF8,#4F46E5)">NƏ</div>
+            <div class="act-body"><div class="act-msg"><strong>Nigar Ə.</strong> tapşırığı tamamladı</div><div style="font-size:11px;color:var(--text-4);margin-top:1px">CSV analizi</div><div class="act-time">5 dəq əvvəl</div></div>
+          </div>
+          <div class="activity-item">
+            <div class="act-ava" style="background:linear-gradient(135deg,var(--secondary),#0891B2)">TQ</div>
+            <div class="act-body"><div class="act-msg"><strong>Tural Q.</strong> şərh yazdı</div><div style="font-size:11px;color:var(--text-4);margin-top:1px">API sənədləşməsi</div><div class="act-time">23 dəq əvvəl</div></div>
+          </div>
+          <div class="activity-item">
+            <div class="act-ava" style="background:linear-gradient(135deg,var(--success),#16A34A)">RQ</div>
+            <div class="act-body"><div class="act-msg"><strong>Rəşad Q.</strong> fayl yüklədi</div><div style="font-size:11px;color:var(--text-4);margin-top:1px">maliyye_mart.xlsx</div><div class="act-time">1 saat əvvəl</div></div>
+          </div>
+          <div class="activity-item">
+            <div class="act-ava" style="background:linear-gradient(135deg,var(--accent),#D97706)">AH</div>
+            <div class="act-body"><div class="act-msg"><strong>Aynur H.</strong> tapşırıq yaratdı</div><div style="font-size:11px;color:var(--text-4);margin-top:1px">Q2 planlaması</div><div class="act-time">2 saat əvvəl</div></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── DETAIL PANEL ── -->
+<div class="overlay" id="overlay" onclick="closePanel()"></div>
+<div class="dpanel" id="panel">
+  <div class="dp-head">
+    <span class="dp-label">Task Detail</span>
+    <div style="display:flex;gap:4px;margin-left:10px">
+      <span class="badge badge-info">Gözləyir</span>
+      <span class="badge badge-error">Kritik</span>
+    </div>
+    <div class="dp-actions">
+      <button class="tb-btn"><i data-lucide="external-link"></i></button>
+      <button class="tb-btn"><i data-lucide="more-horizontal"></i></button>
+      <button class="tb-btn" onclick="closePanel()"><i data-lucide="x"></i></button>
+    </div>
+  </div>
+  <div class="dp-body">
+    <div class="dp-title">Müştəri geri bildirimlərini yoxla</div>
+    <div class="dp-btn-row">
+      <button class="dp-btn"><i data-lucide="play"></i> Başla</button>
+      <button class="dp-btn primary"><i data-lucide="check"></i> Complete Task</button>
+    </div>
+    <div class="dp-meta-grid">
+      <div class="dp-field"><div class="dp-f-label">Assign User</div><div class="dp-f-val"><div style="width:18px;height:18px;border-radius:5px;background:linear-gradient(135deg,#818CF8,#4F46E5);display:flex;align-items:center;justify-content:center;font-size:7.5px;font-weight:700;color:#fff">NƏ</div> Nigar Ə.</div></div>
+      <div class="dp-field"><div class="dp-f-label">Son tarix</div><div class="dp-f-val" style="color:var(--error)"><i data-lucide="calendar-x" style="width:13px;height:13px"></i> 31 Mar</div></div>
+      <div class="dp-field"><div class="dp-f-label">Prioritet</div><div class="dp-f-val" style="color:var(--error)"><i data-lucide="flag" style="width:13px;height:13px"></i> Kritik</div></div>
+      <div class="dp-field"><div class="dp-f-label">Filial</div><div class="dp-f-val">Bakı Filialı</div></div>
+    </div>
+    <div class="dp-desc">App Store rəylərini analiz edin. Premium istifadəçilərin ən çox qeyd etdiyi 3 problem nöqtəsini müəyyən edin və prioritet sırasına görə hesabat hazırlayın.</div>
+
+    <div class="dp-section" style="margin-top:16px">Alt tapşırıqlar <span>2 / 4</span></div>
+    <div class="sub-item done"><div class="sub-chk done"><i data-lucide="check"></i></div><span class="sub-text">CSV faylını yüklə</span></div>
+    <div class="sub-item done"><div class="sub-chk done"><i data-lucide="check"></i></div><span class="sub-text">1-3 ulduzlu rəyləri filtrlə</span></div>
+    <div class="sub-item"><div class="sub-chk"></div><span class="sub-text">Kateqoriyalara ayır</span></div>
+    <div class="sub-item"><div class="sub-chk"></div><span class="sub-text">Xülasə hesabatı hazırla</span></div>
+
+    <div class="dp-section" style="margin-top:18px">Mesajlar</div>
+    <div class="activity-item" style="padding:7px 0;border-bottom:none">
+      <div class="act-ava" style="background:linear-gradient(135deg,var(--success),#16A34A)">HƏ</div>
+      <div class="act-body"><div class="act-msg"><strong>Həsən Ə.</strong> — Rəyləri prioritet sırasına düz.</div><div class="act-time">1 saat əvvəl</div></div>
+    </div>
+    <div class="activity-item" style="padding:7px 0;border-bottom:none">
+      <div class="act-ava" style="background:linear-gradient(135deg,#818CF8,#4F46E5)">NƏ</div>
+      <div class="act-body"><div class="act-msg"><strong>Nigar Ə.</strong> — CSV hazırdır, filtrlərə başlayıram.</div><div class="act-time">30 dəq əvvəl</div></div>
+    </div>
+  </div>
+  <div class="dp-footer">
+    <div class="dp-input">
+      <input type="text" placeholder="Add a comment..."/>
+      <i data-lucide="paperclip"></i>
+      <i data-lucide="send"></i>
+    </div>
+  </div>
+</div>
+
+<script>
+lucide.createIcons();
+function openPanel(){document.getElementById('panel').classList.add('open');document.getElementById('overlay').classList.add('open')}
+function closePanel(){document.getElementById('panel').classList.remove('open');document.getElementById('overlay').classList.remove('open')}
+</script>
+</body>
+</html>

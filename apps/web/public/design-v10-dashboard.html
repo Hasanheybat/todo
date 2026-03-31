@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WorkFlow Pro — Design v10 (Deccount Flow Light)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+:root {
+  --primary: #4F46E5;
+  --primary-light: #EEF2FF;
+  --primary-hover: #4338CA;
+  --secondary: #06B6D4;
+  --secondary-light: #ECFEFF;
+  --accent: #F59E0B;
+  --accent-light: #FFFBEB;
+  --success: #10B981;
+  --success-light: #ECFDF5;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+  --danger-light: #FEF2F2;
+
+  --bg: #F8FAFC;
+  --surface: #FFFFFF;
+  --surface-2: #F1F5F9;
+  --border: #E2E8F0;
+  --border-light: #F1F5F9;
+
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #94A3B8;
+  --text-on-primary: #FFFFFF;
+
+  --sidebar-width: 240px;
+  --header-height: 64px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+
+  --shadow-xs: 0 1px 2px rgba(15,23,42,0.06);
+  --shadow-sm: 0 2px 8px rgba(15,23,42,0.08);
+  --shadow-md: 0 4px 16px rgba(15,23,42,0.10);
+  --shadow-lg: 0 8px 32px rgba(15,23,42,0.12);
+  --shadow-primary: 0 4px 16px rgba(79,70,229,0.25);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: var(--sidebar-width);
+  height: 100vh;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  left: 0; top: 0;
+  z-index: 100;
+  box-shadow: var(--shadow-sm);
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.logo-icon {
+  width: 36px; height: 36px;
+  background: var(--primary);
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+  box-shadow: var(--shadow-primary);
+}
+.logo-icon [data-lucide] { width: 18px; height: 18px; }
+.logo-text {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+.logo-text span {
+  display: block;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.sidebar-section {
+  padding: 16px 12px 8px;
+}
+.sidebar-section-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0 8px;
+  margin-bottom: 4px;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-bottom: 2px;
+  text-decoration: none;
+}
+.nav-item:hover {
+  background: var(--surface-2);
+  color: var(--text-primary);
+}
+.nav-item.active {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+.nav-item [data-lucide] { width: 16px; height: 16px; flex-shrink: 0; }
+.nav-badge {
+  margin-left: auto;
+  background: var(--primary);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 20px;
+  min-width: 18px;
+  text-align: center;
+}
+.nav-badge.amber { background: var(--accent); }
+.nav-badge.cyan { background: var(--secondary); }
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 12px;
+  border-top: 1px solid var(--border);
+}
+.user-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.user-card:hover { background: var(--surface-2); }
+.user-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 12px; font-weight: 700;
+  flex-shrink: 0;
+}
+.user-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.user-role { font-size: 11px; color: var(--text-muted); }
+.user-card [data-lucide] { width: 14px; height: 14px; color: var(--text-muted); margin-left: auto; }
+
+/* ── MAIN ── */
+.main {
+  margin-left: var(--sidebar-width);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ── HEADER ── */
+.header {
+  height: var(--header-height);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  gap: 16px;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-xs);
+}
+.header-title {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--text-primary);
+}
+.header-subtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-left: 4px;
+}
+.header-search {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  width: 220px;
+  transition: border-color 0.15s;
+}
+.header-search:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79,70,229,0.1);
+}
+.header-search [data-lucide] { width: 15px; height: 15px; color: var(--text-muted); flex-shrink: 0; }
+.header-search input {
+  border: none; background: transparent;
+  font-size: 13px; color: var(--text-primary);
+  width: 100%; outline: none;
+  font-family: 'Inter', sans-serif;
+}
+.header-search input::placeholder { color: var(--text-muted); }
+
+.header-actions { display: flex; align-items: center; gap: 8px; }
+.icon-btn {
+  width: 36px; height: 36px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+  color: var(--text-secondary);
+}
+.icon-btn:hover { background: var(--surface-2); border-color: var(--border); }
+.icon-btn [data-lucide] { width: 16px; height: 16px; }
+.notif-dot {
+  position: absolute;
+  top: 6px; right: 6px;
+  width: 7px; height: 7px;
+  background: var(--danger);
+  border-radius: 50%;
+  border: 2px solid var(--surface);
+}
+.header-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 13px; font-weight: 700;
+  cursor: pointer;
+  border: 2px solid var(--border);
+  transition: border-color 0.15s;
+}
+.header-avatar:hover { border-color: var(--primary); }
+
+.new-task-btn {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.15s;
+  box-shadow: var(--shadow-primary);
+}
+.new-task-btn:hover { background: var(--primary-hover); box-shadow: 0 6px 20px rgba(79,70,229,0.35); transform: translateY(-1px); }
+.new-task-btn [data-lucide] { width: 14px; height: 14px; }
+
+/* ── CONTENT ── */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+.content::-webkit-scrollbar { width: 5px; }
+.content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+/* ── WELCOME BANNER ── */
+.welcome-banner {
+  background: linear-gradient(135deg, var(--primary) 0%, #6366F1 40%, var(--secondary) 100%);
+  border-radius: var(--radius-xl);
+  padding: 28px 32px;
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-primary);
+}
+.welcome-banner::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 200px; height: 200px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 50%;
+}
+.welcome-banner::after {
+  content: '';
+  position: absolute;
+  bottom: -60px; right: 80px;
+  width: 160px; height: 160px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 50%;
+}
+.wb-greeting {
+  font-size: 12px;
+  color: rgba(255,255,255,0.7);
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.wb-name {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 26px;
+  color: #fff;
+  margin-bottom: 8px;
+}
+.wb-sub {
+  font-size: 14px;
+  color: rgba(255,255,255,0.75);
+  margin-bottom: 20px;
+}
+.wb-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.wb-chip {
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 12px;
+  border-radius: 20px;
+  display: flex; align-items: center; gap: 5px;
+}
+.wb-chip [data-lucide] { width: 12px; height: 12px; }
+.wb-stats {
+  position: absolute;
+  right: 32px; top: 50%;
+  transform: translateY(-50%);
+  display: flex; gap: 24px;
+  z-index: 1;
+}
+.wb-stat {
+  text-align: center;
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: var(--radius-md);
+  padding: 14px 20px;
+}
+.wb-stat-value {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 24px;
+  color: #fff;
+  display: block;
+}
+.wb-stat-label {
+  font-size: 11px;
+  color: rgba(255,255,255,0.7);
+  display: block;
+  margin-top: 2px;
+}
+
+/* ── GRID ── */
+.grid-12 {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 16px;
+}
+
+/* ── CARDS ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-xs);
+}
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.card-title {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-primary);
+  display: flex; align-items: center; gap: 8px;
+}
+.card-title [data-lucide] { width: 16px; height: 16px; color: var(--primary); }
+.card-action {
+  font-size: 12px;
+  color: var(--primary);
+  cursor: pointer;
+  font-weight: 500;
+}
+.card-action:hover { text-decoration: underline; }
+
+/* STAT CARDS */
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  box-shadow: var(--shadow-xs);
+  transition: all 0.2s;
+  cursor: pointer;
+}
+.stat-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); border-color: var(--primary); }
+.stat-card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
+.stat-icon {
+  width: 40px; height: 40px;
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+}
+.stat-icon [data-lucide] { width: 18px; height: 18px; }
+.stat-icon.indigo { background: var(--primary-light); color: var(--primary); }
+.stat-icon.cyan { background: var(--secondary-light); color: var(--secondary); }
+.stat-icon.amber { background: var(--accent-light); color: var(--accent); }
+.stat-icon.green { background: var(--success-light); color: var(--success); }
+
+.stat-trend {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 7px;
+  border-radius: 20px;
+  display: flex; align-items: center; gap: 3px;
+}
+.stat-trend [data-lucide] { width: 10px; height: 10px; }
+.stat-trend.up { background: var(--success-light); color: var(--success); }
+.stat-trend.down { background: var(--danger-light); color: var(--danger); }
+.stat-trend.neutral { background: var(--surface-2); color: var(--text-muted); }
+
+.stat-value {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 26px;
+  color: var(--text-primary);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.stat-label { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+
+/* TASK ITEMS */
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.12s;
+  margin-bottom: 2px;
+}
+.task-item:hover { background: var(--bg); }
+.task-cb {
+  width: 18px; height: 18px;
+  border-radius: 5px;
+  border: 2px solid var(--border);
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+  cursor: pointer;
+}
+.task-cb.checked { background: var(--primary); border-color: var(--primary); }
+.task-cb.checked [data-lucide] { display: block; }
+.task-cb [data-lucide] { display: none; width: 10px; height: 10px; color: #fff; }
+
+.task-info { flex: 1; min-width: 0; }
+.task-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+.task-name.done { text-decoration: line-through; color: var(--text-muted); }
+.task-meta { display: flex; align-items: center; gap: 8px; }
+.task-meta-item {
+  font-size: 11px;
+  color: var(--text-muted);
+  display: flex; align-items: center; gap: 3px;
+}
+.task-meta-item [data-lucide] { width: 10px; height: 10px; }
+
+.priority-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.priority-dot.high { background: var(--danger); }
+.priority-dot.med { background: var(--accent); }
+.priority-dot.low { background: var(--success); }
+
+.task-assignee {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 9px; font-weight: 700;
+  flex-shrink: 0;
+}
+.task-due {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  display: flex; align-items: center; gap: 3px;
+}
+.task-due [data-lucide] { width: 10px; height: 10px; }
+.task-due.overdue { color: var(--danger); }
+
+/* PROGRESS BAR */
+.progress-wrap { margin-bottom: 14px; }
+.progress-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.progress-label { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+.progress-pct { font-size: 12px; font-weight: 600; color: var(--text-secondary); }
+.progress-bar {
+  height: 6px;
+  background: var(--surface-2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+.progress-fill.indigo { background: linear-gradient(90deg, var(--primary), #818CF8); }
+.progress-fill.cyan { background: linear-gradient(90deg, var(--secondary), #67E8F9); }
+.progress-fill.amber { background: linear-gradient(90deg, var(--accent), #FCD34D); }
+.progress-fill.green { background: linear-gradient(90deg, var(--success), #34D399); }
+
+/* ACTIVITY FEED */
+.activity-item {
+  display: flex;
+  gap: 10px;
+  padding: 8px 0;
+  position: relative;
+}
+.activity-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 13px; top: 32px;
+  width: 1px; height: calc(100% - 16px);
+  background: var(--border);
+}
+.act-icon {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  z-index: 1;
+}
+.act-icon [data-lucide] { width: 12px; height: 12px; }
+.act-icon.indigo { background: var(--primary-light); color: var(--primary); }
+.act-icon.cyan { background: var(--secondary-light); color: var(--secondary); }
+.act-icon.amber { background: var(--accent-light); color: var(--accent); }
+.act-icon.green { background: var(--success-light); color: var(--success); }
+.act-text { font-size: 12px; color: var(--text-secondary); line-height: 1.5; flex: 1; }
+.act-text strong { color: var(--text-primary); font-weight: 600; }
+.act-time { font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+
+/* CALENDAR STRIP */
+.cal-strip { display: flex; gap: 6px; }
+.cal-day {
+  flex: 1;
+  text-align: center;
+  padding: 8px 4px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.cal-day:hover { background: var(--surface-2); }
+.cal-day.today { background: var(--primary); box-shadow: var(--shadow-primary); }
+.cal-day.has-task { position: relative; }
+.cal-day.has-task::after {
+  content: '';
+  position: absolute;
+  bottom: 4px; left: 50%;
+  transform: translateX(-50%);
+  width: 4px; height: 4px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+.cal-day.today.has-task::after { background: rgba(255,255,255,0.8); }
+.cal-weekday { font-size: 10px; color: var(--text-muted); font-weight: 500; margin-bottom: 4px; }
+.cal-day.today .cal-weekday { color: rgba(255,255,255,0.7); }
+.cal-date { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+.cal-day.today .cal-date { color: #fff; }
+
+/* DONUT SVG */
+.donut-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 0;
+  position: relative;
+}
+.donut-label {
+  position: absolute;
+  text-align: center;
+}
+.donut-pct {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 800;
+  font-size: 22px;
+  color: var(--text-primary);
+  display: block;
+}
+.donut-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+  display: block;
+  margin-top: 2px;
+}
+
+/* TAG */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 20px;
+}
+.tag.indigo { background: var(--primary-light); color: var(--primary); }
+.tag.cyan { background: var(--secondary-light); color: var(--secondary); }
+.tag.amber { background: var(--accent-light); color: var(--accent); }
+.tag.green { background: var(--success-light); color: var(--success); }
+.tag.red { background: var(--danger-light); color: var(--danger); }
+.tag [data-lucide] { width: 10px; height: 10px; }
+
+/* DIVIDER */
+.divider { height: 1px; background: var(--border); margin: 12px 0; }
+
+/* ── DETAIL PANEL ── */
+.detail-panel {
+  position: fixed;
+  right: -420px;
+  top: 0; bottom: 0;
+  width: 400px;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  z-index: 500;
+  transition: right 0.3s cubic-bezier(0.4,0,0.2,1);
+  display: flex;
+  flex-direction: column;
+  box-shadow: -8px 0 32px rgba(15,23,42,0.08);
+}
+.detail-panel.open { right: 0; }
+
+.dp-header {
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.dp-close {
+  width: 30px; height: 30px;
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.dp-close:hover { background: var(--surface-2); color: var(--text-primary); }
+.dp-close [data-lucide] { width: 14px; height: 14px; }
+.dp-title {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text-primary);
+  line-height: 1.4;
+  flex: 1;
+}
+.dp-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+.dp-body::-webkit-scrollbar { width: 4px; }
+.dp-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+.dp-section { margin-bottom: 20px; }
+.dp-section-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 10px;
+}
+.dp-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+.dp-meta-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  width: 80px;
+  flex-shrink: 0;
+}
+.dp-meta-value {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  display: flex; align-items: center; gap: 6px;
+}
+.dp-meta-value [data-lucide] { width: 13px; height: 13px; color: var(--text-muted); }
+
+.dp-subtask {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 4px;
+  background: var(--bg);
+  border: 1px solid var(--border-light);
+}
+.dp-st-cb {
+  width: 16px; height: 16px;
+  border-radius: 4px;
+  border: 2px solid var(--border);
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+}
+.dp-st-cb.done { background: var(--success); border-color: var(--success); }
+.dp-st-cb.done [data-lucide] { display: block; }
+.dp-st-cb [data-lucide] { display: none; width: 9px; height: 9px; color: #fff; }
+.dp-st-text { font-size: 12px; color: var(--text-primary); flex: 1; }
+.dp-st-text.done { text-decoration: line-through; color: var(--text-muted); }
+
+.dp-comment {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.dp-cm-avatar {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 9px; font-weight: 700;
+  flex-shrink: 0;
+}
+.dp-cm-content {
+  background: var(--bg);
+  border: 1px solid var(--border-light);
+  border-radius: 0 var(--radius-sm) var(--radius-sm);
+  padding: 8px 10px;
+  flex: 1;
+}
+.dp-cm-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.dp-cm-name { font-size: 12px; font-weight: 600; color: var(--text-primary); }
+.dp-cm-time { font-size: 11px; color: var(--text-muted); }
+.dp-cm-text { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+
+.dp-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+  display: flex; gap: 8px;
+}
+.dp-btn {
+  flex: 1;
+  padding: 9px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.15s;
+  border: none;
+  text-align: center;
+}
+.dp-btn.primary {
+  background: var(--primary);
+  color: #fff;
+  box-shadow: var(--shadow-primary);
+}
+.dp-btn.primary:hover { background: var(--primary-hover); }
+.dp-btn.secondary {
+  background: var(--bg);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+.dp-btn.secondary:hover { background: var(--surface-2); }
+
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(15,23,42,0.15);
+  backdrop-filter: blur(2px);
+  z-index: 400;
+  display: none;
+}
+.overlay.show { display: block; }
+
+/* Span helpers */
+.span-1 { grid-column: span 1; }
+.span-2 { grid-column: span 2; }
+.span-3 { grid-column: span 3; }
+.span-4 { grid-column: span 4; }
+.span-5 { grid-column: span 5; }
+.span-6 { grid-column: span 6; }
+.span-7 { grid-column: span 7; }
+.span-8 { grid-column: span 8; }
+.span-12 { grid-column: span 12; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon"><i data-lucide="zap"></i></div>
+    <div class="logo-text">WorkFlow Pro <span>v2.4.1</span></div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Əsas</div>
+    <a class="nav-item active"><i data-lucide="layout-dashboard"></i> Bugün <span class="nav-badge">5</span></a>
+    <a class="nav-item"><i data-lucide="check-square"></i> Tapşırıqlar <span class="nav-badge cyan">12</span></a>
+    <a class="nav-item"><i data-lucide="inbox"></i> Gələnlər <span class="nav-badge amber">3</span></a>
+    <a class="nav-item"><i data-lucide="calendar"></i> Gündəlik</a>
+    <a class="nav-item"><i data-lucide="git-branch"></i> Kanbord</a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">İdarəetmə</div>
+    <a class="nav-item"><i data-lucide="users"></i> İstifadəçilər</a>
+    <a class="nav-item"><i data-lucide="building-2"></i> Şöbələr</a>
+    <a class="nav-item"><i data-lucide="bar-chart-2"></i> Analitika</a>
+    <a class="nav-item"><i data-lucide="wallet"></i> Maliyyə</a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Digər</div>
+    <a class="nav-item"><i data-lucide="settings"></i> Parametrlər</a>
+    <a class="nav-item"><i data-lucide="help-circle"></i> Yardım</a>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="user-avatar">H</div>
+      <div>
+        <div class="user-name">Hasan B.</div>
+        <div class="user-role">Administrator</div>
+      </div>
+      <i data-lucide="chevrons-up-down"></i>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+  <!-- HEADER -->
+  <header class="header">
+    <div>
+      <div class="header-title">Bugün</div>
+    </div>
+    <span class="header-subtitle">Senin fokus günün — 31 Mart 2026</span>
+
+    <div class="header-search">
+      <i data-lucide="search"></i>
+      <input type="text" placeholder="Axtar...">
+    </div>
+
+    <div class="header-actions">
+      <div class="icon-btn">
+        <i data-lucide="bell"></i>
+        <div class="notif-dot"></div>
+      </div>
+      <div class="icon-btn"><i data-lucide="grid-2x2"></i></div>
+      <div class="header-avatar">H</div>
+      <button class="new-task-btn"><i data-lucide="plus"></i> Tapşırıq Əlavə Et</button>
+    </div>
+  </header>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- WELCOME BANNER -->
+    <div class="welcome-banner">
+      <div class="wb-greeting">Xoş Gəlmisiniz</div>
+      <div class="wb-name">Salam, Hasan! 👋</div>
+      <div class="wb-sub">Bu gün 5 tapşırıq sizə gözləyir. Kəmərinizi bağlayın!</div>
+      <div class="wb-chips">
+        <div class="wb-chip"><i data-lucide="flame"></i> 7 gün seriya</div>
+        <div class="wb-chip"><i data-lucide="target"></i> Mart hədəfi: 84%</div>
+        <div class="wb-chip"><i data-lucide="zap"></i> 3 prioritet tapşırıq</div>
+      </div>
+      <div class="wb-stats">
+        <div class="wb-stat">
+          <span class="wb-stat-value">12</span>
+          <span class="wb-stat-label">Bu həftə</span>
+        </div>
+        <div class="wb-stat">
+          <span class="wb-stat-value">47</span>
+          <span class="wb-stat-label">Bu ay</span>
+        </div>
+        <div class="wb-stat">
+          <span class="wb-stat-value">84%</span>
+          <span class="wb-stat-label">Tamamlanma</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- STAT CARDS ROW -->
+    <div class="grid-12" style="margin-bottom:16px;">
+      <div class="stat-card span-3">
+        <div class="stat-card-header">
+          <div class="stat-icon indigo"><i data-lucide="list-checks"></i></div>
+          <div class="stat-trend up"><i data-lucide="trending-up"></i>+18%</div>
+        </div>
+        <div class="stat-value">28</div>
+        <div class="stat-label">Aktiv tapşırıq</div>
+      </div>
+      <div class="stat-card span-3">
+        <div class="stat-card-header">
+          <div class="stat-icon cyan"><i data-lucide="check-circle-2"></i></div>
+          <div class="stat-trend up"><i data-lucide="trending-up"></i>+12%</div>
+        </div>
+        <div class="stat-value">142</div>
+        <div class="stat-label">Tamamlanan</div>
+      </div>
+      <div class="stat-card span-3">
+        <div class="stat-card-header">
+          <div class="stat-icon amber"><i data-lucide="clock"></i></div>
+          <div class="stat-trend down"><i data-lucide="trending-down"></i>-5%</div>
+        </div>
+        <div class="stat-value">7</div>
+        <div class="stat-label">Gecikən</div>
+      </div>
+      <div class="stat-card span-3">
+        <div class="stat-card-header">
+          <div class="stat-icon green"><i data-lucide="users"></i></div>
+          <div class="stat-trend neutral">= sabit</div>
+        </div>
+        <div class="stat-value">14</div>
+        <div class="stat-label">Aktiv üzv</div>
+      </div>
+    </div>
+
+    <!-- MAIN GRID -->
+    <div class="grid-12">
+
+      <!-- TODAY'S TASKS -->
+      <div class="card span-5">
+        <div class="card-header">
+          <div class="card-title"><i data-lucide="sun"></i> Bu Günün Tapşırıqları</div>
+          <span class="card-action">Hamısı →</span>
+        </div>
+
+        <div class="task-item" onclick="openPanel()">
+          <div class="priority-dot high"></div>
+          <div class="task-cb"><i data-lucide="check"></i></div>
+          <div class="task-info">
+            <div class="task-name">Q1 büdcə hesabatını tamamla</div>
+            <div class="task-meta">
+              <span class="task-meta-item"><i data-lucide="tag"></i> Maliyyə</span>
+              <span class="task-meta-item"><i data-lucide="paperclip"></i> 3 fayl</span>
+            </div>
+          </div>
+          <div class="task-assignee">H</div>
+          <div class="task-due overdue"><i data-lucide="calendar"></i> Dün</div>
+        </div>
+
+        <div class="task-item" onclick="openPanel()">
+          <div class="priority-dot high"></div>
+          <div class="task-cb"><i data-lucide="check"></i></div>
+          <div class="task-info">
+            <div class="task-name">Yeni işçi onboarding sənədlərini hazırla</div>
+            <div class="task-meta">
+              <span class="task-meta-item"><i data-lucide="tag"></i> HR</span>
+            </div>
+          </div>
+          <div class="task-assignee" style="background:linear-gradient(135deg,#06B6D4,#10B981)">L</div>
+          <div class="task-due"><i data-lucide="calendar"></i> Bu gün</div>
+        </div>
+
+        <div class="task-item" onclick="openPanel()">
+          <div class="priority-dot med"></div>
+          <div class="task-cb"><i data-lucide="check"></i></div>
+          <div class="task-info">
+            <div class="task-name">API inteqrasiyası test et</div>
+            <div class="task-meta">
+              <span class="task-meta-item"><i data-lucide="tag"></i> Texniki</span>
+            </div>
+          </div>
+          <div class="task-assignee" style="background:linear-gradient(135deg,#F59E0B,#EF4444)">A</div>
+          <div class="task-due"><i data-lucide="calendar"></i> Bu gün</div>
+        </div>
+
+        <div class="task-item" onclick="openPanel()">
+          <div class="priority-dot med"></div>
+          <div class="task-cb checked"><i data-lucide="check"></i></div>
+          <div class="task-info">
+            <div class="task-name done">Həftəlik team meeting keçir</div>
+            <div class="task-meta">
+              <span class="task-meta-item"><i data-lucide="tag"></i> Toplantı</span>
+            </div>
+          </div>
+          <div class="task-assignee">H</div>
+          <div class="task-due"><i data-lucide="calendar"></i> Sabah</div>
+        </div>
+
+        <div class="task-item" onclick="openPanel()">
+          <div class="priority-dot low"></div>
+          <div class="task-cb"><i data-lucide="check"></i></div>
+          <div class="task-info">
+            <div class="task-name">Müştəri təqdimatı hazırla</div>
+            <div class="task-meta">
+              <span class="task-meta-item"><i data-lucide="tag"></i> Satış</span>
+            </div>
+          </div>
+          <div class="task-assignee" style="background:linear-gradient(135deg,#8B5CF6,#EC4899)">N</div>
+          <div class="task-due"><i data-lucide="calendar"></i> 2 Aprel</div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div style="display:flex;align-items:center;gap:8px;padding:4px 12px;">
+          <i data-lucide="plus-circle" style="width:14px;height:14px;color:var(--primary)"></i>
+          <span style="font-size:13px;color:var(--primary);cursor:pointer;font-weight:500;">Yeni tapşırıq əlavə et</span>
+        </div>
+      </div>
+
+      <!-- CALENDAR + ACTIVITY -->
+      <div class="span-4" style="display:flex;flex-direction:column;gap:16px;">
+
+        <!-- CALENDAR STRIP -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><i data-lucide="calendar-days"></i> Bu Həftə</div>
+            <span class="card-action">Mart 2026</span>
+          </div>
+          <div class="cal-strip">
+            <div class="cal-day">
+              <div class="cal-weekday">B.e</div>
+              <div class="cal-date">25</div>
+            </div>
+            <div class="cal-day has-task">
+              <div class="cal-weekday">Ç.a</div>
+              <div class="cal-date">26</div>
+            </div>
+            <div class="cal-day">
+              <div class="cal-weekday">Çər</div>
+              <div class="cal-date">27</div>
+            </div>
+            <div class="cal-day has-task">
+              <div class="cal-weekday">C.a</div>
+              <div class="cal-date">28</div>
+            </div>
+            <div class="cal-day">
+              <div class="cal-weekday">Cüm</div>
+              <div class="cal-date">29</div>
+            </div>
+            <div class="cal-day">
+              <div class="cal-weekday">Şnb</div>
+              <div class="cal-date">30</div>
+            </div>
+            <div class="cal-day today has-task">
+              <div class="cal-weekday">Baz</div>
+              <div class="cal-date">31</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ACTIVITY FEED -->
+        <div class="card" style="flex:1;">
+          <div class="card-header">
+            <div class="card-title"><i data-lucide="activity"></i> Son Aktivlər</div>
+            <span class="card-action">Hamısı →</span>
+          </div>
+
+          <div class="activity-item">
+            <div class="act-icon indigo"><i data-lucide="check-circle-2"></i></div>
+            <div>
+              <div class="act-text"><strong>Aynur X.</strong> tapşırığı tamamladı: "UX Dizayn Review"</div>
+              <div class="act-time">14 dəqiqə əvvəl</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="act-icon cyan"><i data-lucide="user-plus"></i></div>
+            <div>
+              <div class="act-text"><strong>Leyla M.</strong> yeni istifadəçi əlavə etdi</div>
+              <div class="act-time">1 saat əvvəl</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="act-icon amber"><i data-lucide="upload"></i></div>
+            <div>
+              <div class="act-text"><strong>Nigar R.</strong> Excel faylı yüklədi: "Maliyyə_Mart.xlsx"</div>
+              <div class="act-time">2 saat əvvəl</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="act-icon green"><i data-lucide="message-circle"></i></div>
+            <div>
+              <div class="act-text"><strong>Rashad A.</strong> şərh yazdı: "Q1 hesabatı..."</div>
+              <div class="act-time">3 saat əvvəl</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: PROGRESS + DONUT -->
+      <div class="span-3" style="display:flex;flex-direction:column;gap:16px;">
+
+        <!-- DONUT CHART -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><i data-lucide="pie-chart"></i> Tamamlanma</div>
+          </div>
+          <div class="donut-wrap">
+            <svg width="120" height="120" viewBox="0 0 120 120">
+              <circle cx="60" cy="60" r="48" fill="none" stroke="#E2E8F0" stroke-width="10"/>
+              <circle cx="60" cy="60" r="48" fill="none" stroke="#4F46E5" stroke-width="10"
+                stroke-dasharray="301.6" stroke-dashoffset="72" stroke-linecap="round"
+                transform="rotate(-90 60 60)"/>
+              <circle cx="60" cy="60" r="48" fill="none" stroke="#06B6D4" stroke-width="10"
+                stroke-dasharray="301.6" stroke-dashoffset="241" stroke-linecap="round"
+                transform="rotate(150 60 60)"/>
+            </svg>
+            <div class="donut-label">
+              <span class="donut-pct">76%</span>
+              <span class="donut-sub">Həftəlik</span>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:center;gap:12px;margin-top:4px;">
+            <div style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted)">
+              <div style="width:8px;height:8px;border-radius:2px;background:var(--primary)"></div> Tamamlandı
+            </div>
+            <div style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted)">
+              <div style="width:8px;height:8px;border-radius:2px;background:var(--secondary)"></div> Davam edir
+            </div>
+          </div>
+        </div>
+
+        <!-- PROGRESS BARS -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><i data-lucide="bar-chart-3"></i> Şöbə Performansı</div>
+          </div>
+
+          <div class="progress-wrap">
+            <div class="progress-head">
+              <span class="progress-label">Texniki</span>
+              <span class="progress-pct">92%</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill indigo" style="width:92%"></div></div>
+          </div>
+
+          <div class="progress-wrap">
+            <div class="progress-head">
+              <span class="progress-label">Maliyyə</span>
+              <span class="progress-pct">78%</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill cyan" style="width:78%"></div></div>
+          </div>
+
+          <div class="progress-wrap">
+            <div class="progress-head">
+              <span class="progress-label">HR</span>
+              <span class="progress-pct">65%</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill amber" style="width:65%"></div></div>
+          </div>
+
+          <div class="progress-wrap" style="margin-bottom:0">
+            <div class="progress-head">
+              <span class="progress-label">Satış</span>
+              <span class="progress-pct">84%</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill green" style="width:84%"></div></div>
+          </div>
+        </div>
+
+        <!-- QUICK TAGS -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><i data-lucide="tag"></i> Kateqoriyalar</div>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            <div class="tag indigo"><i data-lucide="code-2"></i> Texniki (8)</div>
+            <div class="tag cyan"><i data-lucide="wallet"></i> Maliyyə (5)</div>
+            <div class="tag amber"><i data-lucide="users"></i> HR (4)</div>
+            <div class="tag green"><i data-lucide="trending-up"></i> Satış (6)</div>
+            <div class="tag red"><i data-lucide="alert-circle"></i> Kritik (2)</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL PANEL -->
+<div class="overlay" id="overlay" onclick="closePanel()"></div>
+<div class="detail-panel" id="detailPanel">
+  <div class="dp-header">
+    <div class="dp-close" onclick="closePanel()"><i data-lucide="x"></i></div>
+    <div style="flex:1;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <div class="tag red"><i data-lucide="alert-triangle"></i> Yüksək</div>
+        <div class="tag cyan">Maliyyə</div>
+      </div>
+      <div class="dp-title">Q1 büdcə hesabatını tamamla</div>
+    </div>
+  </div>
+
+  <div class="dp-body">
+    <div class="dp-section">
+      <div class="dp-section-title">Tapşırıq Detalları</div>
+      <div class="dp-meta-row">
+        <div class="dp-meta-label">Status</div>
+        <div class="dp-meta-value"><div class="tag amber">Davam edir</div></div>
+      </div>
+      <div class="dp-meta-row">
+        <div class="dp-meta-label">Tarix</div>
+        <div class="dp-meta-value"><i data-lucide="calendar"></i> 30 Mart 2026</div>
+      </div>
+      <div class="dp-meta-row">
+        <div class="dp-meta-label">İcraçı</div>
+        <div class="dp-meta-value">
+          <div class="task-assignee" style="width:20px;height:20px;font-size:8px;">H</div>
+          Hasan Bəylər
+        </div>
+      </div>
+      <div class="dp-meta-row">
+        <div class="dp-meta-label">Şöbə</div>
+        <div class="dp-meta-value"><i data-lucide="building-2"></i> Maliyyə Şöbəsi</div>
+      </div>
+    </div>
+
+    <div class="dp-section">
+      <div class="dp-section-title">Alt Tapşırıqlar (2/4)</div>
+      <div class="dp-subtask">
+        <div class="dp-st-cb done"><i data-lucide="check"></i></div>
+        <span class="dp-st-text done">Yanvar-Fevral məlumatlarını topla</span>
+      </div>
+      <div class="dp-subtask">
+        <div class="dp-st-cb done"><i data-lucide="check"></i></div>
+        <span class="dp-st-text done">Mart ayı xərclərini hesabla</span>
+      </div>
+      <div class="dp-subtask">
+        <div class="dp-st-cb"></div>
+        <span class="dp-st-text">Hesabat sənədini hazırla</span>
+      </div>
+      <div class="dp-subtask">
+        <div class="dp-st-cb"></div>
+        <span class="dp-st-text">Rəhbərliyə təqdim et</span>
+      </div>
+    </div>
+
+    <div class="dp-section">
+      <div class="dp-section-title">Şərhlər</div>
+      <div class="dp-comment">
+        <div class="dp-cm-avatar">L</div>
+        <div class="dp-cm-content">
+          <div class="dp-cm-head">
+            <span class="dp-cm-name">Leyla M.</span>
+            <span class="dp-cm-time">2 saat əvvəl</span>
+          </div>
+          <div class="dp-cm-text">Mart məlumatları hazırdır, yükləyə bilərsiniz.</div>
+        </div>
+      </div>
+      <div class="dp-comment">
+        <div class="dp-cm-avatar">H</div>
+        <div class="dp-cm-content">
+          <div class="dp-cm-head">
+            <span class="dp-cm-name">Hasan B.</span>
+            <span class="dp-cm-time">1 saat əvvəl</span>
+          </div>
+          <div class="dp-cm-text">Sağ olun, bu gün tamamlayacağam. 💪</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dp-section">
+      <div class="dp-section-title">Əlavə edilmiş Fayllar</div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg);border:1px solid var(--border-light);border-radius:var(--radius-sm);">
+          <i data-lucide="file-spreadsheet" style="width:14px;height:14px;color:var(--success)"></i>
+          <span style="font-size:12px;color:var(--text-primary);flex:1;">Maliyyə_Yanvar.xlsx</span>
+          <i data-lucide="download" style="width:12px;height:12px;color:var(--text-muted)"></i>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg);border:1px solid var(--border-light);border-radius:var(--radius-sm);">
+          <i data-lucide="file-spreadsheet" style="width:14px;height:14px;color:var(--success)"></i>
+          <span style="font-size:12px;color:var(--text-primary);flex:1;">Maliyyə_Fevral.xlsx</span>
+          <i data-lucide="download" style="width:12px;height:12px;color:var(--text-muted)"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dp-footer">
+    <button class="dp-btn secondary">Redaktə Et</button>
+    <button class="dp-btn primary">Tamamlandı ✓</button>
+  </div>
+</div>
+
+<script>
+function openPanel() {
+  document.getElementById('detailPanel').classList.add('open');
+  document.getElementById('overlay').classList.add('show');
+}
+function closePanel() {
+  document.getElementById('detailPanel').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+lucide.createIcons();
+</script>
+</body>
+</html>

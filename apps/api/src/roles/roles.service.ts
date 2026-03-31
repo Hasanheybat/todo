@@ -26,6 +26,9 @@ export class RolesService {
     })
     if (existing) throw new ConflictException('Bu adda rol artıq mövcuddur')
 
+    // Tenant allowedPermissions yoxlaması
+    await this.validatePermissionsAgainstTenant(dto.permissions, tenantId)
+
     return this.prisma.customRole.create({
       data: {
         name: dto.name,
@@ -61,6 +64,11 @@ export class RolesService {
   async update(id: string, dto: Partial<CreateRoleDto>, tenantId: string) {
     const role = await this.prisma.customRole.findFirst({ where: { id, tenantId } })
     if (!role) throw new NotFoundException('Rol tapılmadı')
+
+    // Tenant allowedPermissions yoxlaması
+    if (dto.permissions) {
+      await this.validatePermissionsAgainstTenant(dto.permissions, tenantId)
+    }
 
     // Default rolun adını dəyişmək olmaz
     const data: any = {
@@ -99,6 +107,29 @@ export class RolesService {
       data: { customRoleId: roleId },
       select: { id: true, fullName: true, customRoleId: true },
     })
+  }
+
+  // Tenant-ın icazə verdiyi yetkiləri yoxla
+  private async validatePermissionsAgainstTenant(permissions: string[], tenantId: string) {
+    const tenant = await this.prisma.tenant.findUnique({ where: { id: tenantId }, select: { allowedPermissions: true } })
+    if (!tenant) throw new NotFoundException('Tenant tapılmadı')
+
+    // allowedPermissions boşdursa limit yoxdur (köhnə tenant-lar üçün geriyə uyğunluq)
+    if (tenant.allowedPermissions.length === 0) return
+
+    const allowed = new Set(tenant.allowedPermissions)
+    const forbidden = permissions.filter(p => !allowed.has(p))
+    if (forbidden.length > 0) {
+      throw new ForbiddenException(`Bu yetkililər işletmənizin planına daxil deyil: ${forbidden.join(', ')}`)
+    }
+  }
+
+  // Tenant-ın icazə verdiyi yetkiləri qaytar (frontend üçün)
+  async getAllowedPermissions(tenantId: string) {
+    const tenant = await this.prisma.tenant.findUnique({ where: { id: tenantId }, select: { allowedPermissions: true } })
+    if (!tenant) throw new NotFoundException('Tenant tapılmadı')
+    // Boşdursa hamısını qaytar (geriyə uyğunluq)
+    return tenant.allowedPermissions.length > 0 ? tenant.allowedPermissions : ALL_PERMISSIONS
   }
 
   // Mövcud bütün permission-ları qaytar

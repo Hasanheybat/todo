@@ -61,6 +61,15 @@ export default function AssigneeTaskModal({ open, onClose, task, subTask, curren
   const [savingBulk, setSavingBulk] = useState(false)
   const [localBulkNotes, setLocalBulkNotes] = useState<any[]>([])
 
+  // Modal açılanda və ya fərqli task seçiləndə localNotes-u sıfırla
+  const taskId = (subTask || task)?.id
+  useEffect(() => {
+    if (open) {
+      setLocalNotes([])
+      setLocalBulkNotes([])
+    }
+  }, [open, taskId]) // eslint-disable-line react-hooks/exhaustive-deps
+
   if (!open || !task) return null
 
   const tt = subTask || task
@@ -73,7 +82,7 @@ export default function AssigneeTaskModal({ open, onClose, task, subTask, curren
   const isLocked = isTaskFinalized || isChatClosed || isFinished
 
   const serverBulkNotes: any[] = Array.isArray(tt.bulkNotes) ? tt.bulkNotes : []
-  const bulkNotes: any[] = [...serverBulkNotes, ...localBulkNotes]
+  const bulkNotes: any[] = [...serverBulkNotes, ...localBulkNotes.filter(ln => !serverBulkNotes.some(sn => sn.text === ln.text))]
   const noteFileIds = new Set<string>()
   ;(tt.assignees || []).forEach((a: any) => {
     ;(Array.isArray(a.notes) ? a.notes : []).forEach((n: any) => { if (n.fileId) noteFileIds.add(n.fileId) })
@@ -88,7 +97,7 @@ export default function AssigneeTaskModal({ open, onClose, task, subTask, curren
   const allMerged = [
     ...serverWorker.map((n, idx) => ({ ...n, type: 'worker', origIndex: idx })),
     ...serverApprover.map((n, idx) => ({ ...n, type: 'approver', origIndex: idx })),
-    ...localNotes.filter(ln => !serverWorker.some(sn => sn.text === ln.text && sn.date === ln.date)).map((n, idx) => ({ ...n, type: 'worker', origIndex: serverWorker.length + idx })),
+    ...localNotes.filter(ln => !serverWorker.some(sn => sn.text === ln.text)).map((n, idx) => ({ ...n, type: 'worker', origIndex: serverWorker.length + idx })),
   ].sort((x, y) => new Date(x.date).getTime() - new Date(y.date).getTime())
   const msgRemaining = Math.max(0, MAX_MESSAGES - allMerged.length)
 
@@ -127,13 +136,13 @@ export default function AssigneeTaskModal({ open, onClose, task, subTask, curren
         body: JSON.stringify({ note: noteText || '', fileId, fileName, fileSize }),
       })
       if (res.ok) {
+        // Optimistic — anlıq göstər
         const newNote: any = { text: noteText, sender: 'worker', date: new Date().toISOString() }
         if (fileId) { newNote.fileId = fileId; newNote.fileName = fileName; newNote.fileSize = fileSize }
-        else if (fileToUpload) { newNote.fileName = fileToUpload.name; newNote.fileSize = fileToUpload.size }
         setLocalNotes(prev => [...prev, newNote])
         onRefresh?.()
       } else { const err = await res.json().catch(() => ({})); throw new Error(err.message || 'Xəta') }
-    } catch (e: any) { alert(e.message) }
+    } catch (e: any) { setLocalNotes(prev => prev.slice(0, -1)); alert(e.message) }
     finally { setSavingNote(false) }
   }
 

@@ -9,31 +9,31 @@ export class SalaryController {
   constructor(private salaryService: SalaryService) {}
 
   @Post()
-  @RequirePermissions('salary.create')
+  @RequirePermissions('salary.manage')
   assignSalary(@Body() body: { userId: string; amount: number; currency?: string }, @Req() req: any) {
     return this.salaryService.assignSalary(body, req.user.tenantId)
   }
 
   @Get()
-  @RequirePermissions('salary.read')
+  @RequirePermissions('salary.manage')
   findAll(@Req() req: any) {
     return this.salaryService.findAll(req.user.tenantId)
   }
 
   @Put(':id')
-  @RequirePermissions('salary.update')
+  @RequirePermissions('salary.manage')
   update(@Param('id') id: string, @Body() body: any, @Req() req: any) {
     return this.salaryService.update(id, body, req.user.tenantId)
   }
 
   @Get('payments')
-  @RequirePermissions('salary.payments')
+  @RequirePermissions('salary.manage')
   getPayments(@Req() req: any, @Query('month') month?: string) {
     return this.salaryService.getPayments(req.user.tenantId, month)
   }
 
   @Post('payments')
-  @RequirePermissions('salary.payments')
+  @RequirePermissions('salary.manage')
   createPayment(@Body() body: any, @Req() req: any) {
     return this.salaryService.createPayment(body, req.user.tenantId)
   }

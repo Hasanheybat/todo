@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>WorkFlow Pro — Gələnlər</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#fafafa;--surface:#fff;--surface-2:#f5f5f5;--surface-3:#ebebeb;
+  --text:#111;--text-2:#555;--text-3:#999;--text-4:#bbb;
+  --accent:#111;--accent-soft:#f0f0f0;
+  --blue:#2563eb;--blue-soft:#eff6ff;
+  --green:#059669;--green-soft:#ecfdf5;
+  --amber:#d97706;--amber-soft:#fffbeb;
+  --red:#dc2626;--red-soft:#fef2f2;
+  --purple:#7c3aed;--purple-soft:#f5f3ff;
+  --radius:10px;--radius-lg:14px;
+  --sidebar-w:240px;
+}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 20;font-size:20px;vertical-align:middle}
+.filled{font-variation-settings:'FILL' 1,'wght' 300,'GRAD' 0,'opsz' 20}
+
+/* Sidebar */
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:var(--sidebar-w);background:#fafafa;display:flex;flex-direction:column;padding:20px 12px;z-index:40;border-right:1px solid var(--surface-3)}
+.sidebar .logo{display:flex;align-items:center;gap:10px;padding:0 8px;margin-bottom:28px}
+.sidebar .logo-icon{width:28px;height:28px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff}
+.sidebar .logo-icon .material-symbols-outlined{font-size:16px;font-variation-settings:'FILL' 1,'wght' 500}
+.sidebar .logo-text{font-weight:700;font-size:15px;letter-spacing:-0.3px}
+.sidebar nav{flex:1;display:flex;flex-direction:column;gap:1px}
+.sidebar a,.sidebar button.nav-btn{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:8px;text-decoration:none;color:var(--text-2);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;cursor:pointer;width:100%;text-align:left}
+.sidebar a:hover,.sidebar button.nav-btn:hover{background:var(--surface-3);color:var(--text)}
+.sidebar a.active{background:var(--surface);color:var(--text);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.sidebar .section-label{font-size:11px;font-weight:600;color:var(--text-4);text-transform:uppercase;letter-spacing:0.5px;padding:16px 10px 6px}
+.sidebar .new-btn{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;background:var(--accent);color:#fff;font-size:13px;font-weight:600;border:none;cursor:pointer;margin-bottom:16px;transition:opacity .15s}
+.sidebar .new-btn:hover{opacity:.85}
+
+/* Main */
+.main{margin-left:var(--sidebar-w);padding:24px 32px 48px;max-width:960px}
+
+/* Header */
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:32px}
+.search-box{position:relative;width:320px}
+.search-box input{width:100%;padding:8px 12px 8px 36px;border-radius:8px;border:1px solid var(--surface-3);background:var(--surface);font-size:13px;outline:none;transition:border .2s}
+.search-box input:focus{border-color:var(--text-4)}
+.search-box .material-symbols-outlined{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-4);font-size:18px}
+.header-actions{display:flex;align-items:center;gap:8px}
+.icon-btn{width:36px;height:36px;border-radius:8px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-3);transition:all .15s}
+.icon-btn:hover{background:var(--surface-2);color:var(--text)}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600}
+
+/* Page Title */
+.page-title{font-size:22px;font-weight:700;letter-spacing:-0.5px;margin-bottom:4px}
+.page-subtitle{font-size:13px;color:var(--text-3);margin-bottom:24px}
+
+/* Tab bar */
+.tab-bar{display:flex;gap:0;background:var(--surface-2);border-radius:10px;padding:3px;margin-bottom:24px;width:fit-content}
+.tab-btn{padding:6px 18px;border-radius:8px;border:none;background:transparent;font-size:12px;font-weight:600;cursor:pointer;color:var(--text-3);transition:all .15s;display:flex;align-items:center;gap:6px}
+.tab-btn.active{background:var(--surface);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.tab-btn .badge{font-size:10px;font-weight:700;padding:1px 7px;border-radius:10px;background:var(--accent);color:#fff;min-width:18px;text-align:center}
+.tab-btn.active .badge{background:var(--blue);color:#fff}
+
+/* Quick add */
+.quick-add{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface);border-radius:var(--radius);margin-bottom:24px;cursor:text}
+.quick-add input{flex:1;border:none;outline:none;font-size:13px;background:transparent;color:var(--text)}
+.quick-add input::placeholder{color:var(--text-4)}
+.quick-add-actions{display:flex;gap:4px}
+.quick-add .add-btn{padding:5px 14px;border-radius:6px;background:var(--accent);color:#fff;font-size:12px;font-weight:600;border:none;cursor:pointer;transition:opacity .15s}
+.quick-add .add-btn:hover{opacity:.8}
+
+/* Section Header */
+.section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.section-title{font-size:11px;font-weight:700;color:var(--text-4);text-transform:uppercase;letter-spacing:0.5px;display:flex;align-items:center;gap:6px}
+.section-title .count{font-size:10px;font-weight:600;padding:1px 7px;border-radius:10px;background:var(--surface-3);color:var(--text-3)}
+
+/* Task List */
+.task-list{display:flex;flex-direction:column;margin-bottom:8px}
+.task-item{display:flex;align-items:flex-start;gap:12px;padding:11px 14px;border-radius:var(--radius);cursor:pointer;transition:background .1s;position:relative}
+.task-item:hover{background:var(--surface)}
+.task-item+.task-item{border-top:1px solid var(--surface-2)}
+.task-item.selected{background:var(--surface);box-shadow:0 0 0 1.5px var(--accent) inset}
+.task-check{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--text-4);flex-shrink:0;margin-top:2px;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center}
+.task-check:hover{border-color:var(--green)}
+.task-check.done{background:var(--green);border-color:var(--green);color:#fff}
+.task-check.done .material-symbols-outlined{font-size:14px;font-variation-settings:'FILL' 1,'wght' 600}
+.todo-check{width:18px;height:18px;border-radius:4px;border:1.5px solid var(--text-4);flex-shrink:0;margin-top:2px;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center}
+.todo-check:hover{border-color:var(--purple)}
+.todo-check.done{background:var(--purple);border-color:var(--purple);color:#fff}
+.todo-check.done .material-symbols-outlined{font-size:14px;font-variation-settings:'FILL' 1,'wght' 600}
+.task-content{flex:1;min-width:0}
+.task-title{font-size:13px;font-weight:500;color:var(--text);line-height:1.4}
+.task-item.done .task-title{color:var(--text-4);text-decoration:line-through}
+.task-meta{display:flex;align-items:center;gap:8px;margin-top:3px;flex-wrap:wrap}
+.tag{font-size:11px;font-weight:600;padding:2px 7px;border-radius:4px}
+.tag-blue{color:var(--blue);background:var(--blue-soft)}
+.tag-amber{color:var(--amber);background:var(--amber-soft)}
+.tag-green{color:var(--green);background:var(--green-soft)}
+.tag-red{color:var(--red);background:var(--red-soft)}
+.tag-purple{color:var(--purple);background:var(--purple-soft)}
+.meta-text{font-size:11px;color:var(--text-3);display:flex;align-items:center;gap:3px}
+.meta-text .material-symbols-outlined{font-size:14px}
+.task-right{display:flex;align-items:center;gap:8px;flex-shrink:0;margin-top:2px}
+.task-status{font-size:10px;font-weight:600;padding:3px 8px;border-radius:4px}
+.task-actions{display:none;gap:4px;align-items:center}
+.task-item:hover .task-actions{display:flex}
+.task-item:hover .task-status-wrap{display:none}
+
+/* Overdue banner */
+.overdue-banner{display:flex;align-items:center;gap:8px;padding:9px 14px;background:var(--red-soft);border-radius:var(--radius);margin-bottom:16px;font-size:12px;font-weight:600;color:var(--red)}
+.overdue-banner .material-symbols-outlined{font-size:18px}
+
+/* Empty state */
+.empty-state{text-align:center;padding:48px 24px;color:var(--text-3)}
+.empty-state .material-symbols-outlined{font-size:40px;margin-bottom:12px;color:var(--text-4)}
+.empty-state p{font-size:13px}
+
+/* Detail Panel */
+.panel-overlay{position:fixed;inset:0;background:rgba(0,0,0,.04);z-index:45;display:none}
+.panel-overlay.open{display:block}
+.detail-panel{position:fixed;right:0;top:0;bottom:0;width:400px;background:var(--surface);z-index:50;transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;border-left:1px solid var(--surface-3)}
+.detail-panel.open{transform:translateX(0)}
+.panel-header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--surface-2)}
+.panel-header h3{font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:0.5px}
+.panel-body{flex:1;overflow-y:auto;padding:20px}
+.panel-footer{padding:14px 20px;border-top:1px solid var(--surface-2)}
+.panel-footer input{width:100%;padding:9px 14px;border-radius:8px;border:1px solid var(--surface-3);font-size:13px;outline:none;background:var(--surface-2)}
+.panel-footer input:focus{border-color:var(--text-4);background:var(--surface)}
+
+/* Detail content */
+.detail-title{font-size:17px;font-weight:600;letter-spacing:-0.3px;margin-bottom:14px;line-height:1.4}
+.detail-row{display:flex;gap:20px;margin-bottom:18px;flex-wrap:wrap}
+.detail-field{min-width:80px}
+.detail-label{font-size:10px;font-weight:600;color:var(--text-4);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:3px}
+.detail-value{font-size:13px;font-weight:500;color:var(--text);display:flex;align-items:center;gap:5px}
+.detail-desc{font-size:13px;color:var(--text-2);line-height:1.7;margin-bottom:20px;padding:12px 14px;background:var(--surface-2);border-radius:8px}
+.assignee-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface-2);border-radius:8px;margin-bottom:18px}
+.assignee-row .a-avatar{width:28px;height:28px;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;color:#fff}
+.subtask-list{display:flex;flex-direction:column;gap:5px;margin-bottom:20px}
+.subtask{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:7px;background:var(--surface-2);font-size:12px}
+.subtask.done{opacity:.5}
+.subtask.done .subtask-text{text-decoration:line-through}
+.subtask .material-symbols-outlined{font-size:16px}
+.activity-item{display:flex;gap:10px;margin-bottom:14px}
+.activity-avatar{width:26px;height:26px;border-radius:50%;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0}
+.activity-text{font-size:12px;color:var(--text-2);line-height:1.5}
+.activity-text strong{color:var(--text);font-weight:600}
+.activity-time{font-size:10px;color:var(--text-4);margin-top:2px}
+.action-btns{display:flex;gap:8px;margin-bottom:20px}
+.action-btn{flex:1;padding:8px;border-radius:8px;font-size:12px;font-weight:600;border:1px solid var(--surface-3);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s}
+.action-btn:hover{background:var(--surface-2)}
+.action-btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.action-btn.primary:hover{opacity:.85}
+.section-sep{height:1px;background:var(--surface-2);margin:18px 0}
+
+/* Tab content */
+.tab-content{display:none}
+.tab-content.active{display:block}
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-icon"><span class="material-symbols-outlined">stacks</span></div>
+    <span class="logo-text">WorkFlow Pro</span>
+  </div>
+  <button class="new-btn"><span class="material-symbols-outlined" style="font-size:18px">add</span> Yeni tapşırıq</button>
+  <nav>
+    <a href="design-v3-dashboard.html"><span class="material-symbols-outlined">today</span> Bugün</a>
+    <a href="design-v3-inbox.html" class="active"><span class="material-symbols-outlined">inbox</span> Gələnlər</a>
+    <a href="#"><span class="material-symbols-outlined">calendar_month</span> Gələcək</a>
+    <div class="section-label">İş sahəsi</div>
+    <a href="design-v3-tasks.html"><span class="material-symbols-outlined">assignment</span> Tapşırıqlar</a>
+    <a href="#"><span class="material-symbols-outlined">check_circle</span> Todo</a>
+    <a href="#"><span class="material-symbols-outlined">repeat</span> Şablonlar</a>
+    <div class="section-label">İdarəetmə</div>
+    <a href="#"><span class="material-symbols-outlined">group</span> İşçilər</a>
+    <a href="#"><span class="material-symbols-outlined">shield</span> Rollar</a>
+    <a href="#"><span class="material-symbols-outlined">account_balance</span> Maliyyə</a>
+  </nav>
+  <a href="#" style="margin-top:auto;display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:8px;text-decoration:none;color:var(--text-3);font-size:13px"><span class="material-symbols-outlined">settings</span> Ayarlar</a>
+</aside>
+
+<!-- Main -->
+<div class="main">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="search-box">
+      <span class="material-symbols-outlined">search</span>
+      <input type="text" placeholder="Axtar..."/>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" style="position:relative">
+        <span class="material-symbols-outlined">notifications</span>
+        <span style="position:absolute;top:7px;right:7px;width:7px;height:7px;border-radius:50%;background:var(--red);border:1.5px solid var(--bg)"></span>
+      </button>
+      <div class="avatar">HƏ</div>
+    </div>
+  </div>
+
+  <!-- Title row -->
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">
+    <div>
+      <div class="page-title">Gələnlər</div>
+      <div class="page-subtitle">Bütün aktiv tapşırıqlar — GÖREV + TODO</div>
+    </div>
+    <button onclick="openPanel()" style="display:flex;align-items:center;gap:7px;padding:8px 16px;border-radius:8px;background:var(--accent);color:#fff;font-size:13px;font-weight:600;border:none;cursor:pointer">
+      <span class="material-symbols-outlined" style="font-size:18px">add</span> Tapşırıq əlavə et
+    </button>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('gorev',this)">
+      <span class="material-symbols-outlined" style="font-size:16px">assignment</span> GÖREV <span class="badge">14</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('todo',this)">
+      <span class="material-symbols-outlined" style="font-size:16px">check_circle</span> TODO <span class="badge" style="background:var(--purple)">6</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('all',this)">
+      <span class="material-symbols-outlined" style="font-size:16px">list</span> Hamısı <span class="badge" style="background:var(--surface-3);color:var(--text-2)">20</span>
+    </button>
+  </div>
+
+  <!-- Quick add bar -->
+  <div class="quick-add">
+    <span class="material-symbols-outlined" style="color:var(--text-4);font-size:18px">add_circle</span>
+    <input type="text" placeholder="Yeni tapşırıq əlavə et... (Enter ilə saxla)"/>
+    <div class="quick-add-actions">
+      <button class="icon-btn" style="width:28px;height:28px" title="Tarix"><span class="material-symbols-outlined" style="font-size:16px">event</span></button>
+      <button class="icon-btn" style="width:28px;height:28px" title="Prioritet"><span class="material-symbols-outlined" style="font-size:16px">flag</span></button>
+      <button class="add-btn">Əlavə et</button>
+    </div>
+  </div>
+
+  <!-- GÖREV Tab -->
+  <div class="tab-content active" id="tab-gorev">
+
+    <!-- Overdue -->
+    <div class="overdue-banner">
+      <span class="material-symbols-outlined">warning</span>
+      2 tapşırıq vaxtı keçmişdir — dərhal baxın
+    </div>
+
+    <div class="section-header">
+      <span class="section-title">
+        <span class="material-symbols-outlined" style="font-size:14px;color:var(--amber)">pending</span>
+        Aktiv tapşırıqlar <span class="count">8</span>
+      </span>
+      <div style="display:flex;gap:4px">
+        <button class="icon-btn" style="width:28px;height:28px"><span class="material-symbols-outlined" style="font-size:16px">tune</span></button>
+        <button class="icon-btn" style="width:28px;height:28px"><span class="material-symbols-outlined" style="font-size:16px">sort</span></button>
+      </div>
+    </div>
+
+    <div class="task-list">
+      <div class="task-item selected" onclick="openPanelGorev(1,this)">
+        <div class="task-check" style="border-color:var(--red)"></div>
+        <div class="task-content">
+          <div class="task-title">Aylıq satış hesabatını hazırla</div>
+          <div class="task-meta">
+            <span class="tag tag-red">Kritik</span>
+            <span class="meta-text" style="color:var(--red);font-weight:600"><span class="material-symbols-outlined">event_busy</span> Gecikmiş — 28 Mar</span>
+            <span class="meta-text">Bakı Filialı</span>
+          </div>
+        </div>
+        <div class="task-right">
+          <div class="task-status-wrap"><span class="task-status" style="background:var(--amber-soft);color:var(--amber)">Davam edir</span></div>
+          <div class="task-actions"><button class="icon-btn" style="width:28px;height:28px"><span class="material-symbols-outlined" style="font-size:16px">edit</span></button></div>
+        </div>
+      </div>
+
+      <div class="task-item" onclick="openPanelGorev(2,this)">
+        <div class="task-check" style="border-color:var(--amber)"></div>
+        <div class="task-content">
+          <div class="task-title">Müştəri geri bildirimlərini yoxla</div>
+          <div class="task-meta">
+            <span class="tag tag-amber">Yüksək</span>
+            <span class="meta-text"><span class="material-symbols-outlined">chat_bubble</span> 3</span>
+            <span class="meta-text"><span class="material-symbols-outlined">person</span> Nigar Ə.</span>
+          </div>
+        </div>
+        <div class="task-right">
+          <div class="task-status-wrap"><span class="task-status" style="background:var(--blue-soft);color:var(--blue)">Gözləyir</span></div>
+          <div class="task-actions"><button class="icon-btn" style="width:28px;height:28px"><span class="material-symbols-outlined" style="font-size:16px">edit</span></button></div>
+        </div>
+      </div>
+
+      <div class="task-item" onclick="openPanelGorev(3,this)">
+        <div class="task-check" style="border-color:var(--red)"></div>
+        <div class="task-content">
+          <div class="task-title">API sənədləşməsini yenilə (v2)</div>
+          <div class="task-meta">
+            <span class="tag tag-red">Kritik</span>
+            <span class="meta-text" style="color:var(--red);font-weight:600"><span class="material-symbols-outlined">event_busy</span> Gecikmiş — 29 Mar</span>
+            <span class="meta-text"><span class="material-symbols-outlined">person</span> Tural Q.</span>
+          </div>
+        </div>
+        <div class="task-right">
+          <div class="task-status-wrap"><span class="task-status" style="background:var(--amber-soft);color:var(--amber)">Davam edir</span></div>
+        </div>
+      </div>
+
+      <div class="task-item" onclick="openPanelGorev(4,this)">
+        <div class="task-check" style="border-color:var(--text-4)"></div>
+        <div class="task-content">
+          <div class="task-title">Maliyyə hesabatı hazırla</div>
+          <div class="task-meta">
+            <span class="tag tag-purple">Maliyyə</span>
+            <span class="meta-text">Gəncə Filialı</span>
+            <span class="meta-text"><span class="material-symbols-outlined">person</span> Rəşad İ.</span>
+            <span class="meta-text"><span class="material-symbols-outlined">event</span> 5 Apr</span>
+          </div>
+        </div>
+        <div class="task-right">
+          <div class="task-status-wrap"><span class="task-status" style="background:var(--surface-2);color:var(--text-3)">Gözləyir</span></div>
+          <div class="task-actions"><button class="icon-btn" style="width:28px;height:28px"><span class="material-symbols-outlined" style="font-size:16px">edit</span></button></div>
+        </div>
+      </div>
+
+      <div class="task-item" onclick="openPanelGorev(5,this)">
+        <div class="task-check" style="border-color:var(--text-4)"></div>
+        <div class="task-content">
+          <div class="task-title">Gəncə filialı stok sayımı</div>
+          <div class="task-meta">
+            <span class="tag tag-blue">Orta</span>
+            <span class="meta-text">Gəncə Filialı</span>
+            <span class="meta-text"><span class="material-symbols-outlined">repeat</span> Aylıq</span>
+            <span class="meta-text"><span class="material-symbols-outlined">event</span> 10 Apr</span>
+          </div>
+        </div>
+        <div class="task-right">
+          <div class="task-status-wrap"><span class="task-status" style="background:var(--surface-2);color:var(--text-3)">Gözləyir</span></div>
+        </div>
+      </div>
+
+      <div class="task-item" onclick="openPanelGorev(6,this)">
+        <div class="task-check" style="border-color:var(--blue)"></div>
+        <div class="task-content">
+          <div class="task-title">Yeni işçi onboarding sənədi hazırla</div>
+          <div class="task-meta">
+            <span class="tag tag-blue">Orta</span>
+            <span class="meta-text">HR Departamenti</span>
+            <span class="meta-text"><span class="material-symbols-outlined">group</span> 2 nəfər</span>
+          </div>
+        </div>
+        <div class="task-right">
+          <div class="task-status-wrap"><span class="task-status" style="background:var(--blue-soft);color:var(--blue)">Gözləyir</span></div>
+          <div class="task-actions"><button class="icon-btn" style="width:28px;height:28px"><span class="material-symbols-outlined" style="font-size:16px">edit</span></button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Onay gözləyir -->
+    <div class="section-header" style="margin-top:24px">
+      <span class="section-title">
+        <span class="material-symbols-outlined" style="font-size:14px;color:var(--amber)">hourglass_top</span>
+        Onay gözləyir <span class="count">3</span>
+      </span>
+    </div>
+
+    <div class="task-list">
+      <div class="task-item" onclick="openPanelGorev(7,this)">
+        <div class="task-check" style="border-color:var(--amber)"></div>
+        <div class="task-content">
+          <div class="task-title">Q1 büdcə icmalı</div>
+          <div class="task-meta">
+            <span class="tag tag-amber">Yüksək</span>
+            <span class="meta-text"><span class="material-symbols-outlined">hourglass_top</span> Rəhbər onayı</span>
+            <span class="meta-text"><span class="material-symbols-outlined">person</span> Həsən Ə.</span>
+          </div>
+        </div>
+        <div class="task-right">
+          <div class="task-status-wrap"><span class="task-status" style="background:var(--amber-soft);color:var(--amber)">Onay gözlənir</span></div>
+        </div>
+      </div>
+
+      <div class="task-item" onclick="openPanelGorev(8,this)">
+        <div class="task-check" style="border-color:var(--text-4)"></div>
+        <div class="task-content">
+          <div class="task-title">Server infrastrukturu yeniləmə təklifi</div>
+          <div class="task-meta">
+            <span class="tag tag-blue">Orta</span>
+            <span class="meta-text"><span class="material-symbols-outlined">hourglass_top</span> Texniki onay</span>
+          </div>
+        </div>
+        <div class="task-right">
+          <div class="task-status-wrap"><span class="task-status" style="background:var(--amber-soft);color:var(--amber)">Onay gözlənir</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tamamlananlar -->
+    <div class="section-header" style="margin-top:24px">
+      <span class="section-title" style="cursor:pointer" onclick="toggleDone()">
+        <span class="material-symbols-outlined filled" style="font-size:14px;color:var(--green)">check_circle</span>
+        Tamamlananlar <span class="count">6</span>
+        <span class="material-symbols-outlined" style="font-size:14px;color:var(--text-4)" id="done-chevron">expand_more</span>
+      </span>
+    </div>
+
+    <div class="task-list" id="done-list">
+      <div class="task-item done">
+        <div class="task-check done"><span class="material-symbols-outlined">check</span></div>
+        <div class="task-content">
+          <div class="task-title">Təqdimat slaydlarını hazırla</div>
+          <div class="task-meta"><span class="tag tag-purple">Marketinq</span><span class="meta-text">Bu gün</span></div>
+        </div>
+      </div>
+      <div class="task-item done">
+        <div class="task-check done"><span class="material-symbols-outlined">check</span></div>
+        <div class="task-content">
+          <div class="task-title">Sistem yedəkləmə yoxlaması</div>
+          <div class="task-meta"><span class="tag tag-blue">IT</span><span class="meta-text">Dünən</span></div>
+        </div>
+      </div>
+      <div class="task-item done">
+        <div class="task-check done"><span class="material-symbols-outlined">check</span></div>
+        <div class="task-content">
+          <div class="task-title">Ödəniş qəbzlərini arxivlə</div>
+          <div class="task-meta"><span class="tag tag-green">Maliyyə</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /tab-gorev -->
+
+  <!-- TODO Tab -->
+  <div class="tab-content" id="tab-todo">
+
+    <div class="section-header">
+      <span class="section-title">
+        <span class="material-symbols-outlined" style="font-size:14px">circle</span>
+        Bu gün <span class="count">3</span>
+      </span>
+    </div>
+
+    <div class="task-list">
+      <div class="task-item" onclick="openPanelTodo(1,this)">
+        <div class="todo-check"></div>
+        <div class="task-content">
+          <div class="task-title">Görüş üçün qeydlər hazırla</div>
+          <div class="task-meta">
+            <span class="meta-text" style="color:var(--amber)"><span class="material-symbols-outlined">schedule</span> Bu gün, 14:00</span>
+            <span class="meta-text">Veb Dizayn</span>
+          </div>
+        </div>
+        <div class="task-right">
+          <div class="task-actions"><button class="icon-btn" style="width:28px;height:28px"><span class="material-symbols-outlined" style="font-size:16px">edit</span></button></div>
+        </div>
+      </div>
+
+      <div class="task-item" onclick="openPanelTodo(2,this)">
+        <div class="todo-check"></div>
+        <div class="task-content">
+          <div class="task-title">Komanda üzərindən e-poçt yoxla</div>
+          <div class="task-meta">
+            <span class="meta-text" style="color:var(--amber)"><span class="material-symbols-outlined">schedule</span> Bu gün, 10:00</span>
+          </div>
+        </div>
+        <div class="task-right">
+          <div class="task-status-wrap"><span class="task-status" style="background:var(--green-soft);color:var(--green)">Aktiv</span></div>
+          <div class="task-actions"><button class="icon-btn" style="width:28px;height:28px"><span class="material-symbols-outlined" style="font-size:16px">edit</span></button></div>
+        </div>
+      </div>
+
+      <div class="task-item" onclick="openPanelTodo(3,this)">
+        <div class="todo-check"></div>
+        <div class="task-content">
+          <div class="task-title">Dizayn fayllarını yenilə</div>
+          <div class="task-meta">
+            <span class="meta-text">Marketinq</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-header" style="margin-top:24px">
+      <span class="section-title">
+        <span class="material-symbols-outlined" style="font-size:14px">calendar_today</span>
+        Sabah <span class="count">2</span>
+      </span>
+    </div>
+
+    <div class="task-list">
+      <div class="task-item" onclick="openPanelTodo(4,this)">
+        <div class="todo-check"></div>
+        <div class="task-content">
+          <div class="task-title">Sprint planlaması üçün hazırlıq</div>
+          <div class="task-meta">
+            <span class="meta-text"><span class="material-symbols-outlined">event</span> 1 Apr</span>
+            <span class="meta-text">Dev komanda</span>
+          </div>
+        </div>
+      </div>
+      <div class="task-item" onclick="openPanelTodo(5,this)">
+        <div class="todo-check"></div>
+        <div class="task-content">
+          <div class="task-title">Mühasibatla görüş</div>
+          <div class="task-meta">
+            <span class="meta-text"><span class="material-symbols-outlined">event</span> 1 Apr, 11:00</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-header" style="margin-top:24px">
+      <span class="section-title" style="cursor:pointer" onclick="toggleTodoDone()">
+        <span class="material-symbols-outlined filled" style="font-size:14px;color:var(--purple)">check_circle</span>
+        Tamamlananlar <span class="count">3</span>
+        <span class="material-symbols-outlined" style="font-size:14px;color:var(--text-4)" id="todo-done-chevron">expand_more</span>
+      </span>
+    </div>
+
+    <div class="task-list" id="todo-done-list">
+      <div class="task-item done">
+        <div class="todo-check done"><span class="material-symbols-outlined">check</span></div>
+        <div class="task-content">
+          <div class="task-title">Sabah üçün agenda göndər</div>
+          <div class="task-meta"><span class="meta-text">Dünən</span></div>
+        </div>
+      </div>
+      <div class="task-item done">
+        <div class="todo-check done"><span class="material-symbols-outlined">check</span></div>
+        <div class="task-content">
+          <div class="task-title">Hesab şifrəsini yenilə</div>
+          <div class="task-meta"><span class="meta-text">Dünən</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /tab-todo -->
+
+  <!-- ALL Tab -->
+  <div class="tab-content" id="tab-all">
+    <div style="text-align:center;padding:40px 0;color:var(--text-3)">
+      <span class="material-symbols-outlined" style="font-size:36px;color:var(--text-4);display:block;margin-bottom:12px">list_alt</span>
+      <p style="font-size:13px">Bütün tapşırıqlar yuxarıdakı tablarda birləşik göstərilir.</p>
+      <p style="font-size:12px;margin-top:4px">GÖREV (14) + TODO (6) = 20 tapşırıq</p>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- Detail Panel -->
+<div class="panel-overlay" id="overlay" onclick="closePanel()"></div>
+<div class="detail-panel" id="panel">
+  <div class="panel-header">
+    <h3 id="panel-type-label">Tapşırıq detalları</h3>
+    <button class="icon-btn" onclick="closePanel()"><span class="material-symbols-outlined">close</span></button>
+  </div>
+  <div class="panel-body" id="panel-body">
+
+    <!-- GÖREV panel content (default) -->
+    <div id="gorev-panel">
+      <div class="detail-title">Aylıq satış hesabatını hazırla</div>
+
+      <div class="action-btns">
+        <button class="action-btn"><span class="material-symbols-outlined" style="font-size:16px">play_arrow</span> Başla</button>
+        <button class="action-btn primary"><span class="material-symbols-outlined" style="font-size:16px">check</span> Tamamla</button>
+        <button class="action-btn"><span class="material-symbols-outlined" style="font-size:16px">more_horiz</span></button>
+      </div>
+
+      <div class="detail-row">
+        <div class="detail-field">
+          <div class="detail-label">Status</div>
+          <div class="detail-value"><span style="width:8px;height:8px;border-radius:50%;background:var(--amber);display:inline-block"></span> Davam edir</div>
+        </div>
+        <div class="detail-field">
+          <div class="detail-label">Prioritet</div>
+          <div class="detail-value" style="color:var(--red)"><span class="material-symbols-outlined" style="font-size:16px">flag</span> Kritik</div>
+        </div>
+        <div class="detail-field">
+          <div class="detail-label">Son tarix</div>
+          <div class="detail-value" style="color:var(--red)"><span class="material-symbols-outlined" style="font-size:14px">event_busy</span> 28 Mar 2026</div>
+        </div>
+      </div>
+
+      <div class="assignee-row">
+        <div class="a-avatar" style="background:var(--green)">HƏ</div>
+        <div>
+          <div style="font-size:13px;font-weight:600">Həsən Əliyev</div>
+          <div style="font-size:11px;color:var(--text-3)">Müdir · Bakı Filialı</div>
+        </div>
+        <button class="icon-btn" style="margin-left:auto;width:28px;height:28px"><span class="material-symbols-outlined" style="font-size:16px">person_add</span></button>
+      </div>
+
+      <div style="margin-bottom:6px"><div class="detail-label">Açıqlama</div></div>
+      <div class="detail-desc">Bakı filialının yanvar–mart dövrü üzrə satış göstəricilərini cədvəl halında hazırlayın. Əvvəlki il ilə müqayisəli analiz daxil edilsin.</div>
+
+      <div class="section-sep"></div>
+
+      <div class="detail-label" style="margin-bottom:8px">Alt tapşırıqlar · 1/3</div>
+      <div class="subtask-list">
+        <div class="subtask done"><span class="material-symbols-outlined filled" style="color:var(--green)">check_circle</span><span class="subtask-text">Məlumat bazasından məlumat çıxar</span></div>
+        <div class="subtask"><span class="material-symbols-outlined" style="color:var(--text-4)">radio_button_unchecked</span><span class="subtask-text">Cədvəli formatla</span></div>
+        <div class="subtask"><span class="material-symbols-outlined" style="color:var(--text-4)">radio_button_unchecked</span><span class="subtask-text">Müqayisəli analiz hazırla</span></div>
+      </div>
+
+      <div class="section-sep"></div>
+
+      <div class="detail-label" style="margin-bottom:10px">Mesajlar</div>
+      <div class="activity-item">
+        <div class="activity-avatar" style="background:var(--blue)">RQ</div>
+        <div>
+          <div class="activity-text"><strong>Rəşad Quliyev</strong> — Son ay məlumatları yenilənib.</div>
+          <div class="activity-time">2 saat əvvəl</div>
+        </div>
+      </div>
+      <div class="activity-item">
+        <div class="activity-avatar" style="background:var(--green)">HƏ</div>
+        <div>
+          <div class="activity-text"><strong>Həsən Əliyev</strong> — Cədvəl şablonuna bax, link göndərdim.</div>
+          <div class="activity-time">1 saat əvvəl</div>
+        </div>
+      </div>
+      <div class="activity-item">
+        <div class="activity-avatar" style="background:var(--amber)">TQ</div>
+        <div>
+          <div class="activity-text"><strong>Tural Quliyev</strong> — Q4 nəticələri artıq hazırdır, istifadə edə bilərsiniz.</div>
+          <div class="activity-time">30 dəq əvvəl</div>
+        </div>
+      </div>
+    </div><!-- /gorev-panel -->
+
+    <!-- TODO panel content (hidden by default) -->
+    <div id="todo-panel" style="display:none">
+      <div class="detail-title">Görüş üçün qeydlər hazırla</div>
+
+      <div class="action-btns">
+        <button class="action-btn primary"><span class="material-symbols-outlined" style="font-size:16px">check</span> Tamamla</button>
+        <button class="action-btn"><span class="material-symbols-outlined" style="font-size:16px">edit</span> Düzəliş</button>
+      </div>
+
+      <div class="detail-row">
+        <div class="detail-field">
+          <div class="detail-label">Vaxt</div>
+          <div class="detail-value"><span class="material-symbols-outlined" style="font-size:16px;color:var(--amber)">schedule</span> Bu gün, 14:00</div>
+        </div>
+        <div class="detail-field">
+          <div class="detail-label">Kateqoriya</div>
+          <div class="detail-value"><span class="tag tag-blue" style="font-size:12px;padding:3px 8px">Veb Dizayn</span></div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:6px"><div class="detail-label">Qeyd</div></div>
+      <div class="detail-desc">Müştəri görüşü üçün əsas mövzuları və suallara cavabları hazırla. Dizayn iterasiyası haqqında yenilikləri əlavə et.</div>
+
+      <div class="section-sep"></div>
+
+      <div class="detail-label" style="margin-bottom:8px">Alt qeydlər</div>
+      <div class="subtask-list">
+        <div class="subtask"><span class="material-symbols-outlined" style="color:var(--text-4)">radio_button_unchecked</span><span class="subtask-text">Əsas mövzu siyahısı</span></div>
+        <div class="subtask"><span class="material-symbols-outlined" style="color:var(--text-4)">radio_button_unchecked</span><span class="subtask-text">Sorğu cavabları</span></div>
+        <div class="subtask"><span class="material-symbols-outlined" style="color:var(--text-4)">radio_button_unchecked</span><span class="subtask-text">Demo link-lər</span></div>
+      </div>
+
+      <div class="section-sep"></div>
+
+      <div class="detail-label" style="margin-bottom:6px">Aktivlik</div>
+      <div class="activity-item">
+        <div class="activity-avatar" style="background:var(--purple)">HƏ</div>
+        <div>
+          <div class="activity-text"><strong>Sən</strong> — Bu tapşırığı yaratdın.</div>
+          <div class="activity-time">Bu gün, 09:15</div>
+        </div>
+      </div>
+    </div><!-- /todo-panel -->
+
+  </div><!-- /panel-body -->
+  <div class="panel-footer">
+    <input type="text" placeholder="Mesaj yaz..."/>
+  </div>
+</div>
+
+<script>
+var currentType = 'gorev';
+
+function switchTab(tab, btn) {
+  // deactivate all tabs
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+  closePanel();
+}
+
+function clearSelection() {
+  document.querySelectorAll('.task-item').forEach(i => i.classList.remove('selected'));
+}
+
+function openPanelGorev(id, el) {
+  clearSelection();
+  if(el) el.classList.add('selected');
+  currentType = 'gorev';
+  document.getElementById('gorev-panel').style.display = '';
+  document.getElementById('todo-panel').style.display = 'none';
+  document.getElementById('panel-type-label').textContent = 'GÖREV detalları';
+  document.getElementById('panel').classList.add('open');
+  document.getElementById('overlay').classList.add('open');
+}
+
+function openPanelTodo(id, el) {
+  clearSelection();
+  if(el) el.classList.add('selected');
+  currentType = 'todo';
+  document.getElementById('gorev-panel').style.display = 'none';
+  document.getElementById('todo-panel').style.display = '';
+  document.getElementById('panel-type-label').textContent = 'TODO detalları';
+  document.getElementById('panel').classList.add('open');
+  document.getElementById('overlay').classList.add('open');
+}
+
+function openPanel() {
+  document.getElementById('gorev-panel').style.display = '';
+  document.getElementById('todo-panel').style.display = 'none';
+  document.getElementById('panel-type-label').textContent = 'GÖREV detalları';
+  document.getElementById('panel').classList.add('open');
+  document.getElementById('overlay').classList.add('open');
+}
+
+function closePanel() {
+  document.getElementById('panel').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+  clearSelection();
+}
+
+function toggleDone() {
+  var list = document.getElementById('done-list');
+  var chevron = document.getElementById('done-chevron');
+  if(list.style.display === 'none') {
+    list.style.display = 'flex';
+    chevron.textContent = 'expand_more';
+  } else {
+    list.style.display = 'none';
+    chevron.textContent = 'chevron_right';
+  }
+}
+
+function toggleTodoDone() {
+  var list = document.getElementById('todo-done-list');
+  var chevron = document.getElementById('todo-done-chevron');
+  if(list.style.display === 'none') {
+    list.style.display = 'flex';
+    chevron.textContent = 'expand_more';
+  } else {
+    list.style.display = 'none';
+    chevron.textContent = 'chevron_right';
+  }
+}
+
+// Quick add enter key
+document.querySelector('.quick-add input').addEventListener('keydown', function(e) {
+  if(e.key === 'Enter' && this.value.trim()) {
+    this.value = '';
+  }
+});
+
+// checkbox click stop propagation
+document.querySelectorAll('.task-check,.todo-check').forEach(function(el) {
+  el.addEventListener('click', function(e) {
+    e.stopPropagation();
+    this.classList.toggle('done');
+    if(this.classList.contains('done')) {
+      this.innerHTML = '<span class="material-symbols-outlined">check</span>';
+    } else {
+      this.innerHTML = '';
+    }
+    var taskItem = this.closest('.task-item');
+    if(taskItem) taskItem.classList.toggle('done', this.classList.contains('done'));
+  });
+});
+
+// open first item by default
+window.addEventListener('DOMContentLoaded', function() {
+  var first = document.querySelector('#tab-gorev .task-item');
+  if(first) openPanelGorev(1, first);
+});
+</script>
+</body>
+</html>

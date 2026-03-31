@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>WorkFlow Pro — Neubrutalism</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#faf5eb;
+  --surface:#fff;
+  --surface-2:#f0ebe0;
+  --surface-3:#e5ddd0;
+  --text:#1a1410;
+  --text-2:#5a4f42;
+  --text-3:#9a8f82;
+  --border:#1a1410;
+  --shadow:3px 3px 0px #1a1410;
+  --shadow-lg:5px 5px 0px #1a1410;
+  --orange:#ff6b35;
+  --orange-soft:#fff0eb;
+  --teal:#00897b;
+  --teal-soft:#e0f2f0;
+  --yellow:#ffd600;
+  --yellow-soft:#fff9e6;
+  --red:#e53935;
+  --red-soft:#fff0ef;
+  --purple:#6a1b9a;
+  --purple-soft:#f3e5f5;
+  --blue:#1565c0;
+  --blue-soft:#e8f0fe;
+  --radius:12px;
+  --sidebar-w:236px;
+}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 20;font-size:20px;vertical-align:middle}
+.filled{font-variation-settings:'FILL' 1,'wght' 400}
+
+/* Sidebar */
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:var(--sidebar-w);background:var(--surface);display:flex;flex-direction:column;padding:24px 16px;z-index:40;border-right:2px solid var(--border)}
+.logo{display:flex;align-items:center;gap:10px;padding:0 4px;margin-bottom:32px}
+.logo-icon{width:36px;height:36px;border-radius:10px;background:var(--orange);display:flex;align-items:center;justify-content:center;color:#fff;border:2px solid var(--border);box-shadow:2px 2px 0 var(--border)}
+.logo-icon .material-symbols-outlined{font-size:18px;font-variation-settings:'FILL' 1,'wght' 600}
+.logo-text{font-family:'Syne',sans-serif;font-weight:800;font-size:16px;letter-spacing:-0.5px}
+.new-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 14px;border-radius:10px;background:var(--orange);color:#fff;font-size:13px;font-weight:700;border:2px solid var(--border);cursor:pointer;margin-bottom:24px;box-shadow:var(--shadow);transition:all .1s;text-transform:uppercase;letter-spacing:0.3px}
+.new-btn:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--border)}
+.new-btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--border)}
+nav{flex:1;display:flex;flex-direction:column;gap:2px}
+.nav-link{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;text-decoration:none;color:var(--text-2);font-size:13px;font-weight:600;transition:all .1s;position:relative}
+.nav-link:hover{background:var(--surface-2);color:var(--text)}
+.nav-link.active{background:var(--yellow);color:var(--text);border:2px solid var(--border);box-shadow:var(--shadow)}
+.section-label{font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;padding:16px 12px 5px}
+.nav-badge{margin-left:auto;font-size:10px;font-weight:800;padding:2px 8px;border-radius:6px;background:var(--orange);color:#fff;border:1.5px solid var(--border)}
+
+/* Main */
+.main{margin-left:var(--sidebar-w);padding:28px 36px 60px;max-width:1000px}
+
+/* Header */
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:36px}
+.search-box{position:relative;width:280px}
+.search-box input{width:100%;padding:9px 14px 9px 38px;border-radius:10px;border:2px solid var(--border);background:var(--surface);font-size:13px;font-weight:500;outline:none;font-family:'DM Sans',sans-serif;box-shadow:var(--shadow)}
+.search-box input:focus{box-shadow:4px 4px 0 var(--border)}
+.search-box .material-symbols-outlined{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--text-3);font-size:18px}
+.header-right{display:flex;align-items:center;gap:10px}
+.icon-btn{width:40px;height:40px;border-radius:10px;border:2px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-2);box-shadow:var(--shadow);transition:all .1s}
+.icon-btn:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--border)}
+.avatar{width:38px;height:38px;border-radius:50%;background:var(--orange);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;box-shadow:var(--shadow)}
+.notif-wrap{position:relative}
+.notif-wrap::after{content:'3';position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:var(--red);border:2px solid var(--border);font-size:9px;font-weight:800;color:#fff;display:flex;align-items:center;justify-content:center;text-align:center;line-height:14px}
+
+/* Welcome */
+.welcome-band{background:var(--orange);border:2px solid var(--border);border-radius:14px;padding:20px 28px;margin-bottom:28px;box-shadow:var(--shadow-lg);display:flex;justify-content:space-between;align-items:center}
+.welcome-band h1{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;letter-spacing:-0.5px;color:#fff;margin-bottom:4px}
+.welcome-band p{font-size:13px;color:rgba(255,255,255,0.75);font-weight:500}
+.streak{display:flex;align-items:center;gap:6px;background:#fff;border:2px solid var(--border);border-radius:8px;padding:8px 14px;font-size:13px;font-weight:800;color:var(--text)}
+
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px}
+.stat-card{border-radius:12px;padding:18px 20px;border:2px solid var(--border);box-shadow:var(--shadow-lg);cursor:default}
+.stat-label{font-size:11px;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.stat-label .material-symbols-outlined{font-size:16px}
+.stat-value{font-family:'Syne',sans-serif;font-size:34px;font-weight:800;letter-spacing:-1px}
+
+/* Two col */
+.two-col{display:grid;grid-template-columns:1fr 320px;gap:16px;align-items:start}
+
+/* Panel */
+.panel{border-radius:12px;background:var(--surface);border:2px solid var(--border);box-shadow:var(--shadow-lg);overflow:hidden}
+.panel-head{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:2px solid var(--border);background:var(--surface-2)}
+.panel-head h2{font-family:'Syne',sans-serif;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:0.3px}
+
+/* Priority card */
+.priority-card{border-radius:12px;background:var(--yellow);border:2px solid var(--border);box-shadow:var(--shadow-lg);padding:20px;margin-bottom:14px;cursor:pointer;transition:all .1s}
+.priority-card:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 var(--border)}
+.priority-tag{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:var(--text);background:#fff;display:inline-block;padding:2px 8px;border-radius:4px;border:1.5px solid var(--border);margin-bottom:10px}
+.priority-title{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;margin-bottom:8px}
+.priority-meta{font-size:12px;color:var(--text-2);font-weight:600;display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.progress-bar{width:100%;height:8px;background:rgba(0,0,0,0.1);border-radius:4px;border:1px solid rgba(0,0,0,0.15);overflow:hidden}
+.progress-fill{height:100%;background:var(--border);border-radius:3px}
+.progress-label{font-size:11px;color:var(--text-2);font-weight:600;margin-top:5px}
+
+/* Task item */
+.task-item{display:flex;align-items:center;gap:12px;padding:12px 20px;transition:background .1s;cursor:pointer;border-bottom:2px solid var(--surface-2)}
+.task-item:last-child{border-bottom:none}
+.task-item:hover{background:var(--surface-2)}
+.task-check{width:20px;height:20px;border-radius:6px;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .1s;background:var(--surface)}
+.task-check.done{background:var(--teal);border-color:var(--border)}
+.task-check.done .material-symbols-outlined{font-size:14px;font-variation-settings:'FILL' 1,'wght' 700;color:#fff}
+.task-text{flex:1;min-width:0}
+.task-name{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.task-item.done .task-name{color:var(--text-3);text-decoration:line-through}
+.task-sub{display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap}
+.chip{font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px;border:1.5px solid}
+.chip-orange{color:var(--orange);background:var(--orange-soft);border-color:var(--orange)}
+.chip-teal{color:var(--teal);background:var(--teal-soft);border-color:var(--teal)}
+.chip-red{color:var(--red);background:var(--red-soft);border-color:var(--red)}
+.chip-purple{color:var(--purple);background:var(--purple-soft);border-color:var(--purple)}
+.chip-blue{color:var(--blue);background:var(--blue-soft);border-color:var(--blue)}
+.task-status{font-size:10px;font-weight:700;padding:3px 10px;border-radius:6px;border:1.5px solid;flex-shrink:0}
+
+/* Activity */
+.act-item{display:flex;gap:10px;padding:12px 20px;border-bottom:2px solid var(--surface-2)}
+.act-item:last-child{border-bottom:none}
+.act-avatar{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;flex-shrink:0;border:2px solid var(--border)}
+.act-text{font-size:12px;color:var(--text-2);font-weight:500}
+.act-text strong{color:var(--text);font-weight:700}
+.act-time{font-size:10px;color:var(--text-3);font-weight:600;margin-top:2px}
+
+/* Detail Panel */
+.panel-overlay{position:fixed;inset:0;background:rgba(0,0,0,.1);z-index:45;display:none}
+.panel-overlay.open{display:block}
+.detail-panel{position:fixed;right:0;top:0;bottom:0;width:400px;background:var(--surface);border-left:2px solid var(--border);z-index:50;transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column}
+.detail-panel.open{transform:translateX(0)}
+.dpanel-head{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:2px solid var(--border);background:var(--surface-2)}
+.dpanel-head span{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px}
+.dpanel-body{flex:1;overflow-y:auto;padding:20px}
+.dpanel-footer{padding:14px 20px;border-top:2px solid var(--border)}
+.dpanel-footer input{width:100%;padding:10px 14px;border-radius:10px;border:2px solid var(--border);font-size:13px;outline:none;font-family:'DM Sans',sans-serif;box-shadow:var(--shadow)}
+.d-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:14px;line-height:1.3}
+.d-row{display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap}
+.d-label{font-size:10px;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px}
+.d-val{font-size:13px;font-weight:600}
+.d-desc{font-size:13px;color:var(--text-2);line-height:1.7;margin-bottom:16px;padding:12px;background:var(--surface-2);border-radius:8px;border:2px solid var(--border);font-weight:500}
+.sub-list{display:flex;flex-direction:column;gap:5px;margin-bottom:16px}
+.sub-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;background:var(--surface-2);border:2px solid var(--border);font-size:12px;font-weight:600}
+.sub-item.done{opacity:.5}
+.sub-item.done .si-text{text-decoration:line-through}
+.btn-row{display:flex;gap:8px;margin-bottom:16px}
+.btn{padding:9px 16px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;border:2px solid var(--border);background:var(--surface);color:var(--text);display:flex;align-items:center;gap:6px;box-shadow:var(--shadow);transition:all .1s;font-family:'DM Sans',sans-serif}
+.btn:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--border)}
+.btn.primary{background:var(--orange);color:#fff}
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-icon"><span class="material-symbols-outlined">stacks</span></div>
+    <span class="logo-text">WorkFlow Pro</span>
+  </div>
+  <button class="new-btn"><span class="material-symbols-outlined" style="font-size:18px">add</span> Yeni tapşırıq</button>
+  <nav>
+    <a href="#" class="nav-link active"><span class="material-symbols-outlined">today</span> Bugün <span class="nav-badge">5</span></a>
+    <a href="#" class="nav-link"><span class="material-symbols-outlined">inbox</span> Gələnlər <span class="nav-badge">12</span></a>
+    <a href="#" class="nav-link"><span class="material-symbols-outlined">calendar_month</span> Gələcək</a>
+    <div class="section-label">İş sahəsi</div>
+    <a href="#" class="nav-link"><span class="material-symbols-outlined">assignment</span> Tapşırıqlar</a>
+    <a href="#" class="nav-link"><span class="material-symbols-outlined">check_circle</span> Todo</a>
+    <a href="#" class="nav-link"><span class="material-symbols-outlined">repeat</span> Şablonlar</a>
+    <div class="section-label">İdarəetmə</div>
+    <a href="#" class="nav-link"><span class="material-symbols-outlined">group</span> İşçilər</a>
+    <a href="#" class="nav-link"><span class="material-symbols-outlined">shield</span> Rollar</a>
+    <a href="#" class="nav-link"><span class="material-symbols-outlined">account_balance</span> Maliyyə</a>
+  </nav>
+  <a href="#" class="nav-link" style="margin-top:auto"><span class="material-symbols-outlined">settings</span> Ayarlar</a>
+</aside>
+
+<!-- Main -->
+<div class="main">
+  <div class="header">
+    <div class="search-box">
+      <span class="material-symbols-outlined">search</span>
+      <input type="text" placeholder="Axtar..."/>
+    </div>
+    <div class="header-right">
+      <div class="notif-wrap">
+        <button class="icon-btn"><span class="material-symbols-outlined">notifications</span></button>
+      </div>
+      <div class="avatar">HƏ</div>
+    </div>
+  </div>
+
+  <!-- Welcome band -->
+  <div class="welcome-band">
+    <div>
+      <h1>Sabah Həsən! 👋</h1>
+      <p>31 Mart 2026 · 5 aktiv tapşırıq sizi gözləyir</p>
+    </div>
+    <div class="streak">🔥 12 gün ardıcıl</div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-grid">
+    <div class="stat-card" style="background:var(--blue-soft)">
+      <div class="stat-label"><span class="material-symbols-outlined" style="color:var(--blue)">radio_button_unchecked</span> Gözləyir</div>
+      <div class="stat-value" style="color:var(--blue)">12</div>
+    </div>
+    <div class="stat-card" style="background:var(--orange-soft)">
+      <div class="stat-label"><span class="material-symbols-outlined" style="color:var(--orange)">pending</span> Davam edir</div>
+      <div class="stat-value" style="color:var(--orange)">5</div>
+    </div>
+    <div class="stat-card" style="background:var(--yellow-soft)">
+      <div class="stat-label"><span class="material-symbols-outlined" style="color:#c8a200">hourglass_top</span> Onay</div>
+      <div class="stat-value" style="color:#c8a200">3</div>
+    </div>
+    <div class="stat-card" style="background:var(--teal-soft)">
+      <div class="stat-label"><span class="material-symbols-outlined filled" style="color:var(--teal)">check_circle</span> Tamamlandı</div>
+      <div class="stat-value" style="color:var(--teal)">18</div>
+    </div>
+  </div>
+
+  <!-- Two col -->
+  <div class="two-col">
+    <div>
+      <!-- Priority -->
+      <div class="priority-card" onclick="openPanel()">
+        <div class="priority-tag">⚡ Prioritet</div>
+        <div class="priority-title">Aylıq satış hesabatını hazırla</div>
+        <div class="priority-meta">
+          <span>📅 Gecikmiş — 28 Mar</span>
+          <span>👥 10 nəfər</span>
+          <span>📍 Bakı Filialı</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:35%"></div></div>
+        <div class="progress-label">3/10 alt tapşırıq tamamlandı</div>
+      </div>
+
+      <!-- Tasks -->
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Tapşırıqlar</h2>
+          <button class="icon-btn" style="width:32px;height:32px;box-shadow:none"><span class="material-symbols-outlined" style="font-size:16px">tune</span></button>
+        </div>
+
+        <div class="task-item" onclick="openPanel()">
+          <div class="task-check"></div>
+          <div class="task-text">
+            <div class="task-name">Müştəri geri bildirimlərini yoxla</div>
+            <div class="task-sub">
+              <span class="chip chip-red">Yüksək</span>
+              <span style="font-size:11px;color:var(--red);font-weight:700">⚠️ Gecikmiş</span>
+              <span style="font-size:11px;color:var(--text-3);font-weight:600">Nigar Ə.</span>
+            </div>
+          </div>
+          <span class="task-status" style="color:var(--blue);background:var(--blue-soft);border-color:var(--blue)">Gözləyir</span>
+        </div>
+
+        <div class="task-item" onclick="openPanel()">
+          <div class="task-check"></div>
+          <div class="task-text">
+            <div class="task-name">API sənədləşməsini yenilə (v2)</div>
+            <div class="task-sub">
+              <span class="chip chip-orange">Orta</span>
+              <span style="font-size:11px;color:var(--text-3);font-weight:600">Tural Q.</span>
+            </div>
+          </div>
+          <span class="task-status" style="color:var(--orange);background:var(--orange-soft);border-color:var(--orange)">Davam edir</span>
+        </div>
+
+        <div class="task-item done">
+          <div class="task-check done"><span class="material-symbols-outlined">check</span></div>
+          <div class="task-text">
+            <div class="task-name">Təqdimat slaydlarını hazırla</div>
+            <div class="task-sub"><span class="chip chip-purple">Marketinq</span></div>
+          </div>
+        </div>
+
+        <div class="task-item" onclick="openPanel()">
+          <div class="task-check"></div>
+          <div class="task-text">
+            <div class="task-name">Maliyyə hesabatı hazırla</div>
+            <div class="task-sub">
+              <span class="chip chip-teal">Maliyyə</span>
+              <span style="font-size:11px;color:var(--text-3);font-weight:600">Gəncə · Rəşad İ.</span>
+            </div>
+          </div>
+          <span class="task-status" style="color:var(--text-3);background:var(--surface-2);border-color:var(--surface-3)">Gözləyir</span>
+        </div>
+
+        <div class="task-item" onclick="openPanel()">
+          <div class="task-check"></div>
+          <div class="task-text">
+            <div class="task-name">Gəncə filialı stok sayımı</div>
+            <div class="task-sub">
+              <span class="chip chip-red">Kritik</span>
+              <span style="font-size:11px;color:var(--text-3);font-weight:600">🔄 Aylıq</span>
+            </div>
+          </div>
+          <span class="task-status" style="color:var(--text-3);background:var(--surface-2);border-color:var(--surface-3)">Gözləyir</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right -->
+    <div>
+      <div class="panel">
+        <div class="panel-head"><h2>Son aktivlik</h2></div>
+        <div class="act-item">
+          <div class="act-avatar" style="background:var(--purple)">NƏ</div>
+          <div><div class="act-text"><strong>Nigar Ə.</strong> tapşırığı tamamladı</div><div style="font-size:11px;color:var(--text-3);font-weight:600">CSV analizi</div><div class="act-time">5 dəq əvvəl</div></div>
+        </div>
+        <div class="act-item">
+          <div class="act-avatar" style="background:var(--teal)">TQ</div>
+          <div><div class="act-text"><strong>Tural Q.</strong> şərh yazdı</div><div style="font-size:11px;color:var(--text-3);font-weight:600">API sənədləşməsi</div><div class="act-time">23 dəq əvvəl</div></div>
+        </div>
+        <div class="act-item">
+          <div class="act-avatar" style="background:var(--orange)">RQ</div>
+          <div><div class="act-text"><strong>Rəşad Q.</strong> fayl yüklədi</div><div style="font-size:11px;color:var(--text-3);font-weight:600">maliyye_mart.xlsx</div><div class="act-time">1 saat əvvəl</div></div>
+        </div>
+        <div class="act-item">
+          <div class="act-avatar" style="background:var(--blue)">AH</div>
+          <div><div class="act-text"><strong>Aynur H.</strong> tapşırıq yaratdı</div><div style="font-size:11px;color:var(--text-3);font-weight:600">Q2 planlaması</div><div class="act-time">2 saat əvvəl</div></div>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:14px">
+        <div class="panel-head"><h2>Bu həftə</h2></div>
+        <div style="padding:16px 20px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <span style="font-size:12px;font-weight:700">Tamamlanma</span>
+            <span style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--teal)">72%</span>
+          </div>
+          <div style="height:10px;background:var(--surface-2);border-radius:5px;border:2px solid var(--border);overflow:hidden;margin-bottom:16px">
+            <div style="width:72%;height:100%;background:var(--teal)"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div style="padding:12px;background:var(--teal-soft);border-radius:10px;border:2px solid var(--border);text-align:center">
+              <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:var(--teal)">18</div>
+              <div style="font-size:10px;font-weight:700;color:var(--text-2);text-transform:uppercase">Tamamlandı</div>
+            </div>
+            <div style="padding:12px;background:var(--red-soft);border-radius:10px;border:2px solid var(--border);text-align:center">
+              <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:var(--red)">2</div>
+              <div style="font-size:10px;font-weight:700;color:var(--text-2);text-transform:uppercase">Gecikmiş</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Detail Panel -->
+<div class="panel-overlay" id="overlay" onclick="closePanel()"></div>
+<div class="detail-panel" id="panel">
+  <div class="dpanel-head">
+    <span>Tapşırıq detalları</span>
+    <button class="icon-btn" style="box-shadow:none" onclick="closePanel()"><span class="material-symbols-outlined">close</span></button>
+  </div>
+  <div class="dpanel-body">
+    <div class="d-title">Müştəri geri bildirimlərini yoxla</div>
+    <div class="btn-row">
+      <button class="btn"><span class="material-symbols-outlined" style="font-size:16px">play_arrow</span> Başla</button>
+      <button class="btn primary"><span class="material-symbols-outlined" style="font-size:16px">check</span> Tamamla</button>
+    </div>
+    <div class="d-row">
+      <div><div class="d-label">Status</div><div class="d-val" style="color:var(--blue)">Gözləyir</div></div>
+      <div><div class="d-label">Prioritet</div><div class="d-val" style="color:var(--red)">Yüksək</div></div>
+      <div><div class="d-label">Son tarix</div><div class="d-val">31 Mar</div></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface-2);border-radius:8px;border:2px solid var(--border);margin-bottom:16px">
+      <div style="width:32px;height:32px;border-radius:8px;background:var(--purple);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff">NƏ</div>
+      <div><div style="font-size:13px;font-weight:700">Nigar Əhmədova</div><div style="font-size:11px;color:var(--text-3);font-weight:600">İşçi · Bakı Filialı</div></div>
+    </div>
+    <div class="d-label">Açıqlama</div>
+    <div class="d-desc">App Store rəylərini analiz edin və premium istifadəçilərin ən çox qeyd etdiyi 3 problem nöqtəsini müəyyən edin.</div>
+    <div class="d-label" style="margin-bottom:8px">Alt tapşırıqlar · 2/4</div>
+    <div class="sub-list">
+      <div class="sub-item done"><span class="material-symbols-outlined filled" style="color:var(--teal);font-size:16px">check_circle</span><span class="si-text">CSV faylını yüklə</span></div>
+      <div class="sub-item done"><span class="material-symbols-outlined filled" style="color:var(--teal);font-size:16px">check_circle</span><span class="si-text">1-3 ulduzlu rəyləri filtrlə</span></div>
+      <div class="sub-item"><span class="material-symbols-outlined" style="color:var(--text-3);font-size:16px">radio_button_unchecked</span><span>Kateqoriyalara ayır</span></div>
+      <div class="sub-item"><span class="material-symbols-outlined" style="color:var(--text-3);font-size:16px">radio_button_unchecked</span><span>Xülasə hazırla</span></div>
+    </div>
+    <div class="d-label" style="margin-bottom:10px">Mesajlar</div>
+    <div class="act-item" style="padding:0 0 12px">
+      <div class="act-avatar" style="background:var(--teal)">HƏ</div>
+      <div><div class="act-text"><strong>Həsən Əliyev</strong> — Rəyləri prioritet sırasına düz.</div><div class="act-time">1 saat əvvəl</div></div>
+    </div>
+    <div class="act-item" style="padding:0 0 12px">
+      <div class="act-avatar" style="background:var(--purple)">NƏ</div>
+      <div><div class="act-text"><strong>Nigar Əhmədova</strong> — CSV hazırdır.</div><div class="act-time">30 dəq əvvəl</div></div>
+    </div>
+  </div>
+  <div class="dpanel-footer">
+    <input type="text" placeholder="Mesaj yaz..."/>
+  </div>
+</div>
+
+<script>
+function openPanel(){document.getElementById('panel').classList.add('open');document.getElementById('overlay').classList.add('open')}
+function closePanel(){document.getElementById('panel').classList.remove('open');document.getElementById('overlay').classList.remove('open')}
+</script>
+</body>
+</html>

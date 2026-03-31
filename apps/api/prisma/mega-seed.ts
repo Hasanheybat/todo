@@ -143,20 +143,10 @@ async function main() {
   console.log('Rollar yaradilir...')
 
   const allPerms = [
-    'tasks.read', 'tasks.create', 'tasks.update', 'tasks.delete', 'tasks.approve', 'tasks.assign',
-    'tasks.assign_upward', 'tasks.finalize', 'tasks.status_change', 'tasks.bulk_action',
-    'templates.create', 'templates.update', 'templates.delete', 'templates.execute', 'templates.toggle',
-    'finance.read', 'finance.create', 'finance.update', 'finance.delete', 'finance.reports', 'finance.export',
-    'users.read', 'users.create', 'users.update', 'users.delete',
-    'roles.read', 'roles.create', 'roles.update', 'roles.delete', 'roles.assign',
-    'reports.read', 'reports.export',
-    'departments.read', 'departments.create', 'departments.update', 'departments.delete',
-    'businesses.read', 'businesses.create', 'businesses.update', 'businesses.delete',
-    'notifications.read', 'notifications.manage',
-    'salary.read', 'salary.create', 'salary.update', 'salary.delete', 'salary.payments',
-    'files.upload', 'files.download', 'files.delete',
-    'comments.create', 'comments.delete',
-    'todo.access', 'todo.create',
+    'tasks.read', 'tasks.create', 'gorev.create', 'tasks.assign_upward',
+    'users.read', 'users.manage',
+    'finance.manage',
+    'salary.manage',
   ]
 
   const ceoRole = await prisma.customRole.create({
@@ -176,20 +166,8 @@ async function main() {
       isDefault: true,
       tenantId: tenant.id,
       permissions: [
-        'tasks.read', 'tasks.create', 'tasks.update', 'tasks.delete', 'tasks.approve', 'tasks.assign',
-        'tasks.finalize', 'tasks.status_change', 'tasks.bulk_action',
-        'templates.create', 'templates.update', 'templates.delete', 'templates.execute', 'templates.toggle',
-        'finance.read', 'finance.reports',
-        'users.read', 'users.create', 'users.update',
-        'roles.read',
-        'reports.read', 'reports.export',
-        'departments.read',
-        'businesses.read',
-        'notifications.read', 'notifications.manage',
-        'salary.read',
-        'files.upload', 'files.download', 'files.delete',
-        'comments.create', 'comments.delete',
-        'todo.access', 'todo.create',
+        'tasks.read', 'tasks.create', 'gorev.create', 'tasks.assign_upward',
+        'users.read',
       ],
     },
   })
@@ -201,20 +179,7 @@ async function main() {
       isDefault: true,
       tenantId: tenant.id,
       permissions: [
-        'tasks.read', 'tasks.create', 'tasks.update', 'tasks.approve', 'tasks.assign',
-        'tasks.status_change', 'tasks.bulk_action',
-        'templates.create', 'templates.execute',
-        'finance.read',
-        'users.read',
-        'roles.read',
-        'reports.read',
-        'departments.read',
-        'businesses.read',
-        'notifications.read', 'notifications.manage',
-        'salary.read',
-        'files.upload', 'files.download',
-        'comments.create',
-        'todo.access', 'todo.create',
+        'tasks.read', 'tasks.create',
       ],
     },
   })
@@ -226,11 +191,7 @@ async function main() {
       isDefault: true,
       tenantId: tenant.id,
       permissions: [
-        'tasks.read', 'tasks.update',
-        'notifications.read',
-        'files.upload', 'files.download',
-        'comments.create',
-        'todo.access', 'todo.create',
+        'tasks.read',
       ],
     },
   })

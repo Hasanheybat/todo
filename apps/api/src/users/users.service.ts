@@ -265,7 +265,7 @@ export class UsersService {
       select: {
         id: true, fullName: true, email: true, role: true,
         parentId: true, status: true,
-        customRole: { select: { id: true, name: true } },
+        customRole: { select: { id: true, name: true, permissions: true } },
         businesses: { select: this.userBusinessSelect },
       },
       orderBy: { fullName: 'asc' },
