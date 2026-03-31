@@ -97,33 +97,10 @@ async function main() {
   // ─── Default Rollar ───
   console.log('🛡️ Default rollar yaradılır...')
   const allPerms = [
-    // Tapşırıqlar
-    'tasks.read', 'tasks.create', 'tasks.update', 'tasks.delete', 'tasks.approve', 'tasks.assign',
-    'tasks.finalize', 'tasks.status_change', 'tasks.bulk_action',
-    // Şablonlar
-    'templates.create', 'templates.update', 'templates.delete', 'templates.execute', 'templates.toggle',
-    // Maliyyə
-    'finance.read', 'finance.create', 'finance.update', 'finance.delete', 'finance.reports', 'finance.export',
-    // İstifadəçilər
-    'users.read', 'users.create', 'users.update', 'users.delete',
-    // Rollar
-    'roles.read', 'roles.create', 'roles.update', 'roles.delete', 'roles.assign',
-    // Hesabatlar
-    'reports.read', 'reports.export',
-    // Şöbələr
-    'departments.read', 'departments.create', 'departments.update', 'departments.delete',
-    // Filiallar
-    'businesses.read', 'businesses.create', 'businesses.update', 'businesses.delete',
-    // Bildirişlər
-    'notifications.read', 'notifications.manage',
-    // Maaş
-    'salary.read', 'salary.create', 'salary.update', 'salary.delete', 'salary.payments',
-    // Fayllar
-    'files.upload', 'files.download', 'files.delete',
-    // Şərhlər
-    'comments.create', 'comments.delete',
-    // TODO
-    'todo.access',
+    'tasks.read', 'tasks.create', 'gorev.create', 'gorev.approve', 'tasks.assign_upward',
+    'users.read', 'users.manage',
+    'finance.manage',
+    'salary.manage',
   ]
   const ownerRole = await prisma.customRole.create({
     data: { name: 'Şirkət Sahibi', description: 'Tam yetki — bütün modullar', permissions: allPerms, isDefault: true, tenantId: tenant.id },
@@ -132,21 +109,13 @@ async function main() {
     data: {
       name: 'Müdir', description: 'Tapşırıq, istifadəçi, hesabat idarəetməsi', isDefault: true, tenantId: tenant.id,
       permissions: [
-        'tasks.read', 'tasks.create', 'tasks.update', 'tasks.delete', 'tasks.approve', 'tasks.assign',
-        'tasks.finalize', 'tasks.status_change', 'tasks.bulk_action',
-        'templates.create', 'templates.update', 'templates.delete', 'templates.execute', 'templates.toggle',
-        'finance.read', 'finance.reports',
-        'users.read', 'users.create', 'users.update', 'roles.read',
-        'reports.read', 'reports.export', 'departments.read', 'businesses.read',
-        'notifications.read', 'notifications.manage', 'salary.read',
-        'files.upload', 'files.download', 'files.delete',
-        'comments.create', 'comments.delete',
-        'todo.access',
+        'tasks.read', 'tasks.create', 'gorev.create', 'gorev.approve', 'tasks.assign_upward',
+        'users.read',
       ],
     },
   })
   const employeeRole = await prisma.customRole.create({
-    data: { name: 'İşçi', description: 'Tapşırıq oxuma/yaratma, bildirişlər', isDefault: true, tenantId: tenant.id, permissions: ['tasks.read', 'tasks.create', 'tasks.update', 'notifications.read', 'files.upload', 'files.download', 'comments.create', 'todo.access'] },
+    data: { name: 'İşçi', description: 'Tapşırıq oxuma/yaratma, bildirişlər', isDefault: true, tenantId: tenant.id, permissions: ['tasks.read'] },
   })
 
   // Rollları istifadəçilərə ata
@@ -262,22 +231,22 @@ async function main() {
   }
 
   console.log('💰 Maliyyə kateqoriyaları...')
-  const catSatis = await prisma.financeCategory.create({ data: { name: 'Satış', type: 'INCOME', color: '#058527', tenantId: tenant.id } })
-  const catXidmet = await prisma.financeCategory.create({ data: { name: 'Xidmət', type: 'INCOME', color: '#246FE0', tenantId: tenant.id } })
-  const catMaas = await prisma.financeCategory.create({ data: { name: 'Maaş', type: 'EXPENSE', color: '#DC4C3E', tenantId: tenant.id } })
-  const catOfis = await prisma.financeCategory.create({ data: { name: 'Ofis xərcləri', type: 'EXPENSE', color: '#EB8909', tenantId: tenant.id } })
-  const catReklam = await prisma.financeCategory.create({ data: { name: 'Reklam', type: 'EXPENSE', color: '#9333EA', tenantId: tenant.id } })
+  const catSatis = await prisma.financeCategory.create({ data: { name: 'Satış', color: '#058527', tenantId: tenant.id } })
+  const catXidmet = await prisma.financeCategory.create({ data: { name: 'Xidmət', color: '#246FE0', tenantId: tenant.id } })
+  const catMaas = await prisma.financeCategory.create({ data: { name: 'Maaş', color: '#DC4C3E', tenantId: tenant.id } })
+  const catOfis = await prisma.financeCategory.create({ data: { name: 'Ofis xərcləri', color: '#EB8909', tenantId: tenant.id } })
+  const catReklam = await prisma.financeCategory.create({ data: { name: 'Reklam', color: '#9333EA', tenantId: tenant.id } })
 
   console.log('💵 Maliyyə əməliyyatları...')
   const txs = [
-    { amount: 15000, type: 'INCOME', desc: 'Mart ayı satışları', date: '2026-03-15', cat: catSatis.id, biz: baku.id },
-    { amount: 8000, type: 'INCOME', desc: 'Konsaltinq xidməti', date: '2026-03-10', cat: catXidmet.id, biz: baku.id },
-    { amount: 5000, type: 'INCOME', desc: 'Gəncə region satışları', date: '2026-03-12', cat: catSatis.id, biz: ganja.id },
-    { amount: 12000, type: 'EXPENSE', desc: 'Mart maaşları — Bakı', date: '2026-03-01', cat: catMaas.id, biz: baku.id },
-    { amount: 8000, type: 'EXPENSE', desc: 'Mart maaşları — Gəncə', date: '2026-03-01', cat: catMaas.id, biz: ganja.id },
-    { amount: 2500, type: 'EXPENSE', desc: 'Ofis icarəsi', date: '2026-03-01', cat: catOfis.id, biz: baku.id },
-    { amount: 3000, type: 'EXPENSE', desc: 'Google Ads kampaniyası', date: '2026-03-05', cat: catReklam.id, biz: null },
-    { amount: 1200, type: 'EXPENSE', desc: 'Ofis avadanlığı', date: '2026-03-08', cat: catOfis.id, biz: ganja.id },
+    { amount: 15000, type: 'CREDIT', desc: 'Mart ayı satışları', date: '2026-03-15', cat: catSatis.id, biz: baku.id },
+    { amount: 8000, type: 'CREDIT', desc: 'Konsaltinq xidməti', date: '2026-03-10', cat: catXidmet.id, biz: baku.id },
+    { amount: 5000, type: 'CREDIT', desc: 'Gəncə region satışları', date: '2026-03-12', cat: catSatis.id, biz: ganja.id },
+    { amount: 12000, type: 'DEBIT', desc: 'Mart maaşları — Bakı', date: '2026-03-01', cat: catMaas.id, biz: baku.id },
+    { amount: 8000, type: 'DEBIT', desc: 'Mart maaşları — Gəncə', date: '2026-03-01', cat: catMaas.id, biz: ganja.id },
+    { amount: 2500, type: 'DEBIT', desc: 'Ofis icarəsi', date: '2026-03-01', cat: catOfis.id, biz: baku.id },
+    { amount: 3000, type: 'DEBIT', desc: 'Google Ads kampaniyası', date: '2026-03-05', cat: catReklam.id, biz: null },
+    { amount: 1200, type: 'DEBIT', desc: 'Ofis avadanlığı', date: '2026-03-08', cat: catOfis.id, biz: ganja.id },
   ]
 
   for (const t of txs) {
@@ -732,14 +701,14 @@ async function main() {
   // ─── Əlavə Maliyyə Əməliyyatları ───
   console.log('💰 Əlavə maliyyə əməliyyatları...')
   const extraTxs = [
-    { amount: 25000, type: 'INCOME', desc: 'Böyük korporativ müqavilə — DataTech', date: '2026-03-18', cat: catSatis.id, biz: baku.id },
-    { amount: 7500, type: 'INCOME', desc: 'Veb dizayn xidməti — SmartMall', date: '2026-03-20', cat: catXidmet.id, biz: baku.id },
-    { amount: 3200, type: 'INCOME', desc: 'Gəncə region satışları — Mart 2-ci yarı', date: '2026-03-22', cat: catSatis.id, biz: ganja.id },
-    { amount: 4500, type: 'EXPENSE', desc: 'AWS server xərcləri — Q1', date: '2026-03-15', cat: catOfis.id, biz: baku.id },
-    { amount: 2800, type: 'EXPENSE', desc: 'Facebook/Instagram reklamları', date: '2026-03-12', cat: catReklam.id, biz: baku.id },
-    { amount: 1500, type: 'EXPENSE', desc: 'Ofis təmiri — Gəncə', date: '2026-03-10', cat: catOfis.id, biz: ganja.id },
-    { amount: 800, type: 'EXPENSE', desc: 'İşçi təlim kursu — Udemy Business', date: '2026-03-08', cat: catOfis.id, biz: baku.id },
-    { amount: 12500, type: 'INCOME', desc: 'Aylıq retainer — AzərEnerji', date: '2026-03-05', cat: catXidmet.id, biz: baku.id },
+    { amount: 25000, type: 'CREDIT', desc: 'Böyük korporativ müqavilə — DataTech', date: '2026-03-18', cat: catSatis.id, biz: baku.id },
+    { amount: 7500, type: 'CREDIT', desc: 'Veb dizayn xidməti — SmartMall', date: '2026-03-20', cat: catXidmet.id, biz: baku.id },
+    { amount: 3200, type: 'CREDIT', desc: 'Gəncə region satışları — Mart 2-ci yarı', date: '2026-03-22', cat: catSatis.id, biz: ganja.id },
+    { amount: 4500, type: 'DEBIT', desc: 'AWS server xərcləri — Q1', date: '2026-03-15', cat: catOfis.id, biz: baku.id },
+    { amount: 2800, type: 'DEBIT', desc: 'Facebook/Instagram reklamları', date: '2026-03-12', cat: catReklam.id, biz: baku.id },
+    { amount: 1500, type: 'DEBIT', desc: 'Ofis təmiri — Gəncə', date: '2026-03-10', cat: catOfis.id, biz: ganja.id },
+    { amount: 800, type: 'DEBIT', desc: 'İşçi təlim kursu — Udemy Business', date: '2026-03-08', cat: catOfis.id, biz: baku.id },
+    { amount: 12500, type: 'CREDIT', desc: 'Aylıq retainer — AzərEnerji', date: '2026-03-05', cat: catXidmet.id, biz: baku.id },
   ]
   for (const t of extraTxs) {
     await prisma.transaction.create({

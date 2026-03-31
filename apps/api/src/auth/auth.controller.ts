@@ -36,7 +36,7 @@ export class AuthController {
   @HttpCode(200)
   login(@Body() dto: LoginDto, @Req() req: any) {
     const ip = req.ip || req.connection?.remoteAddress || 'unknown'
-    this.checkRate(`login:${ip}`, 50, 5 * 60 * 1000) // 5 dəqiqədə max 50 login cəhdi
+    this.checkRate(`login:${ip}`, 100, 5 * 60 * 1000) // 5 dəqiqədə max 100 login cəhdi
     return this.authService.login(dto)
   }
 

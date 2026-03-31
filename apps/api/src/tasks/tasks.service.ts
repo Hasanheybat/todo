@@ -29,6 +29,19 @@ export class TasksService {
     // ── İerarxiya yoxlaması ──
     await this.checkHierarchy(creatorId, dto, tenantId)
 
+    // ── Yetkili kişi yoxlaması: gorev.approve yetkisi olmalı ──
+    if (dto.approverId && (dto as any).type === 'GOREV') {
+      const approver = await this.prisma.user.findFirst({
+        where: { id: dto.approverId, tenantId },
+        include: { customRole: { select: { permissions: true } } },
+      })
+      if (!approver) throw new BadRequestException('Yetkili kişi tapılmadı')
+      const approverPerms: string[] = (approver.customRole?.permissions as string[]) || []
+      if (!approverPerms.includes('gorev.approve') && !approverPerms.includes('gorev.create')) {
+        throw new ForbiddenException(`${approver.fullName} yetkili kişi olaraq təyin edilə bilməz — gorev.approve yetkisi yoxdur`)
+      }
+    }
+
     // ── Label məntiqi: yeni etiketləri yarat, ID-ləri birləşdir ──
     let allLabelIds: string[] = [...(dto.labelIds || [])]
     if (dto.newLabels?.length) {
@@ -88,6 +101,9 @@ export class TasksService {
       }
     }
 
+    // GroupId varsa yeni task-ın bulkNotes-u boş başlasın
+    // Yeni əlavə edilən kişi yalnız əlavə edildikdən sonrakı mesajları görəcək
+
     const task = await this.prisma.task.create({
       data: {
         title: dto.title,
@@ -101,6 +117,8 @@ export class TasksService {
         approverId: dto.approverId || null,
         groupId: dto.groupId || null,
         projectId: dto.projectId || null,
+        isRecurring: dto.isRecurring || false,
+        recurRule: dto.recurRule || null,
         creatorId,
         tenantId,
         assignees: dto.assigneeIds?.length ? {
@@ -287,57 +305,103 @@ export class TasksService {
       }
     }
 
-    // Assignee-ləri yenilə
+    // Assignee-ləri smart sync — mövcud olanları qoru, yenilərini əlavə et, silinənləri sil
     if ((dto as any).assigneeIds) {
-      await this.prisma.taskAssignee.deleteMany({ where: { taskId: id } })
-      if ((dto as any).assigneeIds.length > 0) {
+      const existingAssignees = await this.prisma.taskAssignee.findMany({ where: { taskId: id }, select: { id: true, userId: true } })
+      const existingUserIds = new Set(existingAssignees.map(a => a.userId))
+      const newUserIds = new Set((dto as any).assigneeIds as string[])
+
+      // Silinənlər (yeni siyahıda olmayan köhnələr)
+      const toDelete = existingAssignees.filter(a => !newUserIds.has(a.userId))
+      if (toDelete.length > 0) {
+        await this.prisma.taskAssignee.deleteMany({ where: { id: { in: toDelete.map(a => a.id) } } })
+      }
+
+      // Yeni əlavə olunanlar (köhnə siyahıda olmayan yenilər)
+      const toCreate = [...newUserIds].filter(uid => !existingUserIds.has(uid))
+      if (toCreate.length > 0) {
         await this.prisma.taskAssignee.createMany({
-          data: (dto as any).assigneeIds.map((uid: string) => ({ taskId: id, userId: uid })),
+          data: toCreate.map(uid => ({ taskId: id, userId: uid })),
         })
       }
     }
 
-    // Alt-görevləri yenilə (köhnələri sil, yenilərini yarat)
+    // Alt-görevləri smart sync — mövcudları yenilə, yenilərini yarat, silinənləri sil
     if ((dto as any).subTasks) {
-      // Köhnə alt-görevlərin assignee-lərini sil, sonra alt-görevləri sil
-      const oldSubs = await this.prisma.task.findMany({ where: { parentId: id } })
-      for (const sub of oldSubs) {
-        await this.prisma.taskAssignee.deleteMany({ where: { taskId: sub.id } })
-      }
-      await this.prisma.task.deleteMany({ where: { parentId: id } })
+      const oldSubs = await this.prisma.task.findMany({
+        where: { parentId: id },
+        include: { assignees: true },
+      })
+      const oldSubMap = new Map(oldSubs.map(s => [s.id, s]))
 
-      // Yeni alt-görevlər yarat
-      // Ana task-ın assignee ID-lərini al (fallback üçün)
+      // Frontend-dən gələn sub-task-larda id varsa mövcuddur
+      const incomingIds = new Set<string>()
       const parentAssigneeIds = (dto as any).assigneeIds?.length
         ? (dto as any).assigneeIds
         : (await this.prisma.taskAssignee.findMany({ where: { taskId: id }, select: { userId: true } })).map((a: any) => a.userId)
 
       for (const sub of (dto as any).subTasks) {
         if (!sub.title?.trim()) continue
-        // Sub-task-ın öz assignee-ləri yoxdursa, ana task-ın assignee-lərini istifadə et
+
         const subAssigneeIds = sub.assigneeIds?.length
           ? sub.assigneeIds
           : sub.assigneeId ? [sub.assigneeId]
           : (parentAssigneeIds.length > 0 ? parentAssigneeIds : [])
 
-        await this.prisma.task.create({
-          data: {
-            title: sub.title,
-            type: task.type,
-            priority: (dto.priority as any) || task.priority,
-            status: 'CREATED',
-            parentId: id,
-            creatorId: userId,
-            tenantId,
-            approverId: sub.approverId || null,
-            dueDate: sub.dueDate ? new Date(sub.dueDate) : (dto.dueDate ? new Date(dto.dueDate) : task.dueDate),
-            businessId: (dto as any).businessId || task.businessId,
-            departmentId: (dto as any).departmentId || task.departmentId,
-            assignees: subAssigneeIds.length > 0
-              ? { create: subAssigneeIds.map((uid: string) => ({ userId: uid })) }
-              : undefined,
-          },
-        })
+        if (sub.id && oldSubMap.has(sub.id)) {
+          // ── MÖVCUD: yalnız title, priority, dueDate, approverId yenilə ──
+          // TaskAssignee-lərə, notes-lara, status-lara, chatClosed-a TOXUNMA
+          incomingIds.add(sub.id)
+          await this.prisma.task.update({
+            where: { id: sub.id },
+            data: {
+              title: sub.title,
+              priority: (dto.priority as any) || task.priority,
+              approverId: sub.approverId || null,
+              dueDate: sub.dueDate ? new Date(sub.dueDate) : (dto.dueDate ? new Date(dto.dueDate) : task.dueDate),
+              businessId: (dto as any).businessId || task.businessId,
+              departmentId: (dto as any).departmentId || task.departmentId,
+            },
+          })
+
+          // Yeni assignee əlavə et (mövcud olanları saxla)
+          const existingSub = oldSubMap.get(sub.id)!
+          const existingSubUserIds = new Set((existingSub.assignees || []).map((a: any) => a.userId))
+          const newSubUserIds = subAssigneeIds.filter((uid: string) => !existingSubUserIds.has(uid))
+          if (newSubUserIds.length > 0) {
+            await this.prisma.taskAssignee.createMany({
+              data: newSubUserIds.map((uid: string) => ({ taskId: sub.id, userId: uid })),
+            })
+          }
+        } else {
+          // ── YENİ: yarat ──
+          await this.prisma.task.create({
+            data: {
+              title: sub.title,
+              type: task.type,
+              priority: (dto.priority as any) || task.priority,
+              status: 'CREATED',
+              parentId: id,
+              creatorId: userId,
+              tenantId,
+              approverId: sub.approverId || null,
+              dueDate: sub.dueDate ? new Date(sub.dueDate) : (dto.dueDate ? new Date(dto.dueDate) : task.dueDate),
+              businessId: (dto as any).businessId || task.businessId,
+              departmentId: (dto as any).departmentId || task.departmentId,
+              assignees: subAssigneeIds.length > 0
+                ? { create: subAssigneeIds.map((uid: string) => ({ userId: uid })) }
+                : undefined,
+            },
+          })
+        }
+      }
+
+      // ── SİLİNƏNLƏR: frontend-dən gəlməyən köhnə sub-task-lar ──
+      for (const oldSub of oldSubs) {
+        if (!incomingIds.has(oldSub.id)) {
+          await this.prisma.taskAssignee.deleteMany({ where: { taskId: oldSub.id } })
+          await this.prisma.task.delete({ where: { id: oldSub.id } })
+        }
       }
     }
 
@@ -655,11 +719,28 @@ export class TasksService {
       newNote.fileName = fileName || 'fayl'
       newNote.fileSize = fileSize || 0
     }
+    // TASK + groupId → hər group task-a ayrı-ayrı append et
+    if (task.groupId) {
+      const groupTasks = await this.prisma.task.findMany({
+        where: { groupId: task.groupId },
+        select: { id: true, bulkNotes: true, assignees: { select: { status: true } } },
+      })
+      for (const gt of groupTasks) {
+        // Tamamlanmış/iptal etmiş işçilərin task-ına toplu mesaj yazılmasın
+        const assigneeStatus = gt.assignees?.[0]?.status
+        if (assigneeStatus === 'COMPLETED' || assigneeStatus === 'DECLINED' || assigneeStatus === 'FORCE_COMPLETED') continue
+        const gtBulk = (gt.bulkNotes as any[]) || []
+        await this.prisma.task.update({
+          where: { id: gt.id },
+          data: { bulkNotes: [...gtBulk, newNote] },
+        })
+      }
+      return this.prisma.task.findFirst({ where: { id: taskId } })
+    }
+
     return this.prisma.task.update({
       where: { id: taskId },
-      data: {
-        bulkNotes: [...existingBulk, newNote],
-      },
+      data: { bulkNotes: [...existingBulk, newNote] },
     })
   }
 
@@ -835,18 +916,57 @@ export class TasksService {
     })
     if (!task) throw new NotFoundException('Tapşırıq tapılmadı')
     if (task.creatorId !== creatorId) throw new ForbiddenException('Bu tapşırığın yaradanı deyilsiniz')
-    if (!task.finalized) throw new ForbiddenException('Görev hələ yetkili tərəfindən tamamlanmayıb')
     if (task.creatorApproved) throw new ForbiddenException('Görev artıq onaylanıb')
 
-    await this.prisma.task.update({
-      where: { id: taskId },
-      data: { creatorApproved: true, status: 'APPROVED' },
-    })
+    // TASK tipində finalized yoxlaması yox — yaradan birbaşa onayla bilər
+    // GÖREV tipində finalized olmalıdır
+    if (task.type === 'GOREV' && !task.finalized) {
+      throw new ForbiddenException('Görev hələ yetkili tərəfindən tamamlanmayıb')
+    }
 
-    // Bildiriş: yetkili + bütün işçilərə
-    const notifyIds = task.assignees.map(a => a.userId)
-    if (task.approverId) notifyIds.push(task.approverId)
-    this.notifications.notifyTaskApproved(task.title, notifyIds, creatorId, tenantId).catch(() => {})
+    // DECLINED və COMPLETED statusunda olanlar dəyişmir
+    // IN_PROGRESS, PENDING, CREATED → COMPLETED olur
+    // Hamının söhbəti bağlanır
+
+    // TASK + groupId → bütün group task-ları approve et
+    if (task.groupId) {
+      const groupTasks = await this.prisma.task.findMany({ where: { groupId: task.groupId }, include: { assignees: true } })
+      for (const gt of groupTasks) {
+        // Toxunulmamış və ya başlamış olanları COMPLETED et
+        await this.prisma.taskAssignee.updateMany({
+          where: { taskId: gt.id, status: { in: ['PENDING', 'IN_PROGRESS'] as any } },
+          data: { status: 'COMPLETED' as any, chatClosed: true },
+        })
+        // DECLINED/COMPLETED/FORCE_COMPLETED olanların yalnız söhbətini bağla
+        await this.prisma.taskAssignee.updateMany({
+          where: { taskId: gt.id, status: { in: ['DECLINED', 'COMPLETED', 'FORCE_COMPLETED'] as any } },
+          data: { chatClosed: true },
+        })
+        await this.prisma.task.update({ where: { id: gt.id }, data: { creatorApproved: true, finalized: true, status: 'APPROVED' } })
+      }
+      // Bildiriş: bütün group işçilərə
+      const allIds = groupTasks.flatMap(gt => gt.assignees.map(a => a.userId))
+      this.notifications.notifyTaskApproved(task.title, [...new Set(allIds)], creatorId, tenantId).catch(() => {})
+    } else {
+      // Toxunulmamış və ya başlamış olanları COMPLETED et
+      await this.prisma.taskAssignee.updateMany({
+        where: { taskId, status: { in: ['PENDING', 'IN_PROGRESS'] as any } },
+        data: { status: 'COMPLETED' as any, chatClosed: true },
+      })
+      // DECLINED/COMPLETED/FORCE_COMPLETED olanların yalnız söhbətini bağla
+      await this.prisma.taskAssignee.updateMany({
+        where: { taskId, status: { in: ['DECLINED', 'COMPLETED', 'FORCE_COMPLETED'] as any } },
+        data: { chatClosed: true },
+      })
+      await this.prisma.task.update({
+        where: { id: taskId },
+        data: { creatorApproved: true, finalized: true, status: 'APPROVED' },
+      })
+      // Bildiriş: bütün işçilərə
+      const notifyIds = task.assignees.map(a => a.userId)
+      if (task.approverId) notifyIds.push(task.approverId)
+      this.notifications.notifyTaskApproved(task.title, notifyIds, creatorId, tenantId).catch(() => {})
+    }
 
     return { message: 'Görev onaylandı' }
   }
@@ -884,7 +1004,7 @@ export class TasksService {
       where: { id: creatorId },
       include: {
         customRole: { select: { permissions: true } },
-        businesses: { select: { businessId: true } },
+        businesses: { select: { businessId: true, departmentId: true } },
       },
     })
     const permissions = (creator?.customRole?.permissions as string[]) || []
@@ -927,8 +1047,18 @@ export class TasksService {
         )
       }
     } else {
-      // assign_upward YOX → yalnız parentId subordinatlarına
+      // assign_upward YOX → öz şöbəsi + parentId subordinatları
       const subordinateIds = await this.usersService.getSubordinateIds(creatorId, tenantId)
+
+      // Creator-ın şöbə yoldaşlarını da əlavə et (eyni departmentId)
+      const creatorDeptIds = (creator?.businesses || []).map((b: any) => b.departmentId).filter(Boolean)
+      if (creatorDeptIds.length > 0) {
+        const deptColleagues = await this.prisma.userBusiness.findMany({
+          where: { departmentId: { in: creatorDeptIds }, userId: { not: creatorId } },
+          select: { userId: true },
+        })
+        for (const dc of deptColleagues) subordinateIds.add(dc.userId)
+      }
 
       const unauthorized: string[] = []
       for (const assigneeId of allAssigneeIds) {
@@ -944,7 +1074,7 @@ export class TasksService {
         })
         const names = users.map(u => u.fullName).join(', ')
         throw new ForbiddenException(
-          `İerarxiya xətası: ${names} sizin altınızda deyil. Yalnız öz altınızdakı işçilərə görev ata bilərsiniz.`
+          `İerarxiya xətası: ${names} sizin şöbənizdə və ya altınızda deyil. Yalnız öz şöbənizdəki və altınızdakı işçilərə görev ata bilərsiniz.`
         )
       }
     }

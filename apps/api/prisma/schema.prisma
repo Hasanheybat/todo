@@ -15,8 +15,9 @@ model Tenant {
   id        String   @id @default(uuid())
   name      String
   subdomain String?  @unique
-  plan      String   @default("starter") // starter | pro | enterprise
-  isActive  Boolean  @default(true)
+  plan               String   @default("starter") // starter | pro | enterprise
+  allowedPermissions String[] @default([])
+  isActive           Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -252,6 +253,8 @@ model Task {
   projectId         String?    // layihə (TodoistProject ilə paylaşılır)
   closedBy          String?    // görevi bağlayan userId
   closedByRole      String?    // "creator" | "approver"
+  isRecurring       Boolean    @default(false)  // təkrarlanan görev
+  recurRule         String?    // "daily" | "weekly" | "monthly" | "weekdays" | "custom:3d"
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
 

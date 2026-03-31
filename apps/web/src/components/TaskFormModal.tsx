@@ -9,8 +9,8 @@ import { useAuth } from '@/contexts/AuthContext'
 
 const P = { CRITICAL: '#7C3AED', HIGH: '#EF4444', MEDIUM: '#F59E0B', LOW: '#10B981' } as const
 
-type SubTask = { title: string; assigneeIds: string[]; approverId: string; dueDate: string; files: File[] }
-type TaskItem = { content: string; assigneeId: string; dueDate: string; priority: string; _prioOpen?: boolean }
+type SubTask = { id?: string; title: string; assigneeIds: string[]; approverId: string; dueDate: string; files: File[] }
+type TaskItem = { content: string; assigneeId: string; dueDate: string; priority: string; _prioOpen?: boolean; _taskId?: string; _status?: string; files?: File[] }
 type TaskData = {
   title: string; description: string; type: 'TASK' | 'GOREV';
   priority: string; dueDate: string; responsibleId: string;
@@ -22,6 +22,8 @@ type TaskData = {
   taskItems: TaskItem[];
   labelIds: string[];
   projectId: string;
+  isRecurring: boolean;
+  recurRule: string;
 }
 
 interface TaskFormModalProps {
@@ -52,6 +54,8 @@ function emptyTask(): TaskData {
     taskItems: [],
     labelIds: [],
     projectId: '',
+    isRecurring: false,
+    recurRule: '',
   }
 }
 
@@ -62,9 +66,9 @@ export default function TaskFormModal({ open, onClose, onSaved, editingTask, use
   const { hasPermission } = useAuth()
   const [newTask, setNewTask] = useState<TaskData>(emptyTask())
 
-  // Yetki yoxlaması — tasks.create yetkisi yoxdursa modalı bağla
+  // Yetki yoxlaması — tasks.create və ya gorev.create yetkisi yoxdursa modalı bağla
   useEffect(() => {
-    if (open && !viewMode && !editingTask && !hasPermission('tasks.create')) {
+    if (open && !viewMode && !editingTask && !hasPermission('tasks.create') && !hasPermission('gorev.create')) {
       onClose()
     }
   }, [open, viewMode, editingTask, hasPermission, onClose])
@@ -156,6 +160,7 @@ export default function TaskFormModal({ open, onClose, onSaved, editingTask, use
       assigneeIds: editingTask.assignees?.map((a: any) => a.user.id) || [],
       approverId: editingTask.approverId || '',
       subTasks: editingTask.subTasks?.map((s: any) => ({
+        id: s.id,
         title: s.title || '',
         assigneeIds: s.assignees?.map((a: any) => a.user.id) || [],
         approverId: s.approverId || '',
@@ -163,7 +168,16 @@ export default function TaskFormModal({ open, onClose, onSaved, editingTask, use
         files: [] as File[],
       })) || [],
       files: [],
-      taskItems: [],
+      taskItems: editingTask._groupTasks?.length > 0
+        ? editingTask._groupTasks.map((gt: any) => ({
+            content: gt.description || '',
+            assigneeId: gt.assignees?.[0]?.user?.id || '',
+            dueDate: gt.dueDate ? new Date(gt.dueDate).toISOString().split('T')[0] : '',
+            priority: gt.priority || 'MEDIUM',
+            _taskId: gt.id,
+            _status: gt.assignees?.[0]?.status || gt.status || 'CREATED',
+          }))
+        : [],
       labelIds: editingTask.labels?.map((tl: any) => tl.label?.id || tl.labelId) || [],
       projectId: editingTask.projectId || '',
     })
@@ -414,8 +428,9 @@ export default function TaskFormModal({ open, onClose, onSaved, editingTask, use
       // TASK type — hər item ayrı task yaradır, groupId ilə qruplanır
       if (taskData.type === 'TASK' && !editingTask && taskData.taskItems.length > 0) {
         const groupId = crypto.randomUUID()
+        const createdItems: { taskId: string; itemFiles: File[] }[] = []
         for (const item of taskData.taskItems) {
-          await api.createTask({
+          const result = await api.createTask({
             title: taskData.title,
             description: item.content || undefined,
             type: 'TASK',
@@ -424,7 +439,84 @@ export default function TaskFormModal({ open, onClose, onSaved, editingTask, use
             assigneeIds: [item.assigneeId],
             groupId,
           })
+          if (result?.id) createdItems.push({ taskId: result.id, itemFiles: item.files || [] })
         }
+        // Ümumi faylları hər task-a yüklə
+        for (const { taskId } of createdItems) {
+          for (const file of taskData.files) {
+            await api.uploadFile(file, taskId)
+          }
+        }
+        // Özəl faylları yalnız o task-a yüklə
+        for (const { taskId, itemFiles } of createdItems) {
+          for (const file of itemFiles) {
+            await api.uploadFile(file, taskId)
+          }
+        }
+        handleClose()
+        onSaved()
+        return
+      }
+
+      // TASK type — düzənləmə: sync (yeni yarat, dəyişəni yenilə, silinəni sil)
+      if (taskData.type === 'TASK' && editingTask && editingTask._groupTasks?.length > 0) {
+        const groupId = editingTask.groupId || editingTask._groupTasks?.[0]?.groupId
+        const originalTasks = editingTask._groupTasks as any[]
+        const originalIds = new Set(originalTasks.map((t: any) => t.id))
+        const currentIds = new Set(taskData.taskItems.filter(i => i._taskId).map(i => i._taskId!))
+
+        // 1. Silinənlər — orijinalda var amma indi yox
+        for (const ot of originalTasks) {
+          if (!currentIds.has(ot.id)) {
+            try {
+              await api.deleteTask(ot.id)
+            } catch (e: any) {
+              console.error('Task silmə xətası:', e.message, ot.id)
+            }
+          }
+        }
+
+        // 2. Mövcud olanları yenilə (assignee dəyişməyibsə göndərmə — notes qorunsun)
+        for (const item of taskData.taskItems) {
+          if (item._taskId && originalIds.has(item._taskId)) {
+            const origTask = originalTasks.find((t: any) => t.id === item._taskId)
+            const origAssigneeId = origTask?.assignees?.[0]?.user?.id || origTask?.assignees?.[0]?.userId
+            const assigneeChanged = origAssigneeId !== item.assigneeId
+
+            const updatePayload: any = {
+              title: taskData.title,
+              description: item.content || undefined,
+              type: 'TASK',
+              priority: item.priority || taskData.priority,
+              dueDate: item.dueDate ? new Date(item.dueDate).toISOString() : (taskData.dueDate ? new Date(taskData.dueDate).toISOString() : undefined),
+            }
+            // Assignee dəyişibsə yenilə, dəyişməyibsə göndərmə (notes qorunsun)
+            if (assigneeChanged) {
+              updatePayload.assigneeIds = [item.assigneeId]
+            }
+
+            await api.updateTask(item._taskId, updatePayload)
+          }
+        }
+
+        // 3. Yeni əlavə olunanlar — _taskId olmayan
+        const newItems = taskData.taskItems.filter(i => !i._taskId)
+        for (const item of newItems) {
+          try {
+            await api.createTask({
+              title: taskData.title,
+              description: item.content || undefined,
+              type: 'TASK',
+              priority: item.priority || taskData.priority,
+              dueDate: item.dueDate ? new Date(item.dueDate).toISOString() : (taskData.dueDate ? new Date(taskData.dueDate).toISOString() : undefined),
+              assigneeIds: [item.assigneeId],
+              groupId,
+            })
+          } catch (e: any) {
+            console.error('Yeni task yaratma xətası:', e.message, item)
+          }
+        }
+
         handleClose()
         onSaved()
         return
@@ -449,6 +541,8 @@ export default function TaskFormModal({ open, onClose, onSaved, editingTask, use
         subTasks: finalSubTasks.filter(s => s.title.trim()),
         labelIds: taskData.labelIds.length > 0 ? taskData.labelIds : undefined,
         projectId: taskData.projectId || undefined,
+        isRecurring: taskData.isRecurring || undefined,
+        recurRule: taskData.recurRule || undefined,
       }
 
       let result: any
@@ -470,16 +564,27 @@ export default function TaskFormModal({ open, onClose, onSaved, editingTask, use
 
   function handleDeleteTask() {
     if (!editingTask) return
+    const groupTasks = editingTask._groupTasks as any[] | undefined
+    const isGroupTask = groupTasks && groupTasks.length > 0
     setConfirmModal({
       open: true, type: 'danger',
       title: 'Tapşırığı sil',
-      message: `"${editingTask.title}" tapşırığı silinəcək. Bu əməliyyat geri qaytarıla bilməz.`,
+      message: isGroupTask
+        ? `"${editingTask.title}" tapşırığı və ${groupTasks.length} nəfərə aid bütün görevlər silinəcək. Bu əməliyyat geri qaytarıla bilməz.`
+        : `"${editingTask.title}" tapşırığı silinəcək. Bu əməliyyat geri qaytarıla bilməz.`,
       confirmText: 'Sil',
       onConfirm: async () => {
         setConfirmModal(prev => ({ ...prev, open: false }))
         setDeleteLoading(true)
         try {
-          await api.deleteTask(editingTask.id)
+          if (isGroupTask) {
+            // Bütün group task-ları sil
+            for (const gt of groupTasks) {
+              await api.deleteTask(gt.id)
+            }
+          } else {
+            await api.deleteTask(editingTask.id)
+          }
           handleClose()
           onSaved()
         } catch (err: any) { alert(err.message) }
@@ -1079,6 +1184,42 @@ export default function TaskFormModal({ open, onClose, onSaved, editingTask, use
                 )
               })()}
             </div>
+
+            {/* Təkrarlanan seçimi */}
+            <div className="relative">
+              <button type="button" onClick={() => {
+                if (!newTask.isRecurring) {
+                  setNewTask(prev => ({ ...prev, isRecurring: true, recurRule: 'daily' }))
+                } else {
+                  setNewTask(prev => ({ ...prev, isRecurring: false, recurRule: '' }))
+                }
+              }}
+                className="rounded-md px-2.5 py-1 text-[11px] font-semibold flex items-center gap-1.5 outline-none transition"
+                style={{
+                  backgroundColor: newTask.isRecurring ? '#EEF2FF' : 'var(--todoist-hover)',
+                  border: `1px solid ${newTask.isRecurring ? '#C7D2FE' : 'var(--todoist-divider)'}`,
+                  color: newTask.isRecurring ? '#4F46E5' : 'var(--todoist-text-secondary)',
+                }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 014-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
+                {newTask.isRecurring ? (
+                  {daily:'Gündəlik',weekly:'Həftəlik',monthly:'Aylıq',weekdays:'İş günləri','custom:3d':'Hər 3 gün','custom:2w':'Hər 2 həftə'}[newTask.recurRule] || newTask.recurRule
+                ) : 'Təkrarla'}
+              </button>
+              {newTask.isRecurring && (
+                <select value={newTask.recurRule} onChange={e => setNewTask(prev => ({ ...prev, recurRule: e.target.value }))}
+                  className="ml-1 rounded-md px-1.5 py-1 text-[10px] outline-none"
+                  style={{ backgroundColor: 'var(--todoist-bg)', border: '1px solid var(--todoist-divider)', color: 'var(--todoist-text)' }}>
+                  <option value="daily">Gündəlik</option>
+                  <option value="weekly">Həftəlik</option>
+                  <option value="monthly">Aylıq</option>
+                  <option value="weekdays">İş günləri (B.e-Cümə)</option>
+                  <option value="custom:3d">Hər 3 gün</option>
+                  <option value="custom:2w">Hər 2 həftə</option>
+                  <option value="custom:1m">Hər 1 ay</option>
+                </select>
+              )}
+            </div>
+
             <div className="flex gap-0.5">
               {(['CRITICAL','HIGH','MEDIUM','LOW'] as const).map(p => (
                 <button key={p} type="button" onClick={() => setNewTask({...newTask, priority: p})}
@@ -1206,7 +1347,12 @@ export default function TaskFormModal({ open, onClose, onSaved, editingTask, use
                         className="w-full rounded-md px-2 py-1.5 text-[11px] outline-none" style={{ backgroundColor: 'var(--todoist-hover)', border: '1px solid var(--todoist-divider)', color: 'var(--todoist-text)' }} />
                     </div>
                     <div className="max-h-36 overflow-y-auto">
-                      {filteredUsers.filter((u: any) => u.fullName.toLowerCase().includes(approverSearch.toLowerCase())).map((u: any) => (
+                      {filteredUsers.filter((u: any) => {
+                        if (!u.fullName.toLowerCase().includes(approverSearch.toLowerCase())) return false
+                        // Yetkili kişi yalnız gorev.approve və ya gorev.create yetkisi olan ola bilər
+                        const perms: string[] = u.customRole?.permissions || []
+                        return perms.includes('gorev.approve') || perms.includes('gorev.create')
+                      }).map((u: any) => (
                         <button key={u.id} type="button" onClick={() => { setNewTask(prev => ({...prev, approverId: u.id})); setApproverDropdownOpen(false) }}
                           className="w-full text-left px-3 py-2 text-[11px] flex items-center gap-2 transition hover:bg-gray-50"
                           style={{ color: newTask.approverId === u.id ? '#7C3AED' : 'var(--todoist-text)', fontWeight: newTask.approverId === u.id ? 700 : 400 }}>
@@ -1357,16 +1503,34 @@ export default function TaskFormModal({ open, onClose, onSaved, editingTask, use
                     const u = users.find(x => x.id === item.assigneeId)
                     const isExpanded = expandedItem === i
                     const pColor = P[item.priority as keyof typeof P] || '#B3B3B3'
+                    const canEdit = !item._status || item._status === 'CREATED' || item._status === 'PENDING'
+                    const statusLabels: Record<string, { label: string; color: string; bg: string }> = {
+                      CREATED: { label: 'Yaradıldı', color: '#64748B', bg: '#F1F5F9' },
+                      PENDING: { label: 'Gözləyir', color: '#64748B', bg: '#F1F5F9' },
+                      IN_PROGRESS: { label: 'Davam edir', color: '#3B82F6', bg: '#EFF6FF' },
+                      COMPLETED: { label: 'Tamamlandı', color: '#10B981', bg: '#ECFDF5' },
+                      DECLINED: { label: 'Rədd', color: '#EF4444', bg: '#FEF2F2' },
+                      FORCE_COMPLETED: { label: 'Bağlandı', color: '#94A3B8', bg: '#F1F5F9' },
+                    }
+                    const st = statusLabels[item._status || 'CREATED'] || statusLabels.CREATED
                     return (
                       <div key={i} className="rounded-lg overflow-hidden transition hover:shadow-sm"
-                        style={{ backgroundColor: 'var(--todoist-surface)', border: '1px solid var(--todoist-divider)' }}>
+                        style={{ backgroundColor: 'var(--todoist-surface)', border: '1px solid var(--todoist-divider)', opacity: canEdit ? 1 : 0.7 }}>
                         <div style={{ height: 3, backgroundColor: pColor }} />
                         <div className="flex items-center gap-2.5 px-3 py-2">
-                          {/* Content — truncated, click to expand */}
-                          <div className="flex-1 min-w-0 cursor-pointer" onClick={() => setExpandedItem(isExpanded ? null : i)}>
-                            <p className={`text-[11px] leading-snug ${isExpanded ? 'whitespace-pre-wrap' : 'truncate'}`} style={{ color: 'var(--todoist-text)' }}>
-                              {item.content}
-                            </p>
+                          {/* Content */}
+                          <div className="flex-1 min-w-0 cursor-pointer" onClick={() => canEdit ? setExpandedItem(isExpanded ? null : i) : null}>
+                            {canEdit && isExpanded ? (
+                              <input type="text" value={item.content}
+                                onChange={e => setNewTask(prev => ({ ...prev, taskItems: prev.taskItems.map((ti, idx) => idx === i ? { ...ti, content: e.target.value } : ti) }))}
+                                className="w-full text-[11px] outline-none rounded px-1 py-0.5"
+                                style={{ backgroundColor: 'var(--todoist-hover)', border: '1px solid var(--todoist-divider)' }}
+                                autoFocus />
+                            ) : (
+                              <p className={`text-[11px] leading-snug ${isExpanded ? 'whitespace-pre-wrap' : 'truncate'}`} style={{ color: 'var(--todoist-text)' }}>
+                                {item.content}
+                              </p>
+                            )}
                           </div>
                           {/* Person */}
                           <div className="flex items-center gap-1 shrink-0">
@@ -1378,18 +1542,87 @@ export default function TaskFormModal({ open, onClose, onSaved, editingTask, use
                               {u?.fullName?.split(' ')[0] || '?'}
                             </span>
                           </div>
-                          {/* Date */}
-                          <span className="text-[10px] font-medium shrink-0" style={{ color: '#10B981' }}>
-                            {item.dueDate ? new Date(item.dueDate + 'T00:00').toLocaleDateString('az-AZ', { day: 'numeric', month: 'short' }) : '—'}
-                          </span>
+                          {/* Date — düzənlənə bilən */}
+                          {canEdit ? (
+                            <input type="date" value={item.dueDate}
+                              onChange={e => setNewTask(prev => ({ ...prev, taskItems: prev.taskItems.map((ti, idx) => idx === i ? { ...ti, dueDate: e.target.value } : ti) }))}
+                              className="text-[10px] font-medium shrink-0 outline-none rounded px-1 py-0.5"
+                              style={{ color: '#10B981', backgroundColor: 'var(--todoist-hover)', border: '1px solid var(--todoist-divider)', width: 110 }} />
+                          ) : (
+                            <span className="text-[10px] font-medium shrink-0" style={{ color: '#10B981' }}>
+                              {item.dueDate ? new Date(item.dueDate + 'T00:00').toLocaleDateString('az-AZ', { day: 'numeric', month: 'short' }) : '—'}
+                            </span>
+                          )}
+                          {/* Priority — düzənlənə bilən */}
+                          {canEdit ? (
+                            <div className="relative shrink-0">
+                              <button type="button" onClick={() => setNewTask(prev => ({ ...prev, taskItems: prev.taskItems.map((ti, idx) => idx === i ? { ...ti, _prioOpen: !ti._prioOpen } : { ...ti, _prioOpen: false }) }))}
+                                className="text-[9px] font-bold px-1.5 py-0.5 rounded-full" style={{ backgroundColor: pColor + '20', color: pColor }}>
+                                {item.priority === 'CRITICAL' ? 'Kritik' : item.priority === 'HIGH' ? 'Yüksək' : item.priority === 'MEDIUM' ? 'Orta' : 'Aşağı'}
+                              </button>
+                              {item._prioOpen && (
+                                <div className="absolute right-0 top-full mt-1 w-28 rounded-lg shadow-xl overflow-hidden z-50" style={{ backgroundColor: '#fff', border: '1px solid #E2E8F0' }}>
+                                  {(['CRITICAL','HIGH','MEDIUM','LOW'] as const).map(p => (
+                                    <button key={p} type="button"
+                                      onClick={() => setNewTask(prev => ({ ...prev, taskItems: prev.taskItems.map((ti, idx) => idx === i ? { ...ti, priority: p, _prioOpen: false } : ti) }))}
+                                      className="w-full text-left px-2.5 py-1.5 text-[10px] flex items-center gap-1.5 hover:bg-gray-50"
+                                      style={{ color: P[p], fontWeight: item.priority === p ? 700 : 400 }}>
+                                      <svg width="9" height="9" viewBox="0 0 24 24" fill={P[p]} stroke={P[p]} strokeWidth="1.5"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+                                      {p === 'CRITICAL' ? 'Kritik' : p === 'HIGH' ? 'Yüksək' : p === 'MEDIUM' ? 'Orta' : 'Aşağı'}
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0" style={{ backgroundColor: pColor + '20', color: pColor }}>
+                              {item.priority === 'CRITICAL' ? 'Kritik' : item.priority === 'HIGH' ? 'Yüksək' : item.priority === 'MEDIUM' ? 'Orta' : 'Aşağı'}
+                            </span>
+                          )}
                           {/* Status badge */}
-                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0" style={{ backgroundColor: 'var(--todoist-divider)', color: 'var(--todoist-text-secondary)' }}>
-                            Yaradıldı
+                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0" style={{ backgroundColor: st.bg, color: st.color }}>
+                            {st.label}
                           </span>
-                          {/* Delete */}
-                          <button type="button" onClick={() => removeTaskItem(i)}
-                            className="text-[12px] shrink-0 hover:opacity-70 transition" style={{ color: '#4F46E5' }}>✕</button>
+                          {/* Özəl fayl — yalnız bu işçi görəcək */}
+                          {canEdit && (
+                            <label className="shrink-0 cursor-pointer transition hover:opacity-70" title="Bu işçiyə özəl fayl əlavə et">
+                              <span style={{ color: (item.files?.length || 0) > 0 ? '#4F46E5' : '#CBD5E1', fontSize: 14 }}>📎</span>
+                              <input type="file" multiple className="hidden" onChange={e => {
+                                if (e.target.files) {
+                                  const newFiles = Array.from(e.target.files)
+                                  setNewTask(prev => ({
+                                    ...prev,
+                                    taskItems: prev.taskItems.map((ti, idx) => idx === i
+                                      ? { ...ti, files: [...(ti.files || []), ...newFiles] }
+                                      : ti)
+                                  }))
+                                }
+                              }} />
+                            </label>
+                          )}
+                          {/* Delete — yalnız PENDING/CREATED */}
+                          {canEdit && (
+                            <button type="button" onClick={() => removeTaskItem(i)}
+                              className="text-[12px] shrink-0 hover:opacity-70 transition" style={{ color: '#4F46E5' }}>✕</button>
+                          )}
                         </div>
+                        {/* Özəl fayl siyahısı */}
+                        {(item.files?.length || 0) > 0 && (
+                          <div className="flex gap-1.5 flex-wrap px-3 pb-2">
+                            {item.files!.map((f, fi) => (
+                              <span key={fi} className="flex items-center gap-1 text-[9px] font-semibold px-2 py-1 rounded-md"
+                                style={{ backgroundColor: '#EEF2FF', color: '#4F46E5' }}>
+                                📎 {f.name.substring(0, 15)}{f.name.length > 15 ? '...' : ''}
+                                <button type="button" onClick={() => setNewTask(prev => ({
+                                  ...prev,
+                                  taskItems: prev.taskItems.map((ti, idx) => idx === i
+                                    ? { ...ti, files: (ti.files || []).filter((_, fIdx) => fIdx !== fi) }
+                                    : ti)
+                                }))} className="text-[10px] hover:text-red-500" style={{ color: '#EF4444' }}>✕</button>
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )
                   })}

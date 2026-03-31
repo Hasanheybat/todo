@@ -400,7 +400,9 @@ export class TodoistService {
           isRecurring: true,
           recurRule: task.recurRule,
           duration: task.duration,
-          reminder: task.reminder ? this.calculateNextDate(task.reminder, task.recurRule) : null,
+          reminder: (task.reminder && task.dueDate)
+            ? new Date(nextDate.getTime() - (task.dueDate.getTime() - task.reminder.getTime()))
+            : null,
           sortOrder: task.sortOrder,
         },
         include: this.taskInclude,

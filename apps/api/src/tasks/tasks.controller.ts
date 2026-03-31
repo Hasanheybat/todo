@@ -29,81 +29,86 @@ export class TasksController {
   }
 
   @Put(':id')
-  @RequirePermissions('tasks.update')
+  @RequirePermissions('tasks.create')
   update(@Param('id') id: string, @Body() dto: UpdateTaskDto, @Req() req: any) {
     return this.tasksService.update(id, dto, req.user.sub, req.user.tenantId)
   }
 
   @Patch(':id/my-status')
-  @RequirePermissions('tasks.update')
+  @RequirePermissions('tasks.read')
   updateMyStatus(@Param('id') id: string, @Body() body: { status: string; note?: string }, @Req() req: any) {
     return this.tasksService.updateAssigneeStatus(id, req.user.sub, body.status, body.note)
   }
 
-  // Mesajlaşma — görevə atanan hər kəs yaza bilər (ayrıca yetki lazım deyil)
+  // Mesajlaşma — service-dəki yoxlamalar əsas qorunmadır (approverId/creatorId/assignee yoxlanılır)
   @Patch(':id/assignee-note')
+  @RequirePermissions('tasks.read')
   updateAssigneeNote(@Param('id') id: string, @Body() body: { userId: string; approverNote: string; fileId?: string; fileName?: string; fileSize?: number }, @Req() req: any) {
     return this.tasksService.updateApproverNote(id, req.user.sub, body.userId, body.approverNote, body.fileId, body.fileName, body.fileSize)
   }
 
   @Patch(':id/worker-note')
+  @RequirePermissions('tasks.read')
   addWorkerNote(@Param('id') id: string, @Body() body: { note: string; fileId?: string; fileName?: string; fileSize?: number }, @Req() req: any) {
     return this.tasksService.addWorkerNote(id, req.user.sub, body.note, body.fileId, body.fileName, body.fileSize)
   }
 
   @Patch(':id/bulk-note')
+  @RequirePermissions('tasks.read')
   addBulkNote(@Param('id') id: string, @Body() body: { note: string; fileId?: string; fileName?: string; fileSize?: number }, @Req() req: any) {
     return this.tasksService.addBulkNote(id, req.user.sub, body.note, body.fileId, body.fileName, body.fileSize)
   }
 
   @Patch(':id/edit-note')
+  @RequirePermissions('tasks.read')
   editNote(@Param('id') id: string, @Body() body: { noteType: 'worker' | 'approver' | 'bulk'; noteIndex: number; userId?: string; newText: string }, @Req() req: any) {
     return this.tasksService.editNote(id, req.user.sub, body)
   }
 
   @Patch(':id/delete-note')
+  @RequirePermissions('tasks.read')
   deleteNote(@Param('id') id: string, @Body() body: { noteType: 'worker' | 'approver' | 'bulk'; noteIndex: number; userId?: string }, @Req() req: any) {
     return this.tasksService.deleteNote(id, req.user.sub, body)
   }
 
   @Patch(':id/close-chat')
-  @RequirePermissions('tasks.update')
+  @RequirePermissions('tasks.read')
   toggleChatClosed(@Param('id') id: string, @Body() body: { userId: string; closed: boolean }, @Req() req: any) {
     return this.tasksService.toggleChatClosed(id, req.user.sub, body.userId, body.closed)
   }
 
   @Patch(':id/change-assignee-status')
-  @RequirePermissions('tasks.status_change')
+  @RequirePermissions('tasks.read')
   changeAssigneeStatus(@Param('id') id: string, @Body() body: { userId: string; status: string }, @Req() req: any) {
     return this.tasksService.changeAssigneeStatusByApprover(id, req.user.sub, body.userId, body.status)
   }
 
   @Patch(':id/finalize')
-  @RequirePermissions('tasks.finalize')
+  @RequirePermissions('gorev.create|gorev.approve')
   finalizeTask(@Param('id') id: string, @Body() body: { note?: string; fileId?: string; fileName?: string; fileSize?: number; files?: { fileId: string; fileName: string; fileSize: number }[] }, @Req() req: any) {
     return this.tasksService.finalizeTask(id, req.user.sub, req.user.tenantId, body?.note, body?.fileId, body?.fileName, body?.fileSize, body?.files)
   }
 
   @Patch(':id/creator-approve')
-  @RequirePermissions('tasks.approve')
+  @RequirePermissions('tasks.create')
   creatorApprove(@Param('id') id: string, @Req() req: any) {
     return this.tasksService.creatorApproveTask(id, req.user.sub, req.user.tenantId)
   }
 
   @Post(':id/complete')
-  @RequirePermissions('tasks.update')
+  @RequirePermissions('tasks.read')
   complete(@Param('id') id: string, @Req() req: any) {
     return this.tasksService.complete(id, req.user.sub, req.user.tenantId)
   }
 
   @Post(':id/approve')
-  @RequirePermissions('tasks.approve')
+  @RequirePermissions('tasks.create')
   approve(@Param('id') id: string, @Req() req: any) {
     return this.tasksService.approve(id, req.user.sub, req.user.tenantId)
   }
 
   @Post(':id/reject')
-  @RequirePermissions('tasks.approve')
+  @RequirePermissions('tasks.create')
   reject(@Param('id') id: string, @Req() req: any) {
     return this.tasksService.reject(id, req.user.sub, req.user.tenantId)
   }
@@ -115,7 +120,7 @@ export class TasksController {
   }
 
   @Delete(':id')
-  @RequirePermissions('tasks.delete')
+  @RequirePermissions('tasks.create')
   remove(@Param('id') id: string, @Req() req: any) {
     return this.tasksService.remove(id, req.user.tenantId)
   }

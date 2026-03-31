@@ -88,4 +88,11 @@ export class CreateTaskDto {
   @IsString()
   @IsOptional()
   projectId?: string
+
+  @IsOptional()
+  isRecurring?: boolean
+
+  @IsString()
+  @IsOptional()
+  recurRule?: string
 }

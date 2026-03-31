@@ -51,8 +51,15 @@ export class PermissionsGuard implements CanActivate {
       throw new ForbiddenException('İcazə yoxdur — rol təyin edilməyib')
     }
 
-    // Bütün tələb olunan permission-lar mövcud olmalıdır
-    const hasAll = requiredPermissions.every(p => allPermissions.includes(p))
+    // Permission yoxlaması: "|" ilə ayrılanlar OR, qalanlar AND
+    // Məsələn: @RequirePermissions('gorev.create|gorev.approve') → birindən biri yetər
+    const hasAll = requiredPermissions.every(p => {
+      if (p.includes('|')) {
+        // OR: ən az birinin olması yetər
+        return p.split('|').some(alt => allPermissions.includes(alt.trim()))
+      }
+      return allPermissions.includes(p)
+    })
     if (!hasAll) {
       throw new ForbiddenException(`Bu əməliyyat üçün icazəniz yoxdur. Tələb olunan: ${requiredPermissions.join(', ')}`)
     }
