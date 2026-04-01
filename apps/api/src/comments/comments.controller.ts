@@ -1,8 +1,10 @@
 import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Req } from '@nestjs/common'
+import { ApiTags } from '@nestjs/swagger'
 import { CommentsService } from './comments.service'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { PermissionsGuard, RequirePermissions } from '../auth/guards/permissions.guard'
 
+@ApiTags('Comments')
 @Controller('comments')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 export class CommentsController {

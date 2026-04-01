@@ -1,6 +1,28 @@
 # WorkFlow Pro — Yapılacaklar Siyahısı
 
-*Son yenilənmə: 29 Mart 2026*
+*Son yenilənmə: 31 Mart 2026*
+
+---
+
+## 🎨 Aktiv — V7 Slate Tema Tətbiqi
+
+### ThemeContext + Toggle
+- [ ] `ThemeContext.tsx` — `localStorage` ilə tema saxlama
+- [ ] `ThemeToggle.tsx` — Header-də keçid düyməsi (Default ↔ Slate)
+- [ ] `layout.tsx` — `data-theme` atributu + ThemeProvider
+
+### CSS Tema Faylı
+- [ ] `styles/theme-slate.css` — v7 CSS dəyişənləri (rənglər, fontlar, kölgələr)
+- [ ] Plus Jakarta Sans Google Font əlavəsi
+
+### Komponent Stilləri (Slate tema üçün)
+- [ ] `Sidebar.tsx` — v7 sidebar stili
+- [ ] `Header.tsx` — v7 header stili
+
+### Səhifə Stilləri (Slate tema üçün)
+- [ ] `dashboard/page.tsx` — KPI kartlar, bento grid
+- [ ] `tasks/page.tsx` — task siyahı, filter bar
+- [ ] `inbox/page.tsx` — inbox siyahı
 
 ---
 

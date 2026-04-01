@@ -15,15 +15,19 @@
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.0",
     "@nestjs/schedule": "^6.1.1",
+    "@nestjs/swagger": "^11.0.3",
     "@prisma/client": "^6.4.0",
     "@workflow-pro/shared": "*",
     "bcrypt": "^6.0.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
+    "exceljs": "^4.4.0",
+    "nodemailer": "^6.10.1",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.2.0",
-    "rxjs": "^7.8.0"
+    "rxjs": "^7.8.0",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "@nestjs/testing": "^11.1.17",
@@ -31,6 +35,7 @@
     "@types/jest": "^30.0.0",
     "@types/multer": "^2.1.0",
     "@types/node": "^22.0.0",
+    "@types/nodemailer": "^6.4.23",
     "@types/passport-jwt": "^4.0.1",
     "jest": "^30.3.0",
     "prisma": "^6.4.0",

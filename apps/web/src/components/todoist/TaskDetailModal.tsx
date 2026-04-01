@@ -39,6 +39,7 @@ export default function TaskDetailModal({ taskId, onClose, onRefresh }: TaskDeta
   const [attachments, setAttachments] = useState<any[]>([])
   const [uploading, setUploading] = useState(false)
   const [reminderOpen, setReminderOpen] = useState(false)
+  const [statusOpen, setStatusOpen] = useState(false)
   const [durationOpen, setDurationOpen] = useState(false)
   const [labelPickerOpen, setLabelPickerOpen] = useState(false)
   const [allLabels, setAllLabels] = useState<any[]>([])
@@ -57,6 +58,9 @@ export default function TaskDetailModal({ taskId, onClose, onRefresh }: TaskDeta
   const [editSubLabels, setEditSubLabels] = useState<string[]>([])
   const [editSubLocation, setEditSubLocation] = useState('')
   const [subLocationOpen, setSubLocationOpen] = useState(false)
+  const [locationEditOpen, setLocationEditOpen] = useState(false)
+  const [locationEditValue, setLocationEditValue] = useState('')
+  const [previewAtt, setPreviewAtt] = useState<any>(null)
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [pendingChanges, setPendingChanges] = useState<Record<string, any>>({})
   const [subPrioOpen, setSubPrioOpen] = useState(false)
@@ -67,6 +71,7 @@ export default function TaskDetailModal({ taskId, onClose, onRefresh }: TaskDeta
     if (except !== 'prio') setPrioOpen(false)
     if (except !== 'date') setDatePickerOpen(false)
     if (except !== 'reminder') setReminderOpen(false)
+    if (except !== 'status') setStatusOpen(false)
     if (except !== 'duration') setDurationOpen(false)
     if (except !== 'label') setLabelPickerOpen(false)
     if (except !== 'subDate') setSubDatePickerOpen(false)
@@ -171,6 +176,18 @@ export default function TaskDetailModal({ taskId, onClose, onRefresh }: TaskDeta
     addPending({ priority: p })
   }
 
+  const handleTodoStatus = (s: string) => {
+    setStatusOpen(false)
+    addPending({ todoStatus: s })
+  }
+
+  const TODO_STATUSES = [
+    { key: 'WAITING',     label: 'Gözləyir',     color: '#64748B', dot: '#94A3B8' },
+    { key: 'IN_PROGRESS', label: 'Davam edir',   color: '#D97706', dot: '#F59E0B' },
+    { key: 'DONE',        label: 'Tamamlandı',   color: '#059669', dot: '#10B981' },
+    { key: 'CANCELLED',   label: 'İptal edilib', color: '#DC2626', dot: '#EF4444' },
+  ]
+
   const handleDueDate = (date: string | null) => {
     setDatePickerOpen(false)
     addPending({ dueDate: date })
@@ -272,7 +289,7 @@ export default function TaskDetailModal({ taskId, onClose, onRefresh }: TaskDeta
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-[10vh]">
       <div className="absolute inset-0 bg-black/30" />
-      <div className="relative rounded-xl shadow-2xl w-[600px] max-h-[75vh] flex flex-col" style={{ backgroundColor: 'var(--todoist-surface)' }} onClick={e => e.stopPropagation()}>
+      <div className="relative rounded-xl shadow-2xl w-[600px] max-h-[75vh] flex flex-col overflow-hidden" style={{ backgroundColor: 'var(--todoist-surface)' }} onClick={e => e.stopPropagation()}>
 
         {loading ? (
           <div className="p-8">
@@ -340,7 +357,7 @@ export default function TaskDetailModal({ taskId, onClose, onRefresh }: TaskDeta
                   ) : (
                     <h2 onClick={() => { setEditingContent(true); setTimeout(() => contentInputRef.current?.focus(), 50) }}
                       className={`text-[16px] font-semibold cursor-text hover:bg-[var(--todoist-sidebar-hover)] rounded px-1 -mx-1 py-0.5 transition ${task.isCompleted ? 'line-through text-[var(--todoist-text-tertiary)]' : ''}`}
-                      style={{ color: task.isCompleted ? 'var(--todoist-text-tertiary)' : 'var(--todoist-text)' }}>
+                      style={{ color: task.isCompleted ? 'var(--todoist-text-tertiary)' : 'var(--todoist-text)', wordBreak: 'break-word', overflowWrap: 'break-word' }}>
                       {task.content}
                     </h2>
                   )}
@@ -388,7 +405,34 @@ export default function TaskDetailModal({ taskId, onClose, onRefresh }: TaskDeta
                   )}
                 </div>
 
-                {/* 2. Xatırlatma */}
+                {/* 2. Status */}
+                {(() => {
+                  const cur = TODO_STATUSES.find(s => s.key === (task.todoStatus || 'WAITING')) || TODO_STATUSES[0]
+                  return (
+                    <div className="relative">
+                      <button onClick={() => { closeAllPopups('status'); setStatusOpen(!statusOpen) }}
+                        className="rounded-md px-2 py-1 text-[10px] font-semibold flex items-center gap-1"
+                        style={{ backgroundColor: cur.dot + '18', color: cur.color, border: '1px solid var(--todoist-divider)' }}>
+                        <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: cur.dot }} />
+                        {cur.label}
+                      </button>
+                      {statusOpen && (
+                        <div className="absolute top-full left-0 mt-1 rounded-lg shadow-lg z-10 py-1 min-w-[130px]" style={{ backgroundColor: 'var(--todoist-surface)', border: '1px solid var(--todoist-divider)' }}>
+                          {TODO_STATUSES.map(s => (
+                            <button key={s.key} onClick={() => handleTodoStatus(s.key)}
+                              className={`w-full px-3 py-1.5 text-[11px] font-medium flex items-center gap-2 hover:bg-[var(--todoist-sidebar-hover)] transition text-left ${(task.todoStatus || 'WAITING') === s.key ? 'bg-[var(--todoist-sidebar-hover)]' : ''}`}
+                              style={{ color: s.color }}>
+                              <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: s.dot }} />
+                              {s.label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })()}
+
+                {/* 3. Xatırlatma */}
                 <div className="relative">
                   <button onClick={() => { closeAllPopups('reminder'); setReminderOpen(!reminderOpen) }}
                     className="rounded-md px-2 py-1 text-[10px] font-semibold flex items-center gap-1"
@@ -402,6 +446,57 @@ export default function TaskDetailModal({ taskId, onClose, onRefresh }: TaskDeta
                       onChange={(val) => { addPending({ reminder: val }); setReminderOpen(false) }}
                       onClose={() => setReminderOpen(false)}
                     />
+                  )}
+                </div>
+
+                {/* 2b. Müddət */}
+                <div className="relative">
+                  <button onClick={() => { closeAllPopups('duration'); setDurationOpen(!durationOpen) }}
+                    className="rounded-md px-2 py-1 text-[10px] font-semibold flex items-center gap-1"
+                    style={{ backgroundColor: task.duration ? '#FFF7ED' : 'var(--todoist-sidebar-hover)', color: task.duration ? '#EB8909' : 'var(--todoist-text-secondary)', border: '1px solid var(--todoist-divider)' }}>
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    {task.duration ? fmtDuration(task.duration) : 'Müddət'}
+                  </button>
+                  {durationOpen && (
+                    <div className="absolute top-full left-0 mt-1 rounded-xl shadow-xl z-20 py-2 w-[200px]"
+                      style={{ backgroundColor: 'var(--todoist-surface)', border: '1px solid var(--todoist-divider)' }}>
+                      <div className="px-3 pb-1.5 text-[9px] font-bold uppercase" style={{ color: 'var(--todoist-text-tertiary)' }}>Müddət seç</div>
+                      {[
+                        { label: '15 dəqiqə', value: 15 },
+                        { label: '30 dəqiqə', value: 30 },
+                        { label: '45 dəqiqə', value: 45 },
+                        { label: '1 saat', value: 60 },
+                        { label: '1.5 saat', value: 90 },
+                        { label: '2 saat', value: 120 },
+                        { label: '4 saat', value: 240 },
+                        { label: '8 saat (1 gün)', value: 480 },
+                      ].map(opt => (
+                        <button key={opt.value} onClick={() => { addPending({ duration: opt.value }); setDurationOpen(false) }}
+                          className="w-full px-3 py-1.5 text-[12px] text-left flex items-center justify-between hover:bg-[var(--todoist-sidebar-hover)] transition"
+                          style={{ color: task.duration === opt.value ? '#EB8909' : 'var(--todoist-text)' }}>
+                          {opt.label}
+                          {task.duration === opt.value && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#EB8909" strokeWidth="2.5"><path d="M20 6L9 17l-5-5"/></svg>}
+                        </button>
+                      ))}
+                      <div className="mx-3 my-1.5 border-t" style={{ borderColor: 'var(--todoist-divider)' }} />
+                      <div className="px-3 flex items-center gap-2">
+                        <input
+                          type="number" min="1" max="999" placeholder="Dəq..."
+                          defaultValue={task.duration && ![15,30,45,60,90,120,240,480].includes(task.duration) ? task.duration : ''}
+                          onKeyDown={e => { if (e.key === 'Enter') { const v = parseInt((e.target as HTMLInputElement).value); if (v > 0) { addPending({ duration: v }); setDurationOpen(false) } } }}
+                          className="flex-1 px-2 py-1 rounded-lg text-[11px] outline-none"
+                          style={{ background: 'var(--todoist-sidebar-hover)', border: '1px solid var(--todoist-divider)', color: 'var(--todoist-text)' }}
+                        />
+                        <span className="text-[10px]" style={{ color: 'var(--todoist-text-tertiary)' }}>dəq</span>
+                      </div>
+                      {task.duration && (
+                        <button onClick={() => { addPending({ duration: null }); setDurationOpen(false) }}
+                          className="w-full px-3 py-1.5 text-[11px] text-left mt-1 hover:bg-[var(--todoist-sidebar-hover)] transition"
+                          style={{ color: 'var(--todoist-p1)' }}>
+                          ✕ Müddəti sil
+                        </button>
+                      )}
+                    </div>
                   )}
                 </div>
 
@@ -461,16 +556,37 @@ export default function TaskDetailModal({ taskId, onClose, onRefresh }: TaskDeta
                 </div>
 
                 {/* 5. Konum */}
-                <button onClick={() => {
-                    closeAllPopups()
-                    const loc = prompt('Konum daxil edin:', task.location || '')
-                    if (loc !== null) addPending({ location: loc || null })
-                  }}
-                  className="rounded-md px-2 py-1 text-[10px] font-semibold flex items-center gap-1"
-                  style={{ backgroundColor: task.location ? '#ECFDF5' : 'var(--todoist-sidebar-hover)', color: task.location ? '#059669' : 'var(--todoist-text-secondary)', border: '1px solid var(--todoist-divider)' }}>
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                  {task.location || 'Konum'}
-                </button>
+                {locationEditOpen ? (
+                  <div className="flex items-center gap-1">
+                    <input
+                      autoFocus
+                      value={locationEditValue}
+                      onChange={e => setLocationEditValue(e.target.value)}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter') { addPending({ location: locationEditValue || null }); setLocationEditOpen(false) }
+                        if (e.key === 'Escape') setLocationEditOpen(false)
+                      }}
+                      placeholder="Konum..."
+                      className="rounded-md px-2 py-1 text-[10px] outline-none w-32"
+                      style={{ background: 'var(--todoist-sidebar-hover)', border: '1px solid var(--todoist-divider)', color: 'var(--todoist-text)' }}
+                    />
+                    <button onClick={() => { addPending({ location: locationEditValue || null }); setLocationEditOpen(false) }}
+                      className="w-5 h-5 rounded flex items-center justify-center" style={{ background: '#ECFDF5', color: '#059669' }}>
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    </button>
+                    <button onClick={() => setLocationEditOpen(false)}
+                      className="w-5 h-5 rounded flex items-center justify-center" style={{ background: 'var(--todoist-border)', color: 'var(--todoist-text-secondary)' }}>
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                    </button>
+                  </div>
+                ) : (
+                  <button onClick={() => { closeAllPopups(); setLocationEditValue(task.location || ''); setLocationEditOpen(true) }}
+                    className="rounded-md px-2 py-1 text-[10px] font-semibold flex items-center gap-1"
+                    style={{ backgroundColor: task.location ? '#ECFDF5' : 'var(--todoist-sidebar-hover)', color: task.location ? '#059669' : 'var(--todoist-text-secondary)', border: '1px solid var(--todoist-divider)' }}>
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    {task.location || 'Konum'}
+                  </button>
+                )}
 
                 {/* 6. Kopyala — API ilə yeni TODO yaradır */}
                 <button onClick={async () => {
@@ -1017,28 +1133,45 @@ export default function TaskDetailModal({ taskId, onClose, onRefresh }: TaskDeta
 
                 {attachments.length > 0 && (
                   <div className="space-y-1">
-                    {attachments.map((att: any) => (
-                      <div key={att.id} className="group/file flex items-center gap-2 px-2 py-1.5 rounded hover:bg-[var(--todoist-sidebar-hover)] transition">
-                        <div className="w-7 h-7 rounded flex items-center justify-center shrink-0 text-[9px] font-bold"
-                          style={{ backgroundColor: getFileColor(att.mimeType) + '15', color: getFileColor(att.mimeType) }}>
-                          {getFileIcon(att.mimeType)}
+                    {attachments.map((att: any) => {
+                      const fileUrl = `http://localhost:4000/uploads/${att.storagePath?.split('/').pop() || att.storagePath}`
+                      const isImage = att.mimeType?.startsWith('image/')
+                      return (
+                        <div key={att.id} className="group/file flex items-center gap-2 px-2 py-1.5 rounded hover:bg-[var(--todoist-sidebar-hover)] transition">
+                          {isImage ? (
+                            <button onClick={() => setPreviewAtt(att)}
+                              className="w-7 h-7 rounded flex items-center justify-center shrink-0 overflow-hidden hover:scale-110 transition-transform">
+                              <img src={fileUrl} alt={att.filename} className="w-full h-full object-cover rounded" />
+                            </button>
+                          ) : (
+                            <div className="w-7 h-7 rounded flex items-center justify-center shrink-0 text-[9px] font-bold"
+                              style={{ backgroundColor: getFileColor(att.mimeType) + '15', color: getFileColor(att.mimeType) }}>
+                              {getFileIcon(att.mimeType)}
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            {isImage ? (
+                              <button onClick={() => setPreviewAtt(att)}
+                                className="text-[12px] font-medium truncate block hover:underline text-left w-full" style={{ color: 'var(--todoist-text)' }}>
+                                {att.filename}
+                              </button>
+                            ) : (
+                              <a href={fileUrl} target="_blank" rel="noopener noreferrer"
+                                className="text-[12px] font-medium truncate block hover:underline" style={{ color: 'var(--todoist-text)' }}>
+                                {att.filename}
+                              </a>
+                            )}
+                            <span className="text-[9px]" style={{ color: 'var(--todoist-text-tertiary)' }}>
+                              {formatFileSize(att.size)} · {new Date(att.createdAt).toLocaleDateString('az-AZ', { day: 'numeric', month: 'short' })}
+                            </span>
+                          </div>
+                          <button onClick={() => setDeleteFileId(att.id)}
+                            className="opacity-0 group-hover/file:opacity-60 hover:!opacity-100 p-1 rounded hover:bg-[var(--todoist-red-light)] transition" title="Sil">
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--todoist-red)" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                          </button>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <a href={`http://localhost:4000/uploads/${att.storagePath?.split('/').pop() || att.storagePath}`}
-                            target="_blank" rel="noopener noreferrer"
-                            className="text-[12px] font-medium truncate block hover:underline" style={{ color: 'var(--todoist-text)' }}>
-                            {att.filename}
-                          </a>
-                          <span className="text-[9px]" style={{ color: 'var(--todoist-text-tertiary)' }}>
-                            {formatFileSize(att.size)} · {new Date(att.createdAt).toLocaleDateString('az-AZ', { day: 'numeric', month: 'short' })}
-                          </span>
-                        </div>
-                        <button onClick={() => setDeleteFileId(att.id)}
-                          className="opacity-0 group-hover/file:opacity-60 hover:!opacity-100 p-1 rounded hover:bg-[var(--todoist-red-light)] transition" title="Sil">
-                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--todoist-red)" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-                        </button>
-                      </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 )}
 
@@ -1148,12 +1281,54 @@ export default function TaskDetailModal({ taskId, onClose, onRefresh }: TaskDeta
         </div>
       )}
 
+      {/* ═══ FaYL ÖNİZLƏMƏ LİGHTBOX ═══ */}
+      {previewAtt && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center"
+          style={{ backgroundColor: 'rgba(0,0,0,0.85)' }}
+          onClick={() => setPreviewAtt(null)}>
+          <div className="relative flex flex-col items-center max-w-[90vw] max-h-[90vh]" onClick={e => e.stopPropagation()}>
+            {/* Close */}
+            <button onClick={() => setPreviewAtt(null)}
+              className="absolute -top-10 right-0 w-8 h-8 rounded-full flex items-center justify-center transition"
+              style={{ background: 'rgba(255,255,255,0.15)', color: '#fff' }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+            {/* Image */}
+            <img
+              src={`http://localhost:4000/uploads/${previewAtt.storagePath?.split('/').pop() || previewAtt.storagePath}`}
+              alt={previewAtt.filename}
+              className="rounded-xl shadow-2xl object-contain"
+              style={{ maxWidth: '88vw', maxHeight: '80vh' }}
+            />
+            {/* Footer */}
+            <div className="mt-3 flex items-center gap-3">
+              <span className="text-[12px] font-medium text-white/80">{previewAtt.filename}</span>
+              <span className="text-[10px] text-white/50">·</span>
+              <span className="text-[10px] text-white/50">{formatFileSize(previewAtt.size)}</span>
+              <a href={`http://localhost:4000/uploads/${previewAtt.storagePath?.split('/').pop() || previewAtt.storagePath}`}
+                download={previewAtt.filename} target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold transition hover:opacity-80"
+                style={{ background: 'rgba(255,255,255,0.2)', color: '#fff' }} onClick={e => e.stopPropagation()}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Yüklə
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   )
 }
 
 function toDateStr(d: Date) {
   return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0')
+}
+
+function fmtDuration(mins: number): string {
+  if (mins < 60) return `${mins} dəq`
+  const h = Math.floor(mins / 60), m = mins % 60
+  return m > 0 ? `${h}s ${m}d` : `${h} saat`
 }
 
 function formatDue(d: string) {

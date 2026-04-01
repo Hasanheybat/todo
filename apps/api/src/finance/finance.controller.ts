@@ -1,8 +1,10 @@
 import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, Req } from '@nestjs/common'
+import { ApiTags } from '@nestjs/swagger'
 import { FinanceService } from './finance.service'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { PermissionsGuard, RequirePermissions } from '../auth/guards/permissions.guard'
 
+@ApiTags('Finance')
 @Controller('finance')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 export class FinanceController {

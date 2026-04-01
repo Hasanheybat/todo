@@ -68,6 +68,37 @@ export default function TasksPage() {
   const [workerRecurringModal, setWorkerRecurringModal] = useState<{ open: boolean; task: any }>({ open: false, task: null })
   const groupViewTasks = groupViewModal.groupId ? tasks.filter((t: any) => t.groupId === groupViewModal.groupId) : []
 
+  // Toplu əməliyyat
+  const [bulkMode, setBulkMode] = useState(false)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [bulkLoading, setBulkLoading] = useState(false)
+
+  const toggleBulkSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id); else next.add(id)
+      return next
+    })
+  }
+  const selectAll = () => setSelectedIds(new Set(displayTasks.map((t: any) => t.id)))
+  const clearBulk = () => { setBulkMode(false); setSelectedIds(new Set()) }
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.size === 0) return
+    setConfirmModal({
+      open: true, title: 'Toplu Silmə', type: 'danger',
+      message: `${selectedIds.size} tapşırığı silmək istəyirsiniz?`,
+      confirmText: 'Sil',
+      onConfirm: async () => {
+        setBulkLoading(true)
+        await Promise.all([...selectedIds].map(id => api.deleteTask(id).catch(() => {})))
+        setBulkLoading(false)
+        clearBulk()
+        loadData()
+      }
+    })
+  }
+
   const [todoQuickAddOpen, setTodoQuickAddOpen] = useState(false)
   const [todoProjects, setTodoProjects] = useState<any[]>([])
   const [todoLabels, setTodoLabels] = useState<any[]>([])
@@ -623,12 +654,20 @@ export default function TasksPage() {
           <h1 className="text-[24px] font-extrabold" style={{ color: 'var(--todoist-text)' }}>Tapşırıqlar</h1>
           <p className="text-[13px]" style={{ color: 'var(--todoist-text-secondary)' }}>Bütün tapşırıqlar — {filtered.length} ədəd</p>
         </div>
-        <button onClick={openCreateModal}
-          className="flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-[13px] font-semibold text-white transition hover:opacity-90"
-          style={{ backgroundColor: 'var(--todoist-red)' }}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M12 5v14M5 12h14"/></svg>
-          Tapşırıq əlavə et
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={async () => { try { const blob = await api.exportTasksExcel(); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `tapshiriqlar_${new Date().toISOString().split('T')[0]}.xlsx`; a.click(); URL.revokeObjectURL(url) } catch {} }}
+            className="flex items-center gap-1.5 px-3 py-2 text-[12px] font-semibold rounded-lg transition hover:opacity-80"
+            style={{ backgroundColor: 'var(--todoist-border)', color: 'var(--todoist-text-secondary)' }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Excel
+          </button>
+          <button onClick={openCreateModal}
+            className="flex items-center gap-1.5 px-3.5 py-2 text-[13px] font-semibold text-white transition hover:opacity-90"
+            style={{ backgroundColor: 'var(--todoist-red)', borderRadius: '8px' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M12 5v14M5 12h14"/></svg>
+            Tapşırıq əlavə et
+          </button>
+        </div>
       </div>
 
       {/* ───── STATUS TAB + CHİP FİLTRLƏR ───── */}
@@ -662,14 +701,72 @@ export default function TasksPage() {
         showReset={selectedBiz !== 'ALL' || selectedUser !== 'ALL' || selectedPriority !== 'ALL' || selectedStatus !== 'PENDING'}
       />
 
+      {/* ───── TOPLU ƏMƏLİYYAT TOOLBAR ───── */}
+      {displayTasks.length > 0 && (
+        <div className="flex items-center gap-2 mb-3">
+          <button onClick={() => { setBulkMode(b => !b); setSelectedIds(new Set()) }}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold rounded-lg transition hover:opacity-80"
+            style={{ backgroundColor: bulkMode ? 'var(--todoist-red)' : 'var(--todoist-sidebar-hover)', color: bulkMode ? '#fff' : 'var(--todoist-text-secondary)', border: '1px solid var(--todoist-border)' }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            {bulkMode ? 'Seçim iptal' : 'Toplu seç'}
+          </button>
+          {bulkMode && (
+            <>
+              <button onClick={selectAll} className="px-3 py-1.5 text-[11px] font-semibold rounded-lg transition hover:opacity-80"
+                style={{ backgroundColor: 'var(--todoist-sidebar-hover)', color: 'var(--todoist-text-secondary)', border: '1px solid var(--todoist-border)' }}>
+                Hamısını seç ({displayTasks.length})
+              </button>
+              {selectedIds.size > 0 && (
+                <span className="text-[11px] font-semibold px-2 py-1 rounded-lg" style={{ backgroundColor: '#EEF2FF', color: '#4F46E5' }}>
+                  {selectedIds.size} seçildi
+                </span>
+              )}
+            </>
+          )}
+        </div>
+      )}
+
       {/* ───── TAPŞIRIQ KARTLARI — 4-lü grid ───── */}
       {displayTasks.length > 0 && (
         <div className="mb-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5">
               {displayTasks.map((task: any) => (
-                <TaskCard key={task.id} task={task} onClick={handleTaskClick} />
+                <div key={task.id} className="relative">
+                  {bulkMode && (
+                    <div className="absolute top-2 left-2 z-10"
+                      onClick={e => { e.stopPropagation(); toggleBulkSelect(task.id) }}>
+                      <div className="w-5 h-5 rounded flex items-center justify-center cursor-pointer transition"
+                        style={{ backgroundColor: selectedIds.has(task.id) ? 'var(--todoist-red)' : '#fff', border: `2px solid ${selectedIds.has(task.id) ? 'var(--todoist-red)' : '#CBD5E1'}`, boxShadow: '0 1px 3px rgba(0,0,0,0.12)' }}>
+                        {selectedIds.has(task.id) && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3.5"><path d="M20 6L9 17l-5-5"/></svg>}
+                      </div>
+                    </div>
+                  )}
+                  <div onClick={() => bulkMode ? toggleBulkSelect(task.id) : handleTaskClick(task)}
+                    style={{ opacity: bulkMode && selectedIds.has(task.id) ? 0.85 : 1, outline: bulkMode && selectedIds.has(task.id) ? '2px solid var(--todoist-red)' : 'none', borderRadius: '12px' }}>
+                    <TaskCard task={task} onClick={() => {}} />
+                  </div>
+                </div>
               ))}
             </div>
+        </div>
+      )}
+
+      {/* ───── TOPLU FLOATING BAR ───── */}
+      {bulkMode && selectedIds.size > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-5 py-3 rounded-2xl shadow-2xl"
+          style={{ backgroundColor: 'var(--todoist-surface)', border: '1px solid var(--todoist-border)' }}>
+          <span className="text-[13px] font-semibold" style={{ color: 'var(--todoist-text)' }}>{selectedIds.size} tapşırıq seçildi</span>
+          <div className="w-px h-4" style={{ backgroundColor: 'var(--todoist-border)' }} />
+          <button onClick={handleBulkDelete} disabled={bulkLoading}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
+            style={{ backgroundColor: '#EF4444' }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M3 6h18M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2"/></svg>
+            Sil
+          </button>
+          <button onClick={clearBulk} className="px-3 py-1.5 rounded-lg text-[12px] font-semibold transition hover:opacity-80"
+            style={{ backgroundColor: 'var(--todoist-sidebar-hover)', color: 'var(--todoist-text-secondary)' }}>
+            Ləğv et
+          </button>
         </div>
       )}
 

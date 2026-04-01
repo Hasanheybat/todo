@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WorkFlow Pro — Yeni Funksiyalar Preview</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', sans-serif; background: #F1F5F9; color: #1E293B; }
+.layout { display: flex; min-height: 100vh; }
+
+/* Sidebar */
+.sidebar { width: 260px; background: #FAFAFA; border-right: 1px solid #E2E8F0; padding: 20px 14px; flex-shrink: 0; }
+.sidebar-logo { font-size: 16px; font-weight: 800; color: #4F46E5; margin-bottom: 24px; padding: 0 8px; }
+.sidebar-section { font-size: 9px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1.2px; padding: 0 8px; margin: 16px 0 6px; }
+.sidebar-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; font-size: 13px; font-weight: 500; color: #64748B; cursor: pointer; transition: all 0.15s; }
+.sidebar-item:hover { background: #F1F5F9; color: #1E293B; }
+.sidebar-item.active { background: #EEF2FF; color: #4F46E5; font-weight: 600; }
+.sidebar-item .icon { width: 20px; text-align: center; font-size: 16px; }
+.sidebar-item .badge { margin-left: auto; font-size: 9px; font-weight: 700; background: #4F46E5; color: white; padding: 2px 7px; border-radius: 10px; }
+
+/* Main */
+.main { flex: 1; padding: 28px 36px; overflow-y: auto; }
+.page-title { font-size: 22px; font-weight: 800; color: #1E293B; margin-bottom: 4px; }
+.page-sub { font-size: 13px; color: #64748B; margin-bottom: 24px; }
+
+/* Tabs */
+.tabs { display: flex; gap: 0; border-bottom: 2px solid #E2E8F0; margin-bottom: 24px; }
+.tab { padding: 10px 20px; font-size: 13px; font-weight: 600; color: #94A3B8; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.15s; }
+.tab:hover { color: #64748B; }
+.tab.active { color: #4F46E5; border-color: #4F46E5; }
+
+/* Feature sections */
+.feature-section { display: none; }
+.feature-section.active { display: block; }
+
+/* ===== 1. RICH TEXT EDITOR ===== */
+.editor-container { background: white; border-radius: 12px; border: 1px solid #E2E8F0; overflow: hidden; }
+.editor-toolbar { display: flex; align-items: center; gap: 2px; padding: 8px 12px; border-bottom: 1px solid #F1F5F9; background: #FAFAFA; flex-wrap: wrap; }
+.toolbar-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 6px; border: none; background: transparent; cursor: pointer; font-size: 14px; color: #64748B; transition: all 0.1s; }
+.toolbar-btn:hover { background: #E2E8F0; color: #1E293B; }
+.toolbar-btn.active { background: #EEF2FF; color: #4F46E5; }
+.toolbar-divider { width: 1px; height: 20px; background: #E2E8F0; margin: 0 4px; }
+.editor-body { padding: 20px 24px; min-height: 400px; font-size: 14px; line-height: 1.7; color: #334155; }
+.editor-body h1 { font-size: 28px; font-weight: 800; color: #0F172A; margin-bottom: 12px; line-height: 1.3; }
+.editor-body h2 { font-size: 20px; font-weight: 700; color: #1E293B; margin: 20px 0 8px; border-bottom: 1px solid #F1F5F9; padding-bottom: 6px; }
+.editor-body p { margin-bottom: 10px; }
+.editor-body .tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; margin: 0 2px; }
+.editor-body .tag-blue { background: #EFF6FF; color: #2563EB; }
+.editor-body .tag-green { background: #ECFDF5; color: #059669; }
+.editor-body .tag-amber { background: #FFFBEB; color: #D97706; }
+.editor-body ul { padding-left: 24px; margin-bottom: 10px; }
+.editor-body li { margin-bottom: 4px; }
+.editor-body .checklist { list-style: none; padding-left: 0; }
+.editor-body .checklist li { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
+.editor-body .checklist input { margin-top: 4px; accent-color: #4F46E5; }
+.editor-body .code-block { background: #1E293B; color: #E2E8F0; font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 14px 18px; border-radius: 8px; margin: 12px 0; overflow-x: auto; }
+.editor-body blockquote { border-left: 3px solid #4F46E5; padding: 8px 16px; background: #F8FAFC; margin: 12px 0; color: #475569; font-style: italic; border-radius: 0 8px 8px 0; }
+.editor-body .callout { display: flex; gap: 10px; padding: 12px 16px; border-radius: 8px; margin: 12px 0; }
+.editor-body .callout-info { background: #EFF6FF; border: 1px solid #BFDBFE; }
+.editor-body .callout-warn { background: #FFFBEB; border: 1px solid #FDE68A; }
+.editor-body .mention { background: #EEF2FF; color: #4F46E5; padding: 1px 6px; border-radius: 4px; font-weight: 600; font-size: 13px; cursor: pointer; }
+.editor-body .inline-code { background: #F1F5F9; color: #DC2626; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 12px; }
+.editor-body table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+.editor-body table th, .editor-body table td { border: 1px solid #E2E8F0; padding: 8px 12px; text-align: left; font-size: 13px; }
+.editor-body table th { background: #F8FAFC; font-weight: 600; }
+.editor-body .image-block { border-radius: 8px; overflow: hidden; margin: 12px 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); height: 180px; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight: 600; }
+
+/* Doc list */
+.doc-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.doc-card { background: white; border-radius: 10px; border: 1px solid #E2E8F0; padding: 16px; cursor: pointer; transition: all 0.15s; }
+.doc-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); transform: translateY(-1px); }
+.doc-card .doc-icon { font-size: 24px; margin-bottom: 8px; }
+.doc-card .doc-title { font-size: 13px; font-weight: 600; color: #1E293B; margin-bottom: 4px; }
+.doc-card .doc-meta { font-size: 11px; color: #94A3B8; }
+
+/* ===== 2. NOCODB / SPREADSHEET ===== */
+.spreadsheet-toolbar { display: flex; align-items: center; gap: 8px; padding: 10px 16px; background: white; border-radius: 12px 12px 0 0; border: 1px solid #E2E8F0; border-bottom: none; }
+.spreadsheet-toolbar .view-btn { padding: 6px 12px; font-size: 11px; font-weight: 600; border-radius: 6px; border: 1px solid #E2E8F0; background: white; color: #64748B; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+.spreadsheet-toolbar .view-btn.active { background: #4F46E5; color: white; border-color: #4F46E5; }
+.spreadsheet-toolbar .filter-chip { padding: 4px 10px; font-size: 11px; font-weight: 500; border-radius: 20px; border: 1px solid #E2E8F0; background: #F8FAFC; color: #64748B; cursor: pointer; }
+.spreadsheet-toolbar .filter-chip:hover { border-color: #4F46E5; color: #4F46E5; }
+
+.spreadsheet { width: 100%; background: white; border: 1px solid #E2E8F0; border-radius: 0 0 12px 12px; overflow: hidden; }
+.spreadsheet table { width: 100%; border-collapse: collapse; }
+.spreadsheet th { background: #F8FAFC; padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #E2E8F0; position: relative; }
+.spreadsheet th .resize { position: absolute; right: 0; top: 0; bottom: 0; width: 4px; cursor: col-resize; background: transparent; }
+.spreadsheet th .resize:hover { background: #4F46E5; }
+.spreadsheet td { padding: 9px 14px; font-size: 13px; color: #334155; border-bottom: 1px solid #F1F5F9; }
+.spreadsheet tr:hover td { background: #F8FAFC; }
+.spreadsheet .row-num { width: 40px; text-align: center; color: #94A3B8; font-size: 11px; }
+.spreadsheet .cell-tag { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; }
+.spreadsheet .cell-expand { width: 30px; text-align: center; }
+.spreadsheet .expand-btn { width: 20px; height: 20px; border: none; background: #F1F5F9; border-radius: 4px; cursor: pointer; font-size: 10px; color: #64748B; }
+.spreadsheet .expand-btn:hover { background: #4F46E5; color: white; }
+.spreadsheet .add-row { padding: 10px 14px; color: #94A3B8; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+.spreadsheet .add-row:hover { color: #4F46E5; }
+
+/* ===== 3. AI SUMMARY ===== */
+.ai-container { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.ai-card { background: white; border-radius: 12px; border: 1px solid #E2E8F0; overflow: hidden; }
+.ai-card-header { padding: 14px 18px; border-bottom: 1px solid #F1F5F9; display: flex; align-items: center; justify-content: between; gap: 10px; }
+.ai-card-header h3 { font-size: 14px; font-weight: 700; color: #1E293B; flex: 1; }
+.ai-card-header .ai-badge { font-size: 9px; font-weight: 700; padding: 3px 8px; border-radius: 10px; background: linear-gradient(135deg, #8B5CF6, #6366F1); color: white; }
+.ai-card-body { padding: 16px 18px; }
+.ai-summary-text { font-size: 13px; line-height: 1.7; color: #475569; }
+.ai-summary-text strong { color: #1E293B; }
+.ai-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+.ai-stat { padding: 10px; border-radius: 8px; text-align: center; }
+.ai-stat .num { font-size: 22px; font-weight: 800; }
+.ai-stat .label { font-size: 10px; font-weight: 600; color: #64748B; margin-top: 2px; }
+
+.ai-prompt-bar { background: white; border-radius: 12px; border: 1px solid #E2E8F0; padding: 14px 18px; display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.ai-prompt-bar input { flex: 1; border: none; outline: none; font-size: 13px; color: #1E293B; }
+.ai-prompt-bar input::placeholder { color: #94A3B8; }
+.ai-prompt-bar button { padding: 8px 16px; border-radius: 8px; border: none; background: linear-gradient(135deg, #8B5CF6, #6366F1); color: white; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+.ai-prompt-bar button:hover { opacity: 0.9; }
+
+.ai-chat { background: white; border-radius: 12px; border: 1px solid #E2E8F0; padding: 18px; margin-top: 16px; }
+.ai-chat-msg { margin-bottom: 14px; }
+.ai-chat-msg.user { text-align: right; }
+.ai-chat-msg .bubble { display: inline-block; padding: 10px 14px; border-radius: 12px; font-size: 13px; line-height: 1.5; max-width: 80%; text-align: left; }
+.ai-chat-msg.user .bubble { background: #4F46E5; color: white; border-bottom-right-radius: 4px; }
+.ai-chat-msg.ai .bubble { background: #F1F5F9; color: #334155; border-bottom-left-radius: 4px; }
+.ai-chat-msg .sender { font-size: 10px; font-weight: 600; color: #94A3B8; margin-bottom: 4px; }
+
+/* Full width AI section */
+.ai-full { grid-column: 1 / -1; }
+
+/* Animations */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.feature-section.active { animation: fadeIn 0.3s ease; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+.typing { animation: pulse 1.5s infinite; }
+</style>
+</head>
+<body>
+<div class="layout">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-logo">WorkFlow Pro</div>
+
+    <div class="sidebar-section">Naviqasiya</div>
+    <div class="sidebar-item"><span class="icon">📊</span> Bugün</div>
+    <div class="sidebar-item"><span class="icon">📥</span> Gələnlər</div>
+    <div class="sidebar-item"><span class="icon">📅</span> Gələcək</div>
+
+    <div class="sidebar-section">Yeni Funksiyalar</div>
+    <div class="sidebar-item active" onclick="showTab('editor')">
+      <span class="icon">📝</span> Sənədlər
+      <span class="badge">YENİ</span>
+    </div>
+    <div class="sidebar-item" onclick="showTab('spreadsheet')">
+      <span class="icon">📊</span> Cədvəllər
+      <span class="badge">YENİ</span>
+    </div>
+    <div class="sidebar-item" onclick="showTab('ai')">
+      <span class="icon">🤖</span> AI Köməkçi
+      <span class="badge">YENİ</span>
+    </div>
+
+    <div class="sidebar-section">İş</div>
+    <div class="sidebar-item"><span class="icon">✅</span> Tapşırıqlar</div>
+    <div class="sidebar-item"><span class="icon">☑️</span> Todo</div>
+    <div class="sidebar-item"><span class="icon">📋</span> Şablonlar</div>
+
+    <div class="sidebar-section">İdarəetmə</div>
+    <div class="sidebar-item"><span class="icon">👥</span> İşçilər</div>
+    <div class="sidebar-item"><span class="icon">💰</span> Maliyyə</div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main">
+    <h1 class="page-title">Yeni Funksiyalar Preview</h1>
+    <p class="page-sub">Bu 3 funksiya əlavə olunacaq — interaktiv mockup</p>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <div class="tab active" onclick="showTab('editor')">📝 Rich Text Editor</div>
+      <div class="tab" onclick="showTab('spreadsheet')">📊 Spreadsheet / Cədvəl</div>
+      <div class="tab" onclick="showTab('ai')">🤖 AI Xülasə</div>
+    </div>
+
+    <!-- ==================== 1. RICH TEXT EDITOR ==================== -->
+    <div id="tab-editor" class="feature-section active">
+      <!-- Document list -->
+      <div class="doc-list">
+        <div class="doc-card" onclick="document.getElementById('editor-area').style.display='block'">
+          <div class="doc-icon">📄</div>
+          <div class="doc-title">Sprint #14 Qeydlər</div>
+          <div class="doc-meta">Bugün · Həsən Əliyev</div>
+        </div>
+        <div class="doc-card">
+          <div class="doc-icon">📋</div>
+          <div class="doc-title">Onboarding Proseduru</div>
+          <div class="doc-meta">Dünən · Leyla Məmmədova</div>
+        </div>
+        <div class="doc-card">
+          <div class="doc-icon">📊</div>
+          <div class="doc-title">Q1 Hesabat</div>
+          <div class="doc-meta">28 Mar · Nigar Hüseynova</div>
+        </div>
+        <div class="doc-card" style="border: 2px dashed #E2E8F0; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 4px; color: #94A3B8;">
+          <div style="font-size: 24px;">+</div>
+          <div style="font-size: 12px; font-weight: 600;">Yeni sənəd</div>
+        </div>
+      </div>
+
+      <!-- Editor -->
+      <div id="editor-area" class="editor-container">
+        <!-- Toolbar -->
+        <div class="editor-toolbar">
+          <button class="toolbar-btn" title="Geri al">↩</button>
+          <button class="toolbar-btn" title="Yenidən">↪</button>
+          <div class="toolbar-divider"></div>
+          <button class="toolbar-btn" title="Başlıq 1" style="font-weight: 800; font-size: 13px;">H1</button>
+          <button class="toolbar-btn" title="Başlıq 2" style="font-weight: 700; font-size: 12px;">H2</button>
+          <button class="toolbar-btn" title="Başlıq 3" style="font-weight: 600; font-size: 11px;">H3</button>
+          <div class="toolbar-divider"></div>
+          <button class="toolbar-btn active" title="Qalın"><b>B</b></button>
+          <button class="toolbar-btn" title="İtalik"><i>I</i></button>
+          <button class="toolbar-btn" title="Altxətt" style="text-decoration: underline;">U</button>
+          <button class="toolbar-btn" title="Üstüxətt" style="text-decoration: line-through;">S</button>
+          <button class="toolbar-btn" title="Kod">&lt;/&gt;</button>
+          <div class="toolbar-divider"></div>
+          <button class="toolbar-btn" title="Siyahı">☰</button>
+          <button class="toolbar-btn" title="Nömrəli siyahı">1.</button>
+          <button class="toolbar-btn" title="Checkbox">☑</button>
+          <div class="toolbar-divider"></div>
+          <button class="toolbar-btn" title="Sitat">❝</button>
+          <button class="toolbar-btn" title="Kod bloku">{}</button>
+          <button class="toolbar-btn" title="Cədvəl">⊞</button>
+          <button class="toolbar-btn" title="Şəkil">🖼</button>
+          <button class="toolbar-btn" title="Link">🔗</button>
+          <button class="toolbar-btn" title="Mention">@</button>
+          <div class="toolbar-divider"></div>
+          <button class="toolbar-btn" title="AI ilə yaz" style="background: linear-gradient(135deg, #8B5CF6, #6366F1); color: white; border-radius: 6px;">✨</button>
+        </div>
+
+        <!-- Editor Body -->
+        <div class="editor-body" contenteditable="true">
+          <h1>Sprint #14 Planlaşdırma Qeydləri</h1>
+
+          <p><span class="tag tag-blue">Sprint #14</span> <span class="tag tag-green">Aktiv</span> <span class="tag tag-amber">Son tarix: 15 Aprel</span></p>
+
+          <h2>Görüş xülasəsi</h2>
+          <p>Bu sprint ərzində əsas fokus <strong>mobil tətbiqin beta versiyası</strong> və <strong>maliyyə hesabatları</strong> moduluna yönələcək. <span class="mention">@Leyla Məmmədova</span> frontend, <span class="mention">@Rəşad Əliyev</span> backend hissəsini aparacaq.</p>
+
+          <blockquote>Müştəri tərəfindən ən çox istənilən funksiya Excel export-dur. Bu sprint-də tamamlanmalıdır.</blockquote>
+
+          <h2>Tapşırıq siyahısı</h2>
+          <ul class="checklist">
+            <li><input type="checkbox" checked> Maliyyə Excel export endpoint (backend)</li>
+            <li><input type="checkbox" checked> Dashboard KPI kartları</li>
+            <li><input type="checkbox"> Mobil app — giriş ekranı</li>
+            <li><input type="checkbox"> Mobil app — tapşırıq siyahısı</li>
+            <li><input type="checkbox"> E-poçt bildiriş sistemi test</li>
+            <li><input type="checkbox"> Swagger API docs genişləndir</li>
+          </ul>
+
+          <h2>Texniki qeydlər</h2>
+          <p>API endpoint üçün <span class="inline-code">exceljs</span> paketi istifadə olunur. Controller:</p>
+
+          <div class="code-block">
+@Get('export/tasks')
+async exportTasks(@Req() req, @Res() res) {
+  const buffer = await this.exportService.exportTasks(
+    req.user.tenantId
+  );
+  res.setHeader('Content-Type', 'application/vnd.openxml...');
+  res.send(buffer);
+}</div>
+
+          <div class="callout callout-info">
+            <span>💡</span>
+            <div><strong>Qeyd:</strong> Docker compose ilə development mühiti 1 dəqiqəyə qurulur. <span class="inline-code">docker-compose up</span> işlətmək kifayətdir.</div>
+          </div>
+
+          <h2>Büdcə və resurslar</h2>
+          <table>
+            <thead>
+              <tr><th>Resurs</th><th>Ayrılmış vaxt</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Frontend developer</td><td>40 saat</td><td><span class="cell-tag" style="background:#ECFDF5;color:#059669;">Aktiv</span></td></tr>
+              <tr><td>Backend developer</td><td>32 saat</td><td><span class="cell-tag" style="background:#ECFDF5;color:#059669;">Aktiv</span></td></tr>
+              <tr><td>QA engineer</td><td>16 saat</td><td><span class="cell-tag" style="background:#FFFBEB;color:#D97706;">Gözləyir</span></td></tr>
+              <tr><td>Dizayner</td><td>8 saat</td><td><span class="cell-tag" style="background:#F1F5F9;color:#64748B;">Planlanır</span></td></tr>
+            </tbody>
+          </table>
+
+          <div class="image-block">📸 Şəkil / Ekran görüntüsü buraya əlavə olunur</div>
+
+          <div class="callout callout-warn">
+            <span>⚠️</span>
+            <div><strong>Risk:</strong> Mobil tətbiq üçün Flutter versiya yeniləməsi lazım ola bilər. Test müddəti uzana bilər.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== 2. SPREADSHEET ==================== -->
+    <div id="tab-spreadsheet" class="feature-section">
+      <!-- Toolbar -->
+      <div class="spreadsheet-toolbar">
+        <button class="view-btn active">⊞ Grid</button>
+        <button class="view-btn">▤ Kanban</button>
+        <button class="view-btn">📅 Calendar</button>
+        <button class="view-btn">🎨 Gallery</button>
+        <button class="view-btn">📊 Form</button>
+        <div style="flex:1"></div>
+        <span class="filter-chip">+ Filtr</span>
+        <span class="filter-chip">↕ Sort</span>
+        <span class="filter-chip">👁 Gizlə</span>
+        <span class="filter-chip">🔍 Axtar</span>
+      </div>
+
+      <!-- Spreadsheet -->
+      <div class="spreadsheet">
+        <table>
+          <thead>
+            <tr>
+              <th class="row-num">#</th>
+              <th>Tapşırıq adı <div class="resize"></div></th>
+              <th>Status <div class="resize"></div></th>
+              <th>Prioritet <div class="resize"></div></th>
+              <th>İşçi <div class="resize"></div></th>
+              <th>İşletmə <div class="resize"></div></th>
+              <th>Son tarix <div class="resize"></div></th>
+              <th>Müddət <div class="resize"></div></th>
+              <th>Etiket <div class="resize"></div></th>
+              <th class="cell-expand"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="row-num">1</td>
+              <td style="font-weight:600;">Mobil app login ekranı</td>
+              <td><span class="cell-tag" style="background:#EFF6FF;color:#2563EB;">Davam edir</span></td>
+              <td><span class="cell-tag" style="background:#FEF2F2;color:#DC2626;">Kritik</span></td>
+              <td>Leyla M.</td>
+              <td>Bakı Filialı</td>
+              <td>2026-04-10</td>
+              <td>24s</td>
+              <td><span class="cell-tag" style="background:#F5F3FF;color:#7C3AED;">frontend</span></td>
+              <td class="cell-expand"><button class="expand-btn">↗</button></td>
+            </tr>
+            <tr>
+              <td class="row-num">2</td>
+              <td style="font-weight:600;">Maliyyə hesabat API</td>
+              <td><span class="cell-tag" style="background:#ECFDF5;color:#059669;">Tamamlandı</span></td>
+              <td><span class="cell-tag" style="background:#FFFBEB;color:#D97706;">Yüksək</span></td>
+              <td>Rəşad Ə.</td>
+              <td>Baş ofis</td>
+              <td>2026-04-05</td>
+              <td>16s</td>
+              <td><span class="cell-tag" style="background:#ECFDF5;color:#059669;">backend</span></td>
+              <td class="cell-expand"><button class="expand-btn">↗</button></td>
+            </tr>
+            <tr>
+              <td class="row-num">3</td>
+              <td style="font-weight:600;">Excel export düyməsi</td>
+              <td><span class="cell-tag" style="background:#ECFDF5;color:#059669;">Tamamlandı</span></td>
+              <td><span class="cell-tag" style="background:#EFF6FF;color:#2563EB;">Orta</span></td>
+              <td>Həsən Ə.</td>
+              <td>Baş ofis</td>
+              <td>2026-04-02</td>
+              <td>4s</td>
+              <td><span class="cell-tag" style="background:#FFF7ED;color:#EA580C;">UI</span></td>
+              <td class="cell-expand"><button class="expand-btn">↗</button></td>
+            </tr>
+            <tr>
+              <td class="row-num">4</td>
+              <td style="font-weight:600;">Swagger API docs</td>
+              <td><span class="cell-tag" style="background:#ECFDF5;color:#059669;">Tamamlandı</span></td>
+              <td><span class="cell-tag" style="background:#F1F5F9;color:#64748B;">Aşağı</span></td>
+              <td>Həsən Ə.</td>
+              <td>Baş ofis</td>
+              <td>2026-04-01</td>
+              <td>2s</td>
+              <td><span class="cell-tag" style="background:#ECFDF5;color:#059669;">backend</span></td>
+              <td class="cell-expand"><button class="expand-btn">↗</button></td>
+            </tr>
+            <tr>
+              <td class="row-num">5</td>
+              <td style="font-weight:600;">Push notification test</td>
+              <td><span class="cell-tag" style="background:#F1F5F9;color:#64748B;">Gözləyir</span></td>
+              <td><span class="cell-tag" style="background:#FFFBEB;color:#D97706;">Yüksək</span></td>
+              <td>Aynur H.</td>
+              <td>Gəncə Filialı</td>
+              <td>2026-04-12</td>
+              <td>8s</td>
+              <td><span class="cell-tag" style="background:#FFF1F2;color:#E11D48;">mobil</span></td>
+              <td class="cell-expand"><button class="expand-btn">↗</button></td>
+            </tr>
+            <tr>
+              <td class="row-num">6</td>
+              <td style="font-weight:600;">Maaş ödəmə avtomatlaşdırma</td>
+              <td><span class="cell-tag" style="background:#FFFBEB;color:#D97706;">Onay gözl.</span></td>
+              <td><span class="cell-tag" style="background:#FEF2F2;color:#DC2626;">Kritik</span></td>
+              <td>Nigar H.</td>
+              <td>Bakı Filialı</td>
+              <td>2026-04-15</td>
+              <td>32s</td>
+              <td><span class="cell-tag" style="background:#ECFDF5;color:#059669;">backend</span> <span class="cell-tag" style="background:#FFF7ED;color:#EA580C;">HR</span></td>
+              <td class="cell-expand"><button class="expand-btn">↗</button></td>
+            </tr>
+            <tr>
+              <td class="row-num">7</td>
+              <td style="font-weight:600;">Müştəri idarəetmə modulu</td>
+              <td><span class="cell-tag" style="background:#F1F5F9;color:#64748B;">Planlanır</span></td>
+              <td><span class="cell-tag" style="background:#EFF6FF;color:#2563EB;">Orta</span></td>
+              <td>—</td>
+              <td>Baş ofis</td>
+              <td>2026-05-01</td>
+              <td>80s</td>
+              <td><span class="cell-tag" style="background:#F5F3FF;color:#7C3AED;">feature</span></td>
+              <td class="cell-expand"><button class="expand-btn">↗</button></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="add-row">+ Yeni sətir əlavə et</div>
+      </div>
+
+      <!-- Summary row -->
+      <div style="display:flex; gap:16px; margin-top:12px; font-size:11px; color:#64748B;">
+        <span>7 sətir</span>
+        <span>·</span>
+        <span>CƏMİ müddət: <strong style="color:#1E293B;">166 saat</strong></span>
+        <span>·</span>
+        <span>Tamamlanma: <strong style="color:#059669;">43%</strong></span>
+      </div>
+    </div>
+
+    <!-- ==================== 3. AI SUMMARY ==================== -->
+    <div id="tab-ai" class="feature-section">
+      <!-- AI Prompt -->
+      <div class="ai-prompt-bar">
+        <span style="font-size:18px;">🤖</span>
+        <input type="text" placeholder="AI-dən soruş: 'Bu həftə nə oldu?', 'Gecikmiş tapşırıqlar haqqında xülasə', 'Maliyyə vəziyyəti'..." />
+        <button>✨ Soruş</button>
+      </div>
+
+      <div class="ai-container">
+        <!-- Weekly Summary -->
+        <div class="ai-card">
+          <div class="ai-card-header">
+            <h3>📊 Həftəlik Xülasə</h3>
+            <span class="ai-badge">AI</span>
+          </div>
+          <div class="ai-card-body">
+            <div class="ai-summary-text">
+              <p>Bu həftə <strong>12 tapşırıq tamamlandı</strong>, <strong>3 tapşırıq gecikmiş</strong> statusdadır. Ən aktiv işçi <strong>Leyla Məmmədova</strong> olub (5 tapşırıq).</p>
+              <p style="margin-top:8px;">Kritik gecikmiş tapşırıq: <strong>"Mobil app login ekranı"</strong> — 2 gün gecikir, Leyla-ya xatırlatma göndərildi.</p>
+            </div>
+            <div class="ai-stat-grid">
+              <div class="ai-stat" style="background:#ECFDF5;">
+                <div class="num" style="color:#059669;">12</div>
+                <div class="label">Tamamlandı</div>
+              </div>
+              <div class="ai-stat" style="background:#FEF2F2;">
+                <div class="num" style="color:#DC2626;">3</div>
+                <div class="label">Gecikmiş</div>
+              </div>
+              <div class="ai-stat" style="background:#EFF6FF;">
+                <div class="num" style="color:#2563EB;">8</div>
+                <div class="label">Davam edir</div>
+              </div>
+              <div class="ai-stat" style="background:#FFFBEB;">
+                <div class="num" style="color:#D97706;">87%</div>
+                <div class="label">Effektivlik</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Finance Summary -->
+        <div class="ai-card">
+          <div class="ai-card-header">
+            <h3>💰 Maliyyə Təhlili</h3>
+            <span class="ai-badge">AI</span>
+          </div>
+          <div class="ai-card-body">
+            <div class="ai-summary-text">
+              <p>Mart ayında <strong>toplam gəlir 24,500 AZN</strong>, xərclər <strong>18,200 AZN</strong> olub. Xalis mənfəət <strong style="color:#059669;">+6,300 AZN</strong>.</p>
+              <p style="margin-top:8px;">Ən böyük xərc maddəsi: <strong>Maaşlar (12,400 AZN)</strong>. Keçən ayla müqayisədə xərclər <strong style="color:#DC2626;">8% artıb</strong>.</p>
+              <p style="margin-top:8px;"><strong>Tövsiyə:</strong> Aprel ayında hosting xərclərini optimallaşdırmaq 15% qənaət edə bilər.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Chat -->
+        <div class="ai-card ai-full">
+          <div class="ai-card-header">
+            <h3>💬 AI Söhbət</h3>
+            <span class="ai-badge">AI</span>
+          </div>
+          <div class="ai-card-body">
+            <div class="ai-chat-msg user">
+              <div class="sender">Sən</div>
+              <div class="bubble">Bu həftə hansı tapşırıqlar gecikib?</div>
+            </div>
+            <div class="ai-chat-msg ai">
+              <div class="sender">🤖 AI Köməkçi</div>
+              <div class="bubble">
+                Bu həftə 3 tapşırıq gecikmiş statusdadır:<br><br>
+                1. <strong>Mobil app login ekranı</strong> — 2 gün gecikir (Leyla M.)<br>
+                2. <strong>Push notification test</strong> — 1 gün gecikir (Aynur H.)<br>
+                3. <strong>Müştəri feedback formu</strong> — 3 gün gecikir (Nigar H.)<br><br>
+                <em>Həmin işçilərə avtomatik xatırlatma göndərilsin?</em>
+              </div>
+            </div>
+            <div class="ai-chat-msg user">
+              <div class="sender">Sən</div>
+              <div class="bubble">Bəli, xatırlatma göndər və gecikmiş tapşırıqların prioritetini "Kritik" et</div>
+            </div>
+            <div class="ai-chat-msg ai">
+              <div class="sender">🤖 AI Köməkçi</div>
+              <div class="bubble">
+                ✅ 3 işçiyə xatırlatma e-poçtu göndərildi<br>
+                ✅ 3 tapşırığın prioriteti "Kritik" olaraq yeniləndi<br><br>
+                Başqa bir şey istəyirsiniz?
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showTab(name) {
+  document.querySelectorAll('.feature-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+
+  document.getElementById('tab-' + name).classList.add('active');
+
+  const tabNames = { editor: 0, spreadsheet: 1, ai: 2 };
+  document.querySelectorAll('.tab')[tabNames[name]].classList.add('active');
+
+  const sidebarItems = document.querySelectorAll('.sidebar-item');
+  const sidebarMap = { editor: 4, spreadsheet: 5, ai: 6 };
+  sidebarItems[sidebarMap[name]].classList.add('active');
+}
+</script>
+</body>
+</html>

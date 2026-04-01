@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Put, Delete, Patch, Body, Param, Query, UseGuards, UseInterceptors, UploadedFile, Req } from '@nestjs/common'
+import { ApiTags } from '@nestjs/swagger'
 import { FileInterceptor } from '@nestjs/platform-express'
 import { diskStorage } from 'multer'
 import { TodoistService } from './todoist.service'
@@ -10,6 +11,7 @@ import * as path from 'path'
 import * as crypto from 'crypto'
 import { secureFileFilter } from '../common/file-filter'
 
+@ApiTags('Todoist')
 @Controller('todoist')
 @UseGuards(JwtAuthGuard)
 export class TodoistController {
@@ -208,8 +210,12 @@ export class TodoistController {
   }
 
   @Post('templates')
-  createTemplate(@Body() body: { name: string; description?: string; tasks: string; color?: string }, @Req() req: any) {
-    return this.service.createTemplate(req.user.sub, req.user.tenantId, body)
+  createTemplate(@Body() body: { name: string; description?: string; tasks?: string; color?: string }, @Req() req: any) {
+    // tasks göndərilməyibsə boş massiv saxla — 500 əvəzinə düzgün yaradır
+    return this.service.createTemplate(req.user.sub, req.user.tenantId, {
+      ...body,
+      tasks: body.tasks || '[]',
+    })
   }
 
   @Post('templates/:id/use')

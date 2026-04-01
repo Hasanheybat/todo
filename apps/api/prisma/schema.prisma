@@ -638,6 +638,13 @@ model Notification {
 // Todoist Modulu (Şəxsi tapşırıq idarəetmə)
 // ──────────────────────────────────────────
 
+enum TodoistTaskStatus {
+  WAITING      // Gözləyir
+  IN_PROGRESS  // Davam edir
+  DONE         // Tamamlandı
+  CANCELLED    // İptal edilib
+}
+
 enum TodoistPriority {
   P1  // Qırmızı — təcili
   P2  // Narıncı — yüksək
@@ -696,8 +703,9 @@ model TodoistTask {
   id          String          @id @default(uuid())
   content     String
   description String?
-  priority    TodoistPriority @default(P4)
-  isCompleted Boolean         @default(false)
+  priority    TodoistPriority    @default(P4)
+  todoStatus  TodoistTaskStatus  @default(WAITING)
+  isCompleted Boolean            @default(false)
   dueDate     DateTime?
   dueString   String?         // "hər bazar ertəsi", "sabah" kimi
   isRecurring Boolean         @default(false)

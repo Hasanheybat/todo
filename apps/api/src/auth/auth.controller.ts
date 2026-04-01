@@ -1,9 +1,11 @@
 import { Controller, Post, Get, Body, UseGuards, Req, HttpCode, BadRequestException } from '@nestjs/common'
+import { ApiTags } from '@nestjs/swagger'
 import { AuthService } from './auth.service'
 import { RegisterDto } from './dto/register.dto'
 import { LoginDto } from './dto/login.dto'
 import { JwtAuthGuard } from './guards/jwt-auth.guard'
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   // Rate limiting — IP bazalı

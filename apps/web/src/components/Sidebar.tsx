@@ -22,6 +22,7 @@ const workNav = [
   { name: 'Tapşırıqlar', href: '/tasks', icon: 'tasks', perm: 'tasks.read' },
   { name: 'Todo', href: '/todo', icon: 'todo' },
   { name: 'Şablonlar', href: '/templates', icon: 'templates', perm: 'tasks.read' },
+  { name: 'Filter Test ✦', href: '/filter-test', icon: 'filter' },
 ]
 
 const manageNav = [
@@ -43,6 +44,7 @@ function NavIcon({ type, active }: { type: string; active: boolean }) {
     finance: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 100 7h5a3.5 3.5 0 110 7H6"/></svg>,
     roles: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
     salary: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16M12 11h.01"/></svg>,
+    filter: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>,
   }
   return icons[type] || <span />
 }
@@ -51,6 +53,7 @@ function NavLink({ item, pathname, onClose, hasProjectOrLabel }: { item: { name:
   const isActive = item.href === '/todo'
     ? (pathname === '/todo' && !hasProjectOrLabel)
     : (pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href + '/')) || (item.href === '/dashboard' && pathname === '/dashboard'))
+
   return (
     <Link href={item.href} onClick={onClose}
       className={`flex items-center gap-2.5 rounded-lg px-2.5 py-[7px] text-[13px] font-medium transition`}
@@ -102,7 +105,9 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
     try { setLabels(await api.getTodoistLabels()) } catch {}
   }, [])
 
-  useEffect(() => { loadProjects(); loadLabels(); loadKarma() }, [loadProjects, loadLabels, loadKarma])
+  useEffect(() => {
+    loadProjects(); loadLabels(); loadKarma()
+  }, [loadProjects, loadLabels, loadKarma])
 
   const visibleManageNav = manageNav.filter(item => hasPermission(item.perm))
 
@@ -114,7 +119,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         ${open ? 'translate-x-0' : '-translate-x-full'}`}
         style={{ backgroundColor: 'var(--todoist-sidebar-flat)' }}
       >
-        {/* Profil */}
+        {/* Üst blok — profil */}
         <div className="px-3 pt-4 pb-2">
           <div className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 cursor-pointer transition"
             style={{ backgroundColor: 'transparent' }}
@@ -254,30 +259,15 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
 
           {/* İdarəetmə */}
           {visibleManageNav.length > 0 && (
-            <p className="px-2.5 mb-1.5 text-[11px] font-bold uppercase tracking-wider" style={{ color: 'var(--todoist-sidebar-label)' }}>İdarəetmə</p>
+            <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider px-2.5" style={{ color: 'var(--todoist-sidebar-label)' }}>İdarəetmə</p>
           )}
           <div className="space-y-0.5">
-            {visibleManageNav.map(item => {
-              const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
-              return (
-                <Link key={item.href} href={item.href} onClick={onClose}
-                  className={`flex items-center gap-2.5 rounded-lg px-2.5 py-[7px] text-[13px] font-medium transition`}
-                  style={isActive
-                    ? { backgroundColor: 'var(--todoist-sidebar-active)', color: 'var(--todoist-sidebar-text-active)', fontWeight: 600 }
-                    : { color: 'var(--todoist-sidebar-text)' }}
-                  onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--todoist-sidebar-hover)' }}
-                  onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent' }}>
-                  <NavIcon type={item.icon} active={isActive} />
-                  {item.name}
-                </Link>
-              )
-            })}
+            {visibleManageNav.map(item => <NavLink key={item.href} item={item} pathname={pathname} onClose={onClose} />)}
           </div>
         </nav>
 
-        {/* Alt — Karma + rol */}
+        {/* Alt — karma + rol */}
         <div className="px-3 pb-3 pt-2" style={{ borderTop: '1px solid var(--todoist-sidebar-divider)' }}>
-          {/* Karma Widget */}
           <div className="flex items-center gap-2 px-2.5 py-1.5 mb-1">
             <span className="text-[14px]">🔥</span>
             <div className="flex-1">

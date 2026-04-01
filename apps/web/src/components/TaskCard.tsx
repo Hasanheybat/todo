@@ -46,9 +46,17 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
   const timeColor = diff !== null && diff < 0 ? '#EF4444' : diff === 0 ? '#F59E0B' : '#64748B'
   const isGroup = !!task._groupCount && task._groupCount > 1
 
+  // SLA badge — gecikən / bu gün / yaxın tapşırıqlar
+  const slaBadge = !done && diff !== null ? (
+    diff < 0 ? { label: `${Math.abs(diff)}g gecikmiş`, bg: '#FEF2F2', color: '#DC2626', border: '#FECACA' } :
+    diff === 0 ? { label: 'Bugün son gün', bg: '#FFFBEB', color: '#D97706', border: '#FDE68A' } :
+    diff <= 2 ? { label: `${diff}g qalıb`, bg: '#FFF7ED', color: '#EA580C', border: '#FDBA74' } :
+    null
+  ) : null
+
   return (
     <div onClick={() => onClick(task)} className="rounded-xl hover:shadow-md transition cursor-pointer overflow-hidden"
-      style={{ backgroundColor: 'var(--todoist-surface)', border: '1px solid var(--todoist-border)' }}>
+      style={{ backgroundColor: 'var(--todoist-surface)', border: `1px solid ${slaBadge?.border || 'var(--todoist-border)'}` }}>
 
       {/* Üst rəng xətti */}
       <div style={{ height: 3, backgroundColor: pColor }} />
@@ -65,23 +73,31 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
       <div className={`px-3 ${task.isCreator ? 'pt-1' : 'pt-2.5'} pb-2 flex items-start justify-between gap-2`}>
         <div className="flex items-start gap-1.5 flex-1 min-w-0">
           <div className="shrink-0 mt-0.5"><PrioFlag color={pColor} size={14} /></div>
-          <p className="text-[13px] font-semibold leading-snug"
+          <p className="text-[13px] font-semibold leading-snug line-clamp-2"
             style={{ color: done ? 'var(--todoist-text-tertiary)' : 'var(--todoist-text)' }}>
             {task.title}
           </p>
         </div>
-        {task.sourceTemplateId && (
-          <span className="shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded-full"
-            style={{ backgroundColor: '#E8F0FE', color: '#246FE0' }}>
-            🔁 Təkrarlanan
-          </span>
-        )}
-        {isGroup && !task.sourceTemplateId && (
-          <span className="shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded-full"
-            style={{ backgroundColor: '#E8F0FE', color: '#246FE0' }}>
-            {task._groupCount} nəfər
-          </span>
-        )}
+        <div className="flex items-center gap-1 shrink-0">
+          {slaBadge && (
+            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full"
+              style={{ backgroundColor: slaBadge.bg, color: slaBadge.color }}>
+              ⚠ {slaBadge.label}
+            </span>
+          )}
+          {task.sourceTemplateId && (
+            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full"
+              style={{ backgroundColor: '#E8F0FE', color: '#246FE0' }}>
+              🔁 Təkrarlanan
+            </span>
+          )}
+          {isGroup && !task.sourceTemplateId && (
+            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full"
+              style={{ backgroundColor: '#E8F0FE', color: '#246FE0' }}>
+              {task._groupCount} nəfər
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Etiketlər + Layihə */}
@@ -97,6 +113,30 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
               {tl.label?.name || tl.name}
             </span>
           ))}
+        </div>
+      )}
+
+      {/* Badge row: alt tapşırıq / fayl / qeyd */}
+      {(task.subTasks?.length > 0 || task.attachments?.length > 0 || task.notes?.length > 0 || task.comments?.length > 0) && (
+        <div className="px-3 pb-1.5 flex items-center gap-2.5">
+          {task.subTasks?.length > 0 && (
+            <span className="flex items-center gap-0.5 text-[9px] font-semibold" style={{ color: 'var(--todoist-text-secondary)' }}>
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+              {task.subTasks.length}
+            </span>
+          )}
+          {task.attachments?.length > 0 && (
+            <span className="flex items-center gap-0.5 text-[9px] font-semibold" style={{ color: 'var(--todoist-text-secondary)' }}>
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+              {task.attachments.length}
+            </span>
+          )}
+          {(task.notes?.length > 0 || task.comments?.length > 0) && (
+            <span className="flex items-center gap-0.5 text-[9px] font-semibold" style={{ color: 'var(--todoist-text-secondary)' }}>
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              {(task.notes?.length || 0) + (task.comments?.length || 0)}
+            </span>
+          )}
         </div>
       )}
 

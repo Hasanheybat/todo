@@ -1,8 +1,10 @@
 import { Controller, Get, Post, Put, Patch, Delete, Body, Param, Query, UseGuards, Req, BadRequestException } from '@nestjs/common'
+import { ApiTags } from '@nestjs/swagger'
 import { AdminService } from './admin.service'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { SuperAdminGuard } from '../auth/guards/super-admin.guard'
 
+@ApiTags('Admin')
 @Controller('admin')
 export class AdminController {
   constructor(private service: AdminService) {}

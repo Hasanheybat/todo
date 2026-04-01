@@ -80,9 +80,29 @@
   .dark [data-sonner-toaster], .dark div[role="status"] { background-color: #334155 !important; color: #F1F5F9 !important; }
   .dark div[role="status"] > div { background-color: #334155 !important; color: #F1F5F9 !important; }
 
+  /* ═══ Dark mode: modal/dropdown/popover ═══ */
+  .dark [role="dialog"],
+  .dark [role="menu"],
+  .dark [role="listbox"],
+  .dark [data-radix-popper-content-wrapper] > div,
+  .dark .popover-content { background-color: #1E293B !important; border-color: #334155 !important; color: #F1F5F9 !important; }
+  /* Floating panels / modals — any fixed/absolute white containers */
+  .dark .fixed > .bg-white,
+  .dark .fixed > div[class*="bg-white"],
+  .dark .absolute > .bg-white { background-color: #1E293B !important; }
+  /* Date picker calendars */
+  .dark .rdp, .dark .react-datepicker { background-color: #1E293B !important; border-color: #334155 !important; color: #F1F5F9 !important; }
+  .dark .react-datepicker__header { background-color: #0F172A !important; border-color: #334155 !important; }
+  .dark .react-datepicker__day { color: #F1F5F9 !important; }
+  .dark .react-datepicker__day:hover { background-color: #334155 !important; }
+  .dark .react-datepicker__day--selected { background-color: #4F46E5 !important; }
+  /* Toast */
+  .dark [data-hot-toast] > div { background-color: #334155 !important; color: #F1F5F9 !important; }
+
   * {
     scrollbar-width: thin;
     scrollbar-color: #CBD5E1 transparent;
   }
   .dark * { scrollbar-color: #475569 transparent; }
+
 }

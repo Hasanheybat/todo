@@ -1,8 +1,10 @@
 import { Controller, Get, Post, Delete, Body, Param, Query, UseGuards, Req } from '@nestjs/common'
+import { ApiTags } from '@nestjs/swagger'
 import { DepartmentsService } from './departments.service'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { PermissionsGuard, RequirePermissions } from '../auth/guards/permissions.guard'
 
+@ApiTags('Departments')
 @Controller('departments')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 export class DepartmentsController {

@@ -7,6 +7,13 @@ const PRIO_COLORS: Record<string, string> = {
   P4: 'var(--todoist-text-tertiary)',
 }
 
+const STATUS_COLORS: Record<string, string> = {
+  WAITING:     '#94A3B8',
+  IN_PROGRESS: '#F59E0B',
+  DONE:        '#10B981',
+  CANCELLED:   '#EF4444',
+}
+
 const PRIO_LABELS: Record<string, string> = {
   P1: 'Təcili',
   P2: 'Yüksək',
@@ -24,6 +31,7 @@ interface TaskItemProps {
     dueDate?: string
     isRecurring?: boolean
     recurRule?: string
+    todoStatus?: string
     labels?: { label: { name: string; color: string } }[]
     project?: { id: string; name: string; color: string }
     _count?: { children?: number; comments?: number }
@@ -40,7 +48,7 @@ interface TaskItemProps {
 }
 
 export default function TaskItem({ task, onToggle, onClick, onDelete, showProject = false, showDueDate = true, dragHandleProps }: TaskItemProps) {
-  const color = PRIO_COLORS[task.priority] || 'var(--todoist-text-tertiary)'
+  const color = STATUS_COLORS[task.todoStatus || 'WAITING'] || '#94A3B8'
 
   // Badge hesablamaları
   const subtaskTotal = task._count?.children || task.children?.length || 0
@@ -50,7 +58,7 @@ export default function TaskItem({ task, onToggle, onClick, onDelete, showProjec
   const recurLabel = task.recurRule === 'daily' ? 'Hər gün' : task.recurRule === 'weekly' ? 'Hər həftə' : task.recurRule === 'monthly' ? 'Hər ay' : task.recurRule
 
   return (
-    <div className={`group flex items-start gap-2.5 px-3 py-2.5 rounded-lg hover:bg-[var(--todoist-sidebar-hover)] cursor-pointer transition-all duration-200 ${task.isCompleted ? 'opacity-50' : 'opacity-100'}`}
+    <div className={`group flex items-start gap-2.5 px-3 py-2.5 rounded-lg hover:bg-[var(--todoist-sidebar-hover)] cursor-pointer transition-all duration-200 overflow-hidden ${task.isCompleted ? 'opacity-50' : 'opacity-100'}`}
       onClick={() => onClick(task.id)}>
 
       {/* Drag Handle */}
@@ -74,7 +82,8 @@ export default function TaskItem({ task, onToggle, onClick, onDelete, showProjec
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <p className={`text-[13px] leading-snug ${task.isCompleted ? 'line-through text-[var(--todoist-text-tertiary)]' : 'text-[var(--todoist-text)]'}`}>
+        <p className={`text-[13px] leading-snug ${task.isCompleted ? 'line-through text-[var(--todoist-text-tertiary)]' : 'text-[var(--todoist-text)]'}`}
+          style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '45ch' }}>
           {task.content}
         </p>
         {task.description && (

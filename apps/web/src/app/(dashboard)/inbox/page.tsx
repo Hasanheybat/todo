@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { api } from '@/lib/api'
 import { useAuth } from '@/contexts/AuthContext'
+import toast from 'react-hot-toast'
 import TaskDetailModal from '@/components/todoist/TaskDetailModal'
 import TaskFormModal from '@/components/TaskFormModal'
 import AssigneeTaskModal from '@/components/AssigneeTaskModal'
@@ -11,8 +12,9 @@ import CreatorTaskModal from '@/components/CreatorTaskModal'
 import RecurringTrackModal from '@/components/templates/RecurringTrackModal'
 import WorkerRecurringTaskModal from '@/components/templates/WorkerRecurringTaskModal'
 import GlobalQuickAdd from '@/components/todoist/GlobalQuickAdd'
-import TaskCard, { daysDiff } from '@/components/TaskCard'
-import FilterBar from '@/components/FilterBar'
+import TaskCard, { P, S, daysDiff } from '@/components/TaskCard'
+import GlassFilterBar from '@/components/GlassFilterBar'
+import DraggableTodoList from '@/components/todoist/DraggableTodoList'
 
 export default function InboxPage() {
   const { user } = useAuth()
@@ -44,6 +46,25 @@ export default function InboxPage() {
   const groupViewTasks = groupViewModal.groupId ? tasks.filter((t: any) => t.groupId === groupViewModal.groupId) : []
   const [recurringTrackModal, setRecurringTrackModal] = useState<{ open: boolean; task: any }>({ open: false, task: null })
   const [workerRecurringModal, setWorkerRecurringModal] = useState<{ open: boolean; task: any }>({ open: false, task: null })
+  const [todoSearch, setTodoSearch] = useState('')
+  const [todoStatusFilter, setTodoStatusFilter] = useState<'ALL' | 'WAITING' | 'IN_PROGRESS' | 'DONE' | 'CANCELLED'>('ALL')
+  const [todoView, setTodoView] = useState<'list' | 'board'>('list')
+  const [todoDragTaskId, setTodoDragTaskId] = useState<string | null>(null)
+  const [todoDragOverCol, setTodoDragOverCol] = useState<string | null>(null)
+
+  function fmtDuration(mins: number): string {
+    if (!mins) return ''
+    if (mins < 60) return `${mins} dəq`
+    const h = Math.floor(mins / 60), m = mins % 60
+    return m > 0 ? `${h}s ${m}d` : `${h} saat`
+  }
+
+  function todoDiff(dueDate: string): number | null {
+    if (!dueDate) return null
+    const now = new Date(); now.setHours(0, 0, 0, 0)
+    const due = new Date(dueDate); due.setHours(0, 0, 0, 0)
+    return Math.ceil((due.getTime() - now.getTime()) / 86400000)
+  }
 
   useEffect(() => {
     loadData()
@@ -57,6 +78,17 @@ export default function InboxPage() {
       window.removeEventListener('open-add-todo', todoHandler)
       window.removeEventListener('open-add-task', gorevHandler)
     }
+  }, [])
+
+  // N klaviatura qısayolu — sürətli TODO əlavə et
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement
+      if (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable) return
+      if (e.key === 'n' || e.key === 'N') { e.preventDefault(); setTodoQuickAddOpen(true) }
+    }
+    window.addEventListener('keydown', handleKey)
+    return () => window.removeEventListener('keydown', handleKey)
   }, [])
 
   function loadData() {
@@ -209,6 +241,9 @@ export default function InboxPage() {
   }, [tasksWithMyStatus, selectedBiz, selectedUser, selectedPriority])
 
   const incompleteTodos = todoTasks
+  const filteredTodos = todoStatusFilter === 'ALL'
+    ? incompleteTodos
+    : incompleteTodos.filter((t: any) => (t.todoStatus || 'WAITING') === todoStatusFilter)
 
   if (loading) return <div className="flex items-center justify-center py-20"><svg className="animate-spin h-6 w-6" style={{ color: 'var(--todoist-red)' }} viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg></div>
 
@@ -220,90 +255,226 @@ export default function InboxPage() {
           <h1 className="text-[24px] font-extrabold" style={{ color: 'var(--todoist-text)' }}>Gələnlər</h1>
           <p className="text-[13px]" style={{ color: 'var(--todoist-text-secondary)' }}>Aktiv tapşırıqlar — {displayTasks.length + incompleteTodos.length} ədəd</p>
         </div>
-        <button onClick={() => { setEditingTask(null); setAddOpen(true) }}
-          className="flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-[13px] font-semibold text-white transition hover:opacity-90"
-          style={{ backgroundColor: 'var(--todoist-red)' }}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M12 5v14M5 12h14"/></svg>
-          Tapşırıq əlavə et
-        </button>
       </div>
 
-      {/* GÖREV / TODO filtr tabları */}
-      <div className="flex gap-0 mb-4" style={{ borderBottom: '2px solid var(--todoist-divider)' }}>
-        {[
-          { key: 'all', label: 'Hamısı', count: displayTasks.length + incompleteTodos.length },
-          { key: 'gorev', label: 'Tapşırıqlar', badge: 'GÖREV', badgeBg: '#E8F0FE', badgeColor: '#246FE0', count: displayTasks.length },
-          { key: 'todo', label: 'Şəxsi', badge: 'TODO', badgeBg: '#FFF3E0', badgeColor: '#EB8909', count: incompleteTodos.length },
-        ].map(tab => (
-          <button key={tab.key} onClick={() => setViewFilter(tab.key as any)}
-            className="px-5 py-2.5 text-[13px] font-semibold border-b-2 -mb-[2px] transition flex items-center gap-1.5"
-            style={{ borderColor: viewFilter === tab.key ? 'var(--todoist-red)' : 'transparent', color: viewFilter === tab.key ? 'var(--todoist-red)' : 'var(--todoist-text-secondary)' }}>
-            {tab.badge && <span className="text-[9px] px-1.5 py-px rounded font-bold" style={{ backgroundColor: tab.badgeBg, color: tab.badgeColor }}>{tab.badge}</span>}
-            {tab.label}
-            <span className={`text-[10px] px-1.5 py-px rounded-full font-bold ${viewFilter === tab.key ? 'bg-[var(--todoist-red-light)] text-[var(--todoist-red)]' : 'bg-[var(--todoist-border)] text-[var(--todoist-text-tertiary)]'}`}>{tab.count}</span>
-          </button>
-        ))}
-      </div>
-
-      {/* Status tab + Chip filtrlər */}
-      {viewFilter !== 'todo' && (
-        <FilterBar
-          statusTabs={[
-            { key: 'PENDING', label: 'Gözləyir', dot: '#64748B', count: statusTabCounts.PENDING },
-            { key: 'IN_PROGRESS', label: 'Davam edir', dot: '#3B82F6', count: statusTabCounts.IN_PROGRESS },
-            { key: 'PENDING_APPROVAL', label: 'Onay gözləyir', dot: '#F59E0B', count: statusTabCounts.PENDING_APPROVAL },
-            { key: 'COMPLETED', label: 'Tamamlandı', dot: '#10B981', count: statusTabCounts.COMPLETED },
-            { key: 'REJECTED', label: 'Rədd', dot: '#EF4444', count: statusTabCounts.REJECTED },
-          ]}
-          selectedStatus={selectedStatus}
-          onStatusChange={setSelectedStatus}
-          businesses={businesses}
-          selectedBiz={selectedBiz}
-          onBizChange={setSelectedBiz}
-          selectedPriority={selectedPriority}
-          onPriorityChange={setSelectedPriority}
-          users={users}
-          selectedUser={selectedUser}
-          onUserChange={setSelectedUser}
-          onReset={() => { setSelectedBiz('ALL'); setSelectedUser('ALL'); setSelectedPriority('ALL'); setSelectedStatus('PENDING') }}
-          showReset={selectedBiz !== 'ALL' || selectedUser !== 'ALL' || selectedPriority !== 'ALL' || selectedStatus !== 'PENDING'}
-        />
-      )}
+      {/* ── GLASS FILTER BAR V4 ── */}
+      <GlassFilterBar
+        viewFilter={viewFilter}
+        onViewFilter={v => { setViewFilter(v); setSelectedStatus('PENDING'); setTodoStatusFilter('ALL') }}
+        gorevCount={displayTasks.length}
+        todoCount={incompleteTodos.length}
+        businesses={businesses}
+        selectedBiz={selectedBiz}
+        onBizChange={setSelectedBiz}
+        selectedPriority={selectedPriority}
+        onPriorityChange={setSelectedPriority}
+        users={users}
+        selectedUser={selectedUser}
+        onUserChange={setSelectedUser}
+        statusTabs={viewFilter === 'todo' ? [
+          { key: 'ALL',         label: 'Hamısı',    dot: '#94A3B8', count: incompleteTodos.length },
+          { key: 'WAITING',     label: 'Gözləyir',  dot: '#64748B', count: incompleteTodos.filter((t:any) => (t.todoStatus||'WAITING')==='WAITING').length },
+          { key: 'IN_PROGRESS', label: 'Davam edir',dot: '#3B82F6', count: incompleteTodos.filter((t:any) => (t.todoStatus||'WAITING')==='IN_PROGRESS').length },
+          { key: 'DONE',        label: 'Tamamlandı',dot: '#10B981', count: incompleteTodos.filter((t:any) => (t.todoStatus||'WAITING')==='DONE').length },
+          { key: 'CANCELLED',   label: 'İptal',     dot: '#EF4444', count: incompleteTodos.filter((t:any) => (t.todoStatus||'WAITING')==='CANCELLED').length },
+        ] : [
+          { key: 'PENDING',          label: 'Gözləyir',     dot: '#64748B', count: statusTabCounts.PENDING },
+          { key: 'IN_PROGRESS',      label: 'Davam edir',   dot: '#3B82F6', count: statusTabCounts.IN_PROGRESS },
+          { key: 'PENDING_APPROVAL', label: 'Onay gözl.',   dot: '#F59E0B', count: statusTabCounts.PENDING_APPROVAL },
+          { key: 'COMPLETED',        label: 'Tamamlandı',   dot: '#10B981', count: statusTabCounts.COMPLETED },
+          { key: 'REJECTED',         label: 'Rədd',         dot: '#EF4444', count: statusTabCounts.REJECTED },
+        ]}
+        selectedStatus={viewFilter === 'todo' ? todoStatusFilter : selectedStatus}
+        onStatusChange={viewFilter === 'todo' ? (k => setTodoStatusFilter(k as any)) : setSelectedStatus}
+        showReset={selectedBiz !== 'ALL' || selectedUser !== 'ALL' || selectedPriority !== 'ALL' || selectedStatus !== 'PENDING' || todoStatusFilter !== 'ALL'}
+        onReset={() => { setSelectedBiz('ALL'); setSelectedUser('ALL'); setSelectedPriority('ALL'); setSelectedStatus('PENDING'); setTodoStatusFilter('ALL') }}
+      />
 
       {/* TODO bölməsi */}
-      {viewFilter !== 'gorev' && incompleteTodos.length > 0 && (
-        <div className={viewFilter === 'all' ? 'mb-6' : ''}>
-          {viewFilter === 'all' && (
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-[9px] px-1.5 py-px rounded bg-[#FFF3E0] text-[#EB8909] font-bold">TODO</span>
-              <span className="text-[13px] font-bold" style={{ color: 'var(--todoist-text)' }}>Şəxsi tapşırıqlar</span>
-              <div className="flex-1 h-px" style={{ backgroundColor: 'var(--todoist-divider)' }} />
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ color: 'var(--todoist-text-tertiary)', backgroundColor: 'var(--todoist-border)' }}>{incompleteTodos.length}</span>
+      {viewFilter !== 'gorev' && (viewFilter === 'todo' || incompleteTodos.length > 0) && (
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-[9px] px-1.5 py-px rounded bg-[#FFF3E0] text-[#EB8909] font-bold">TODO</span>
+            <span className="text-[13px] font-bold" style={{ color: 'var(--todoist-text)' }}>Şəxsi tapşırıqlar</span>
+            <div className="flex-1 h-px" style={{ backgroundColor: 'var(--todoist-divider)' }} />
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full mr-1" style={{ color: 'var(--todoist-text-tertiary)', backgroundColor: 'var(--todoist-border)' }}>{filteredTodos.length < incompleteTodos.length ? `${filteredTodos.length}/${incompleteTodos.length}` : incompleteTodos.length}</span>
+            <div className="flex rounded-md overflow-hidden border border-[var(--todoist-divider)]">
+              <button onClick={() => setTodoView('list')} title="Sürükle-bırak siyahı"
+                className={`px-2 py-1 text-[10px] font-bold flex items-center gap-1 transition
+                  ${todoView === 'list' ? 'bg-[#EB8909] text-white' : 'bg-white text-[var(--todoist-text-secondary)] hover:bg-gray-50'}`}>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+                Siyahı
+              </button>
+              <button onClick={() => setTodoView('board')} title="Kanban board"
+                className={`px-2 py-1 text-[10px] font-bold flex items-center gap-1 transition
+                  ${todoView === 'board' ? 'bg-[#3B82F6] text-white' : 'bg-white text-[var(--todoist-text-secondary)] hover:bg-gray-50'}`}>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="12" rx="1"/><rect x="17" y="3" width="5" height="15" rx="1"/></svg>
+                Board
+              </button>
             </div>
-          )}
-          <div className="space-y-0.5 mb-4">
-            {incompleteTodos.map((task: any) => (
-              <div key={task.id} onClick={() => setSelectedTodoId(task.id)}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition"
-                onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--todoist-bg)'}
-                onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'}>
-                <button onClick={async (e) => { e.stopPropagation(); try { await api.completeTodoistTask(task.id); loadData() } catch {} }}
-                  className="w-[18px] h-[18px] rounded-full border-2 shrink-0 hover:bg-gray-50"
-                  style={{ borderColor: task.priority === 'P1' ? '#EF4444' : task.priority === 'P2' ? '#F59E0B' : task.priority === 'P3' ? '#3B82F6' : '#64748B' }} />
-                <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-medium truncate" style={{ color: 'var(--todoist-text)' }}>{task.content}</p>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-[9px] px-1.5 py-px rounded bg-[#FFF3E0] text-[#EB8909] font-bold">TODO</span>
-                    {task.project && <span className="text-[10px]" style={{ color: 'var(--todoist-text-tertiary)' }}>{task.project.name}</span>}
-                  </div>
-                </div>
-              </div>
-            ))}
           </div>
+          {incompleteTodos.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-[14px] font-semibold" style={{ color: 'var(--todoist-text)' }}>Şəxsi tapşırıq yoxdur</p>
+              <p className="text-[12px] mt-1" style={{ color: 'var(--todoist-text-secondary)' }}>Todo səhifəsindən tapşırıq əlavə edin</p>
+            </div>
+          ) : filteredTodos.length === 0 ? (
+            <div className="text-center py-6">
+              <p className="text-[13px] font-semibold" style={{ color: 'var(--todoist-text-secondary)' }}>Bu filtrdə todo tapılmadı</p>
+              <button onClick={() => setTodoStatusFilter('ALL')} className="mt-2 text-[11px] font-bold px-3 py-1 rounded-lg" style={{ background: 'var(--todoist-red-light)', color: 'var(--todoist-red)' }}>Filtr sıfırla</button>
+            </div>
+          ) : (
+          <>
+          {todoView === 'list' && <div className="mb-4">
+            <DraggableTodoList
+              items={filteredTodos}
+              disabled={false}
+              onReorder={async (reordered) => {
+                try { await api.reorderTodoistTasks(reordered); loadData() } catch {}
+              }}
+              renderItem={(task, dragHandleProps) => {
+                const diff = todoDiff(task.dueDate)
+                const dueDateColor = diff !== null ? (diff < 0 ? '#EF4444' : diff === 0 ? '#D97706' : 'var(--todoist-text-tertiary)') : 'var(--todoist-text-tertiary)'
+                const dueDateText = diff !== null ? (diff < 0 ? `${Math.abs(diff)}g gecikmiş` : diff === 0 ? 'Bugün' : new Date(task.dueDate).toLocaleDateString('az-AZ', { day: 'numeric', month: 'short' })) : ''
+                const hasBadges = (task.subTasks?.length > 0) || (task.attachments?.length > 0) || ((task.notes?.length || 0) + (task.comments?.length || 0)) > 0
+                return (
+                  <div onClick={() => setSelectedTodoId(task.id)}
+                    className="group flex items-start gap-2 px-2 py-2.5 rounded-lg cursor-pointer transition overflow-hidden"
+                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--todoist-bg)'}
+                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'}>
+                    {/* Drag handle */}
+                    <div {...dragHandleProps as any}
+                      className="shrink-0 mt-1 cursor-grab active:cursor-grabbing touch-none opacity-0 group-hover:opacity-30 hover:!opacity-70 transition-opacity"
+                      style={{ color: 'var(--todoist-text-tertiary)' }}
+                      onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+                      <svg width="8" height="12" viewBox="0 0 8 12" fill="currentColor">
+                        <circle cx="2" cy="2" r="1.2"/><circle cx="6" cy="2" r="1.2"/>
+                        <circle cx="2" cy="6" r="1.2"/><circle cx="6" cy="6" r="1.2"/>
+                        <circle cx="2" cy="10" r="1.2"/><circle cx="6" cy="10" r="1.2"/>
+                      </svg>
+                    </div>
+                    <button onClick={async (e) => { e.stopPropagation(); try { await api.updateTodoistTask(task.id, { todoStatus: "DONE" }); loadData() } catch {} }}
+                      className="mt-0.5 w-[18px] h-[18px] rounded-full border-2 shrink-0 hover:bg-gray-50"
+                      style={{ borderColor: (task.todoStatus || 'WAITING') === 'CANCELLED' ? '#EF4444' : (task.todoStatus || 'WAITING') === 'DONE' ? '#10B981' : (task.todoStatus || 'WAITING') === 'IN_PROGRESS' ? '#F59E0B' : '#94A3B8' }} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] font-medium leading-snug" style={{ color: 'var(--todoist-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '45ch' }}>{task.content}</p>
+                      <div className="flex items-center flex-wrap gap-1.5 mt-0.5">
+                        <span className="text-[9px] px-1.5 py-px rounded bg-[#FFF3E0] text-[#EB8909] font-bold">TODO</span>
+                        {task.project && <span className="text-[10px]" style={{ color: 'var(--todoist-text-tertiary)' }}>{task.project.name}</span>}
+                        {dueDateText && (
+                          <span className="flex items-center gap-0.5 text-[10px] font-medium" style={{ color: dueDateColor }}>
+                            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                            {dueDateText}
+                          </span>
+                        )}
+                        {task.duration > 0 && (
+                          <span className="flex items-center gap-0.5 text-[10px] font-medium" style={{ color: 'var(--todoist-text-tertiary)' }}>
+                            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            {fmtDuration(task.duration)}
+                          </span>
+                        )}
+                        {task.labels?.map((l: any) => (
+                          <span key={l.id || l.labelId} className="text-[9px] px-1.5 py-px rounded-full font-semibold"
+                            style={{ backgroundColor: (l.color || l.label?.color || '#808080') + '20', color: l.color || l.label?.color || '#808080' }}>
+                            {l.name || l.label?.name}
+                          </span>
+                        ))}
+                      </div>
+                      {hasBadges && (
+                        <div className="flex items-center gap-2 mt-1">
+                          {task.subTasks?.length > 0 && (
+                            <span className="flex items-center gap-0.5 text-[9px] font-semibold" style={{ color: 'var(--todoist-text-secondary)' }}>
+                              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                              {task.subTasks.length}
+                            </span>
+                          )}
+                          {task.attachments?.length > 0 && (
+                            <span className="flex items-center gap-0.5 text-[9px] font-semibold" style={{ color: 'var(--todoist-text-secondary)' }}>
+                              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                              {task.attachments.length}
+                            </span>
+                          )}
+                          {((task.notes?.length || 0) + (task.comments?.length || 0)) > 0 && (
+                            <span className="flex items-center gap-0.5 text-[9px] font-semibold" style={{ color: 'var(--todoist-text-secondary)' }}>
+                              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                              {(task.notes?.length || 0) + (task.comments?.length || 0)}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )
+              }}
+            />
+          </div>}
+          {todoView === 'board' && (() => {
+            const TODO_COLS = [
+              { status: 'WAITING',     label: 'Gözləyir',   color: '#64748B', bg: '#F1F5F9' },
+              { status: 'IN_PROGRESS', label: 'Davam edir', color: '#F59E0B', bg: '#FFFBEB' },
+              { status: 'DONE',        label: 'Tamamlandı', color: '#10B981', bg: '#ECFDF5' },
+              { status: 'CANCELLED',   label: 'İptal',      color: '#EF4444', bg: '#FEF2F2' },
+            ]
+            return (
+              <div style={{ display: 'flex', gap: 8, width: '100%' }}>
+                  {TODO_COLS.map(col => {
+                    const colTasks = incompleteTodos.filter((t: any) => (t.todoStatus || 'WAITING') === col.status)
+                    const isOver = todoDragOverCol === col.status
+                    return (
+                      <div key={col.status}
+                        onDragOver={e => { e.preventDefault(); setTodoDragOverCol(col.status) }}
+                        onDragLeave={() => setTodoDragOverCol(null)}
+                        onDrop={async e => {
+                          e.preventDefault(); setTodoDragOverCol(null)
+                          if (!todoDragTaskId) return
+                          try { await api.updateTodoistTask(todoDragTaskId, { todoStatus: col.status }); loadData() } catch {}
+                          setTodoDragTaskId(null)
+                        }}
+                        style={{ flex: 1, minWidth: 0, minHeight: 300, borderRadius: 10,
+                          backgroundColor: isOver ? col.bg : 'rgba(0,0,0,0.02)',
+                          border: `1.5px solid ${isOver ? col.color : 'rgba(0,0,0,0.06)'}`,
+                          transition: 'all 0.15s' }}>
+                        <div style={{ padding: '8px 10px 7px', borderBottom: '1px solid rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <span style={{ fontSize: 11, fontWeight: 700, color: col.color }}>{col.label}</span>
+                          <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 7, backgroundColor: col.color + '18', color: col.color }}>{colTasks.length}</span>
+                        </div>
+                        <div style={{ padding: '7px', display: 'flex', flexDirection: 'column', gap: 5 }}>
+                          {colTasks.map((task: any) => {
+                            const isDragging = todoDragTaskId === task.id
+                            const diff = todoDiff(task.dueDate)
+                            const dueDateColor = diff !== null ? (diff < 0 ? '#EF4444' : diff === 0 ? '#D97706' : '#94A3B8') : '#94A3B8'
+                            const dueDateText = diff !== null ? (diff < 0 ? `${Math.abs(diff)}g gecikmiş` : diff === 0 ? 'Bugün' : new Date(task.dueDate).toLocaleDateString('az-AZ', { day: 'numeric', month: 'short' })) : ''
+                            return (
+                              <div key={task.id} draggable
+                                onDragStart={() => setTodoDragTaskId(task.id)}
+                                onDragEnd={() => setTodoDragTaskId(null)}
+                                onClick={() => setSelectedTodoId(task.id)}
+                                style={{ background: isDragging ? '#f0f4ff' : 'white', borderRadius: 7,
+                                  boxShadow: isDragging ? '0 4px 12px rgba(0,0,0,0.1)' : '0 1px 3px rgba(0,0,0,0.06)',
+                                  padding: '8px 9px', cursor: 'grab', opacity: isDragging ? 0.6 : 1,
+                                  border: '1px solid rgba(0,0,0,0.05)', overflow: 'hidden' }}>
+                                <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--todoist-text)', lineHeight: 1.4, marginBottom: 4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{task.content}</p>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+                                  {task.project && <span style={{ fontSize: 9, fontWeight: 600, padding: '1px 5px', borderRadius: 4, backgroundColor: '#FFF3E0', color: '#EB8909' }}>{task.project.name}</span>}
+                                  {dueDateText && <span style={{ fontSize: 9, fontWeight: 600, color: dueDateColor }}>{dueDateText}</span>}
+                                </div>
+                              </div>
+                            )
+                          })}
+                          {colTasks.length === 0 && <div style={{ textAlign: 'center', padding: '16px 8px', color: '#CBD5E1', fontSize: 11 }}>Boş</div>}
+                        </div>
+                      </div>
+                    )
+                  })}
+              </div>
+            )
+          })()}
+          </>
+          )}
         </div>
       )}
 
-      {/* GÖREV kart grid */}
+      {/* GÖREV — kart grid — yalnız list modunda */}
       {viewFilter !== 'todo' && displayTasks.length > 0 && (
         <div className="mb-5">
           {viewFilter === 'all' && (
@@ -314,11 +485,13 @@ export default function InboxPage() {
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ color: 'var(--todoist-text-tertiary)', backgroundColor: 'var(--todoist-border)' }}>{displayTasks.length}</span>
             </div>
           )}
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5">
             {displayTasks.map((task: any) => (
               <TaskCard key={task.id} task={task} onClick={handleTaskClick} />
             ))}
           </div>
+
         </div>
       )}
 
@@ -336,12 +509,6 @@ export default function InboxPage() {
         </div>
       )}
 
-      {viewFilter === 'todo' && incompleteTodos.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-[14px] font-semibold" style={{ color: 'var(--todoist-text)' }}>Şəxsi tapşırıq yoxdur</p>
-          <p className="text-[12px] mt-1" style={{ color: 'var(--todoist-text-secondary)' }}>Todo səhifəsindən tapşırıq əlavə edin</p>
-        </div>
-      )}
 
       {/* Modallar */}
       <TaskFormModal open={addOpen} onClose={() => { setAddOpen(false); setEditingTask(null) }} onSaved={() => { setAddOpen(false); setEditingTask(null); loadData() }} editingTask={editingTask} users={assignableUsers.length > 0 ? assignableUsers : users} departments={departments} businesses={businesses} />

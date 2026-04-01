@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useSocket } from '@/contexts/SocketContext'
+import { useTheme } from '@/contexts/ThemeContext'
 import { api } from '@/lib/api'
 import { useRouter } from 'next/navigation'
 
@@ -16,6 +17,7 @@ interface HeaderProps { onMenuClick: () => void }
 export default function Header({ onMenuClick }: HeaderProps) {
   const { user, logout } = useAuth()
   const { onNotification } = useSocket()
+  const { colorMode, setColorMode } = useTheme()
   const [notifOpen, setNotifOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
@@ -24,8 +26,8 @@ export default function Header({ onMenuClick }: HeaderProps) {
   const [searchLoading, setSearchLoading] = useState(false)
   const [notifications, setNotifications] = useState<any[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
-  const [currentTheme, setCurrentTheme] = useState('sunset')
   const router = useRouter()
+
   const notifRef = useRef<HTMLDivElement>(null)
   const profileRef = useRef<HTMLDivElement>(null)
   const searchRef = useRef<HTMLDivElement>(null)
@@ -53,9 +55,6 @@ export default function Header({ onMenuClick }: HeaderProps) {
     return unsub
   }, [onNotification, loadNotifs])
 
-  useEffect(() => {
-    setCurrentTheme(document.documentElement.classList.contains('dark') ? 'dark' : 'light')
-  }, [profileOpen])
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -89,9 +88,15 @@ export default function Header({ onMenuClick }: HeaderProps) {
   }
 
   return (
-    <header className="sticky top-0 z-30 flex h-12 items-center justify-between px-4"
-      style={{ backgroundColor: 'var(--todoist-surface)', borderBottom: '1px solid var(--todoist-divider)' }}>
-      <button onClick={onMenuClick} className="lg:hidden p-1.5 rounded-md transition"
+    <header className="sticky top-0 z-30 flex items-center justify-between px-4"
+      style={{
+        backgroundColor: 'var(--todoist-surface)',
+        borderBottom: '1px solid var(--todoist-divider)',
+        height: '48px',
+        minHeight: '48px',
+      }}>
+      {/* Mobil menü */}
+      <button onClick={onMenuClick} className="lg:hidden p-1.5 rounded-md transition mr-2"
         style={{ color: 'var(--todoist-text-secondary)' }}
         onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--todoist-sidebar-hover)'}
         onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'}>
@@ -136,8 +141,8 @@ export default function Header({ onMenuClick }: HeaderProps) {
                     onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--todoist-sidebar-hover)'}
                     onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'}>
                     <div className="w-4 h-4 rounded-full border-2 shrink-0"
-                      style={{ borderColor: task.priority === 'P1' ? '#DC4C3E' : task.priority === 'P2' ? '#EB8909' : task.priority === 'P3' ? '#246FE0' : '#B3B3B3',
-                        backgroundColor: task.isCompleted ? (task.priority === 'P1' ? '#DC4C3E' : task.priority === 'P2' ? '#EB8909' : task.priority === 'P3' ? '#246FE0' : '#B3B3B3') : 'transparent' }} />
+                      style={{ borderColor: (task.todoStatus || 'WAITING') === 'CANCELLED' ? '#EF4444' : (task.todoStatus || 'WAITING') === 'DONE' ? '#10B981' : (task.todoStatus || 'WAITING') === 'IN_PROGRESS' ? '#F59E0B' : '#94A3B8',
+                        backgroundColor: 'transparent' }} />
                     <div className="flex-1 min-w-0">
                       <p className={`text-[12px] font-medium truncate ${task.isCompleted ? 'line-through' : ''}`}
                         style={{ color: task.isCompleted ? 'var(--todoist-text-tertiary)' : 'var(--todoist-text)' }}>{task.content}</p>
@@ -214,21 +219,22 @@ export default function Header({ onMenuClick }: HeaderProps) {
                 onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--todoist-sidebar-hover)'}
                 onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'}>Tənzimləmələr</a>
               <div className="px-3 py-2">
-                <p className="text-[10px] font-bold uppercase tracking-wider mb-1.5" style={{ color: 'var(--todoist-text-tertiary)' }}>Görünüş</p>
-                <div className="flex gap-2">
-                  <button onClick={() => { document.documentElement.classList.remove('dark'); localStorage.setItem('wfp-theme', 'light'); setCurrentTheme('light') }}
-                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-[12px] font-semibold transition"
-                    style={{ backgroundColor: currentTheme !== 'dark' ? '#EEF2FF' : 'transparent', color: currentTheme !== 'dark' ? '#4F46E5' : 'var(--todoist-text-tertiary)', border: '1px solid var(--todoist-border)' }}>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                <p className="text-[10px] font-bold uppercase tracking-wider mb-1.5" style={{ color: 'var(--todoist-text-tertiary)' }}>Rəng Sxemi</p>
+                <div className="flex gap-2 mb-3">
+                  <button onClick={() => setColorMode('light')}
+                    className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-[11px] font-semibold transition"
+                    style={{ backgroundColor: colorMode !== 'dark' ? '#EEF2FF' : 'transparent', color: colorMode !== 'dark' ? '#4F46E5' : 'var(--todoist-text-tertiary)', border: '1px solid var(--todoist-border)' }}>
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
                     Açıq
                   </button>
-                  <button onClick={() => { document.documentElement.classList.add('dark'); localStorage.setItem('wfp-theme', 'dark'); setCurrentTheme('dark') }}
-                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-[12px] font-semibold transition"
-                    style={{ backgroundColor: currentTheme === 'dark' ? '#334155' : 'transparent', color: currentTheme === 'dark' ? '#818CF8' : 'var(--todoist-text-tertiary)', border: '1px solid var(--todoist-border)' }}>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+                  <button onClick={() => setColorMode('dark')}
+                    className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-[11px] font-semibold transition"
+                    style={{ backgroundColor: colorMode === 'dark' ? '#334155' : 'transparent', color: colorMode === 'dark' ? '#818CF8' : 'var(--todoist-text-tertiary)', border: '1px solid var(--todoist-border)' }}>
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
                     Qaranlıq
                   </button>
                 </div>
+
               </div>
               {/* Bildiriş ayarları */}
               <div className="px-3 py-2" style={{ borderTop: '1px solid var(--todoist-border)' }}>

@@ -480,6 +480,20 @@ class ApiClient {
   async getAdminLogs(action?: string) { return this.request<any[]>(`/admin/logs${action ? `?action=${action}` : ''}`) }
   async getAdminSettings() { return this.request<any>('/admin/settings') }
   async getAdminHealth() { return this.request<any>('/admin/health') }
+
+  // Export
+  async exportTasksExcel() {
+    const token = this.accessToken || localStorage.getItem('accessToken')
+    const res = await fetch(`${API_URL}/export/tasks`, { headers: { Authorization: `Bearer ${token}` } })
+    if (!res.ok) throw new Error('Export failed')
+    return res.blob()
+  }
+  async exportFinanceExcel() {
+    const token = this.accessToken || localStorage.getItem('accessToken')
+    const res = await fetch(`${API_URL}/export/finance`, { headers: { Authorization: `Bearer ${token}` } })
+    if (!res.ok) throw new Error('Export failed')
+    return res.blob()
+  }
 }
 
 export const api = new ApiClient()

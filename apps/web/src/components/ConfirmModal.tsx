@@ -30,7 +30,13 @@ export default function ConfirmModal({ open, title, message, type = 'info', conf
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center px-4" onClick={onCancel}>
       <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px]" />
-      <div className="relative w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl" style={{ backgroundColor: '#fff', border: '1px solid #E2E8F0' }} onClick={e => e.stopPropagation()}>
+      <div className="relative w-full max-w-sm overflow-hidden shadow-2xl"
+        style={{
+          backgroundColor: 'var(--todoist-surface)',
+          border: '1px solid var(--todoist-border)',
+          borderRadius: '14px',
+        }}
+        onClick={e => e.stopPropagation()}>
         <div style={{ height: 3, background: `linear-gradient(90deg, ${c.color}, ${c.color}80)` }} />
 
         <div className="p-5">
@@ -39,19 +45,21 @@ export default function ConfirmModal({ open, title, message, type = 'info', conf
               {icons[type]}
             </div>
             <div>
-              <h3 className="text-[15px] font-bold" style={{ color: '#0F172A' }}>{title}</h3>
-              <p className="text-[12px] mt-1 leading-relaxed" style={{ color: '#64748B' }}>{message}</p>
+              <h3 className="text-[15px] font-bold" style={{ color: 'var(--todoist-text)' }}>{title}</h3>
+              <p className="text-[12px] mt-1 leading-relaxed" style={{ color: 'var(--todoist-text-secondary)' }}>{message}</p>
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-2 mt-4 pt-3" style={{ borderTop: '1px solid #E2E8F0' }}>
+          <div className="flex items-center justify-end gap-2 mt-4 pt-3" style={{ borderTop: '1px solid var(--todoist-border)' }}>
             <button onClick={onCancel}
-              className="rounded-xl px-4 py-2 text-[12px] font-semibold transition hover:bg-gray-100"
-              style={{ color: '#64748B', backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0' }}>
+              className="rounded-lg px-4 py-2 text-[12px] font-semibold transition"
+              style={{ color: 'var(--todoist-text-secondary)', backgroundColor: 'var(--todoist-bg)', border: '1px solid var(--todoist-border)' }}
+              onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--todoist-sidebar-hover)'}
+              onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--todoist-bg)'}>
               {cancelText}
             </button>
             <button onClick={onConfirm}
-              className="rounded-xl px-4 py-2 text-[12px] font-bold text-white transition hover:opacity-90"
+              className="rounded-lg px-4 py-2 text-[12px] font-bold text-white transition hover:opacity-90"
               style={{ backgroundColor: c.btnBg }}>
               {confirmText}
             </button>

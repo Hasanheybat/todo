@@ -1,4 +1,11 @@
-import { IsString, IsOptional, IsBoolean, IsNumber } from 'class-validator'
+import { IsString, IsOptional, IsBoolean, IsNumber, IsEnum, IsDateString } from 'class-validator'
+
+enum TodoStatus {
+  WAITING = 'WAITING',
+  IN_PROGRESS = 'IN_PROGRESS',
+  DONE = 'DONE',
+  CANCELLED = 'CANCELLED',
+}
 
 export class CreateTaskDto {
   @IsString()
@@ -19,7 +26,7 @@ export class CreateTaskDto {
   @IsString() @IsOptional()
   parentId?: string
 
-  @IsString() @IsOptional()
+  @IsDateString() @IsOptional()
   dueDate?: string
 
   @IsString() @IsOptional()
@@ -31,11 +38,17 @@ export class CreateTaskDto {
   @IsString() @IsOptional()
   recurRule?: string
 
+  @IsString() @IsOptional()
+  recurringRule?: string  // Frontend alias → recurRule ilə eynidir
+
   @IsNumber() @IsOptional()
   duration?: number  // dəqiqə ilə
 
-  @IsString() @IsOptional()
+  @IsDateString() @IsOptional()
   reminder?: string  // ISO datetime
+
+  @IsDateString() @IsOptional()
+  reminderAt?: string  // Frontend alias → reminder ilə eynidir
 
   @IsString() @IsOptional()
   location?: string  // konum
@@ -60,7 +73,7 @@ export class UpdateTaskDto {
   @IsString() @IsOptional()
   sectionId?: string
 
-  @IsString() @IsOptional()
+  @IsDateString() @IsOptional()
   dueDate?: string
 
   @IsString() @IsOptional()
@@ -72,8 +85,11 @@ export class UpdateTaskDto {
   @IsNumber() @IsOptional()
   duration?: number
 
-  @IsString() @IsOptional()
+  @IsDateString() @IsOptional()
   reminder?: string
+
+  @IsDateString() @IsOptional()
+  reminderAt?: string  // Frontend alias → reminder ilə eynidir
 
   @IsBoolean() @IsOptional()
   isRecurring?: boolean
@@ -82,8 +98,14 @@ export class UpdateTaskDto {
   recurRule?: string
 
   @IsString() @IsOptional()
+  recurringRule?: string  // Frontend alias → recurRule ilə eynidir
+
+  @IsString() @IsOptional()
   location?: string
 
   @IsString({ each: true }) @IsOptional()
   labelIds?: string[]
+
+  @IsEnum(TodoStatus, { message: 'todoStatus WAITING, IN_PROGRESS, DONE və ya CANCELLED olmalıdır' }) @IsOptional()
+  todoStatus?: string
 }

@@ -56,17 +56,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
   }, [])
 
-  // Tema yüklə — FocusFlow (light/dark)
-  useEffect(() => {
-    const saved = localStorage.getItem('wfp-theme')
-    if (saved === 'dark') {
-      document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
-    }
-    // Köhnə data-theme attributunu təmizlə
-    document.documentElement.removeAttribute('data-theme')
-  }, [])
+  // Tema ThemeProvider tərəfindən idarə olunur — buradan müdaxilə etmə
 
   useEffect(() => {
     if (!loading && !isAuthenticated) router.push('/login')

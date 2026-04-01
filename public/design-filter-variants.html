@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Filter Dizayn — 5 Variant</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --primary: #00236f;
+    --primary-light: #e8edf8;
+    --teal: #006b5f;
+    --teal-light: #e0f2ef;
+    --surface: #f7f9fb;
+    --white: #ffffff;
+    --text: #1a2332;
+    --text-2: #4a5568;
+    --text-3: #94a3b8;
+    --border: rgba(0,35,111,0.08);
+    --shadow: 0 4px 24px rgba(0,35,111,0.08);
+    --shadow-lg: 0 8px 40px rgba(0,35,111,0.12);
+    --red: #e53935;
+    --red-light: #fde8e8;
+    --amber: #f59e0b;
+    --amber-light: #fef3c7;
+    --green: #10b981;
+    --green-light: #d1fae5;
+    --purple: #7c3aed;
+    --purple-light: #ede9fe;
+    --slate: #64748b;
+    --blue: #3b82f6;
+  }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #eef2f7;
+    color: var(--text);
+    padding: 32px 24px;
+    min-height: 100vh;
+  }
+  h1 {
+    font-family: 'Manrope', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--primary);
+    margin-bottom: 8px;
+  }
+  .subtitle {
+    font-size: 13px;
+    color: var(--text-2);
+    margin-bottom: 40px;
+  }
+
+  .variant-block {
+    background: var(--white);
+    border-radius: 20px;
+    padding: 28px 28px 32px;
+    margin-bottom: 32px;
+    box-shadow: var(--shadow);
+  }
+  .variant-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .variant-num {
+    width: 28px;
+    height: 28px;
+    background: var(--primary);
+    color: #fff;
+    border-radius: 8px;
+    font-family: 'Manrope', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .variant-title {
+    font-family: 'Manrope', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .variant-desc {
+    font-size: 12px;
+    color: var(--text-3);
+    margin-left: auto;
+  }
+
+  /* ─── MOCK CONTENT ─── */
+  .mock-items {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .mock-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--surface);
+    border-radius: 12px;
+  }
+  .mock-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .mock-item-text { font-size: 13px; font-weight: 500; color: var(--text); flex: 1; }
+  .mock-item-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 20px;
+    background: var(--primary-light);
+    color: var(--primary);
+  }
+  .mock-item-date { font-size: 11px; color: var(--text-3); }
+
+  /* ═══════════════════════════════════════
+     VARİANT 1 — Floating Pill Tabs
+  ═══════════════════════════════════════ */
+  .v1-wrap {
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 20px;
+  }
+  .v1-row1 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .v1-pill-group {
+    display: flex;
+    background: rgba(0,35,111,0.06);
+    border-radius: 14px;
+    padding: 4px;
+    gap: 2px;
+  }
+  .v1-pill {
+    padding: 6px 16px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-2);
+    cursor: pointer;
+    transition: all 0.18s;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .v1-pill.active {
+    background: var(--white);
+    color: var(--primary);
+    box-shadow: 0 2px 8px rgba(0,35,111,0.12);
+  }
+  .v1-pill .cnt {
+    font-size: 10px;
+    background: var(--primary-light);
+    color: var(--primary);
+    border-radius: 10px;
+    padding: 1px 6px;
+    font-weight: 700;
+  }
+  .v1-pill.active .cnt {
+    background: var(--primary);
+    color: var(--white);
+  }
+  .v1-sep { width: 1px; height: 24px; background: var(--border); margin: 0 4px; }
+  .v1-row2 {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .v1-chip {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--white);
+    color: var(--text-2);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .v1-chip:hover { box-shadow: 0 2px 8px rgba(0,35,111,0.12); color: var(--primary); }
+  .v1-chip.active { background: var(--primary); color: #fff; box-shadow: 0 2px 12px rgba(0,35,111,0.25); }
+  .v1-chip .dot { width: 7px; height: 7px; border-radius: 50%; }
+  .v1-chip i { font-size: 13px; }
+  .v1-reset {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--red);
+    font-weight: 600;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 8px;
+    background: var(--red-light);
+  }
+  .v1-reset i { font-size: 14px; }
+
+  /* ═══════════════════════════════════════
+     VARİANT 2 — Segmented + Accordion Chips
+  ═══════════════════════════════════════ */
+  .v2-wrap {
+    background: var(--white);
+    border-radius: 16px;
+    border: 1.5px solid var(--border);
+    overflow: hidden;
+  }
+  .v2-top {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    border-bottom: 1.5px solid var(--border);
+    background: var(--surface);
+  }
+  .v2-seg {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 12px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-3);
+    cursor: pointer;
+    border-right: 1.5px solid var(--border);
+    transition: all 0.15s;
+    position: relative;
+  }
+  .v2-seg:last-child { border-right: none; }
+  .v2-seg.active {
+    color: var(--primary);
+    background: var(--white);
+  }
+  .v2-seg.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1.5px;
+    left: 0; right: 0;
+    height: 2.5px;
+    background: var(--primary);
+    border-radius: 2px 2px 0 0;
+  }
+  .v2-seg .badge {
+    font-size: 10px;
+    padding: 1px 7px;
+    border-radius: 20px;
+    font-weight: 700;
+    background: var(--primary-light);
+    color: var(--primary);
+  }
+  .v2-seg.active .badge { background: var(--primary); color: #fff; }
+  .v2-mid {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 10px 16px;
+    border-bottom: 1.5px solid var(--border);
+    overflow-x: auto;
+    scrollbar-width: none;
+    background: var(--white);
+  }
+  .v2-mid::-webkit-scrollbar { display: none; }
+  .v2-status {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--text-3);
+    transition: all 0.15s;
+    white-space: nowrap;
+    margin-right: 4px;
+  }
+  .v2-status .sdot { width: 7px; height: 7px; border-radius: 50%; }
+  .v2-status.active { background: var(--primary-light); color: var(--primary); }
+  .v2-status.active .sdot-primary { background: var(--primary) !important; }
+  .v2-bottom {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: var(--surface);
+  }
+  .v2-filter-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-2);
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .v2-filter-btn:hover { border-color: var(--primary); color: var(--primary); }
+  .v2-filter-btn.sel { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+  .v2-filter-btn i { font-size: 14px; }
+  .v2-filter-btn .chevron { font-size: 14px; color: var(--text-3); }
+
+  /* ═══════════════════════════════════════
+     VARİANT 3 — Command Bar (Minimal)
+  ═══════════════════════════════════════ */
+  .v3-wrap {
+    background: var(--white);
+    border-radius: 14px;
+    box-shadow: 0 1px 0 var(--border), 0 4px 20px rgba(0,35,111,0.06);
+    overflow: hidden;
+  }
+  .v3-bar {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 0 8px;
+    border-bottom: 1px solid var(--border);
+    background: var(--white);
+    min-height: 48px;
+    flex-wrap: wrap;
+  }
+  .v3-typeswitch {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 8px 8px;
+    border-right: 1px solid var(--border);
+    margin-right: 4px;
+  }
+  .v3-typebtn {
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-3);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .v3-typebtn.active {
+    background: var(--primary-light);
+    color: var(--primary);
+  }
+  .v3-divider { color: var(--border); font-size: 18px; user-select: none; padding: 0 2px; }
+  .v3-cmd {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-2);
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .v3-cmd:hover { background: var(--surface); }
+  .v3-cmd.active { background: var(--primary-light); color: var(--primary); font-weight: 600; }
+  .v3-cmd i { font-size: 15px; }
+  .v3-cmd .v3-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .v3-cmd .v3-arr { font-size: 13px; color: var(--text-3); }
+  .v3-spacer { flex: 1; }
+  .v3-count-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .v3-count-row::-webkit-scrollbar { display: none; }
+  .v3-stab {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-3);
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .v3-stab .sdot { width: 7px; height: 7px; border-radius: 50%; }
+  .v3-stab.active { background: var(--white); color: var(--text); box-shadow: 0 1px 6px rgba(0,0,0,0.08); }
+  .v3-stab .cnt { font-size: 10px; font-weight: 700; color: var(--text-3); }
+  .v3-stab.active .cnt { color: var(--primary); }
+
+  /* ═══════════════════════════════════════
+     VARİANT 4 — Glass Card Filter Shelf
+  ═══════════════════════════════════════ */
+  .v4-wrap {
+    background: linear-gradient(135deg, rgba(0,35,111,0.04) 0%, rgba(0,107,95,0.04) 100%);
+    border-radius: 20px;
+    padding: 4px;
+  }
+  .v4-inner {
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(12px);
+    border-radius: 17px;
+    overflow: hidden;
+  }
+  .v4-shelf {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    padding: 0;
+    border-bottom: 1px solid rgba(0,35,111,0.06);
+  }
+  .v4-group {
+    flex: 1;
+    padding: 12px 16px 10px;
+    border-right: 1px solid rgba(0,35,111,0.06);
+    min-width: 0;
+  }
+  .v4-group:last-child { border-right: none; }
+  .v4-group-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-bottom: 8px;
+  }
+  .v4-chips {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+  .v4-chip {
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-2);
+    background: rgba(0,35,111,0.04);
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+  }
+  .v4-chip .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .v4-chip:hover { background: rgba(0,35,111,0.08); color: var(--primary); }
+  .v4-chip.active { background: var(--primary); color: var(--white); }
+  .v4-chip.teal.active { background: var(--teal); }
+  .v4-chip .cnt { font-size: 9px; opacity: 0.7; }
+  .v4-status-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .v4-status-row::-webkit-scrollbar { display: none; }
+  .v4-stab {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-3);
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .v4-stab .icon { font-size: 14px; }
+  .v4-stab .cnt {
+    font-size: 10px;
+    background: rgba(0,0,0,0.06);
+    border-radius: 6px;
+    padding: 1px 6px;
+    font-weight: 700;
+  }
+  .v4-stab.active.blue { background: rgba(59,130,246,0.1); color: #2563eb; }
+  .v4-stab.active.blue .cnt { background: #2563eb; color: #fff; }
+  .v4-stab.active.amber { background: var(--amber-light); color: #d97706; }
+  .v4-stab.active.amber .cnt { background: #d97706; color: #fff; }
+  .v4-stab.active.green { background: var(--green-light); color: #059669; }
+  .v4-stab.active.green .cnt { background: #059669; color: #fff; }
+  .v4-stab.active.red { background: var(--red-light); color: var(--red); }
+  .v4-stab.active.red .cnt { background: var(--red); color: #fff; }
+  .v4-stab.active.primary { background: var(--primary-light); color: var(--primary); }
+  .v4-stab.active.primary .cnt { background: var(--primary); color: #fff; }
+
+  /* ═══════════════════════════════════════
+     VARİANT 5 — Floating Side Panel Trigger
+  ═══════════════════════════════════════ */
+  .v5-wrap { display: flex; gap: 16px; align-items: flex-start; }
+  .v5-panel {
+    width: 180px;
+    flex-shrink: 0;
+    background: var(--white);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    padding: 16px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .v5-section-title {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-bottom: 6px;
+    padding-left: 4px;
+  }
+  .v5-radio {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 9px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-2);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .v5-radio:hover { background: var(--surface); color: var(--text); }
+  .v5-radio.active { background: var(--primary-light); color: var(--primary); font-weight: 600; }
+  .v5-radio .bullet {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .v5-radio.active .bullet { border-color: var(--primary); }
+  .v5-radio.active .bullet::after {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--primary);
+  }
+  .v5-radio .cnt-badge {
+    margin-left: auto;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-3);
+  }
+  .v5-radio.active .cnt-badge { color: var(--primary); }
+  .v5-radio .cdot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .v5-divider { height: 1px; background: var(--border); margin: 0 4px; }
+  .v5-prio-row {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .v5-main {
+    flex: 1;
+    min-width: 0;
+  }
+  .v5-topbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .v5-type-pill {
+    display: flex;
+    background: rgba(0,35,111,0.06);
+    border-radius: 10px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .v5-tp {
+    padding: 5px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-3);
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .v5-tp.active { background: var(--white); color: var(--primary); box-shadow: 0 1px 6px rgba(0,35,111,0.1); }
+  .v5-title {
+    font-family: 'Manrope', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text);
+    margin-left: auto;
+  }
+  .v5-pill-count {
+    font-size: 11px;
+    background: var(--primary-light);
+    color: var(--primary);
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 700;
+  }
+
+  /* ─── SHARED MOCK ITEMS ─── */
+  .mock-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    background: var(--surface);
+    transition: all 0.15s;
+  }
+  .mock-card:hover { background: rgba(0,35,111,0.04); }
+  .mock-chk {
+    width: 18px; height: 18px;
+    border-radius: 5px;
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+  }
+  .mock-chk.done { border-color: var(--green); background: var(--green); }
+  .mock-info { flex: 1; min-width: 0; }
+  .mock-name { font-size: 13px; font-weight: 500; color: var(--text); }
+  .mock-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+  .mc-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 6px;
+    flex-shrink: 0;
+  }
+  .mc-badge.high { background: var(--red-light); color: var(--red); }
+  .mc-badge.med { background: var(--amber-light); color: #d97706; }
+  .mc-badge.low { background: var(--green-light); color: #059669; }
+  .mc-badge.gorev { background: var(--primary-light); color: var(--primary); }
+</style>
+</head>
+<body>
+
+<h1>Filter Dizayn — 5 Variant</h1>
+<p class="subtitle">Bugün · Gələcək · Gələnlər — filtr sahəsinin müxtəlif dizayn yanaşmaları</p>
+
+<!-- ═══════════════════════════════════
+     VARİANT 1 — Floating Pill Tabs
+═══════════════════════════════════ -->
+<div class="variant-block">
+  <div class="variant-label">
+    <div class="variant-num">1</div>
+    <div class="variant-title">Floating Pill Tabs</div>
+    <div class="variant-desc">Yüksəyə qalxan pill qrup + yüngül çiplər — yığcam, hava dolu</div>
+  </div>
+
+  <div class="v1-wrap">
+    <!-- Row 1: Type + Status tabs -->
+    <div class="v1-row1">
+      <div class="v1-pill-group">
+        <div class="v1-pill">Hamısı <span class="cnt">47</span></div>
+        <div class="v1-pill active">GÖREV <span class="cnt">31</span></div>
+        <div class="v1-pill">TODO <span class="cnt">16</span></div>
+      </div>
+      <div class="v1-sep"></div>
+      <div class="v1-pill-group">
+        <div class="v1-pill active">Gözləyir <span class="cnt">12</span></div>
+        <div class="v1-pill">Davam edir <span class="cnt">8</span></div>
+        <div class="v1-pill">Onay gözl. <span class="cnt">3</span></div>
+        <div class="v1-pill">Tamamlandı <span class="cnt">8</span></div>
+      </div>
+    </div>
+    <!-- Row 2: Chip filters -->
+    <div class="v1-row2">
+      <div class="v1-chip active">
+        <i class="material-icons-outlined">apartment</i> Bütün filiallar
+      </div>
+      <div class="v1-chip">
+        <span class="dot" style="background:#e53935"></span> Yüksək
+      </div>
+      <div class="v1-chip">
+        <i class="material-icons-outlined">person</i> İşçi seçin
+      </div>
+      <div class="v1-chip">
+        <i class="material-icons-outlined">label</i> Etiket
+      </div>
+      <div class="v1-reset">
+        <i class="material-icons-outlined">restart_alt</i> Sıfırla
+      </div>
+    </div>
+  </div>
+
+  <!-- Mock Items -->
+  <div class="mock-items">
+    <div class="mock-card">
+      <div class="mock-chk"></div>
+      <div class="mock-info">
+        <div class="mock-name">API inteqrasiyası sənədini hazırla</div>
+        <div class="mock-sub">Texniki komanda · Bu gün</div>
+      </div>
+      <span class="mc-badge high">Yüksək</span>
+      <span class="mc-badge gorev">GÖREV</span>
+    </div>
+    <div class="mock-card">
+      <div class="mock-chk"></div>
+      <div class="mock-info">
+        <div class="mock-name">Müştəri görüşünə hazırlaş</div>
+        <div class="mock-sub">Satış · Bu gün, 14:00</div>
+      </div>
+      <span class="mc-badge med">Orta</span>
+      <span class="mc-badge gorev">GÖREV</span>
+    </div>
+    <div class="mock-card">
+      <div class="mock-chk done"></div>
+      <div class="mock-info">
+        <div class="mock-name" style="text-decoration:line-through;color:var(--text-3)">Hesabat göndər</div>
+        <div class="mock-sub">Maliyyə · Tamamlandı</div>
+      </div>
+      <span class="mc-badge low">Aşağı</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════
+     VARİANT 2 — Segmented + Dropdown Chips
+═══════════════════════════════════ -->
+<div class="variant-block">
+  <div class="variant-label">
+    <div class="variant-num">2</div>
+    <div class="variant-title">Segmented Control + Dropdown Chips</div>
+    <div class="variant-desc">Bordered bölmə başlığı + dropdown açılan filter düymələri — rəsmi görünüş</div>
+  </div>
+
+  <div class="v2-wrap">
+    <!-- Top: Type segmented control -->
+    <div class="v2-top">
+      <div class="v2-seg">
+        Hamısı <span class="badge">47</span>
+      </div>
+      <div class="v2-seg active">
+        Tapşırıqlar <span class="badge">31</span>
+      </div>
+      <div class="v2-seg">
+        Şəxsi TODO <span class="badge">16</span>
+      </div>
+    </div>
+
+    <!-- Mid: Status tabs -->
+    <div class="v2-mid">
+      <div class="v2-status">
+        <span class="sdot" style="background:#94a3b8"></span> Hamısı
+      </div>
+      <div class="v2-status active">
+        <span class="sdot" style="background:#64748b"></span> Gözləyir
+      </div>
+      <div class="v2-status">
+        <span class="sdot" style="background:#3b82f6"></span> Davam edir
+      </div>
+      <div class="v2-status">
+        <span class="sdot" style="background:#f59e0b"></span> Onay gözləyir
+      </div>
+      <div class="v2-status">
+        <span class="sdot" style="background:#10b981"></span> Tamamlandı
+      </div>
+      <div class="v2-status">
+        <span class="sdot" style="background:#e53935"></span> Rədd edildi
+      </div>
+    </div>
+
+    <!-- Bottom: Dropdown filter buttons -->
+    <div class="v2-bottom">
+      <div class="v2-filter-btn sel">
+        <i class="material-icons-outlined" style="font-size:14px">apartment</i>
+        Texniki komanda
+        <i class="material-icons-outlined chevron">expand_more</i>
+      </div>
+      <div class="v2-filter-btn">
+        <i class="material-icons-outlined" style="font-size:14px">flag</i>
+        Prioritet
+        <i class="material-icons-outlined chevron">expand_more</i>
+      </div>
+      <div class="v2-filter-btn">
+        <i class="material-icons-outlined" style="font-size:14px">person_outline</i>
+        İşçi
+        <i class="material-icons-outlined chevron">expand_more</i>
+      </div>
+      <div class="v2-filter-btn">
+        <i class="material-icons-outlined" style="font-size:14px">label_outline</i>
+        Etiket
+        <i class="material-icons-outlined chevron">expand_more</i>
+      </div>
+      <div style="margin-left:auto;font-size:11px;color:var(--red);font-weight:600;cursor:pointer;display:flex;align-items:center;gap:3px">
+        <i class="material-icons-outlined" style="font-size:14px">close</i> Sıfırla
+      </div>
+    </div>
+  </div>
+
+  <div class="mock-items">
+    <div class="mock-card">
+      <div class="mock-chk"></div>
+      <div class="mock-info">
+        <div class="mock-name">Backend API sənədləşdirmə</div>
+        <div class="mock-sub">Texniki komanda · Hasan Əliyev · Bu gün</div>
+      </div>
+      <span class="mc-badge high">Yüksək</span>
+      <span class="mc-badge gorev">GÖREV</span>
+    </div>
+    <div class="mock-card">
+      <div class="mock-chk"></div>
+      <div class="mock-info">
+        <div class="mock-name">Sprint planlaşdırması</div>
+        <div class="mock-sub">Texniki komanda · Bu gün, 15:00</div>
+      </div>
+      <span class="mc-badge med">Orta</span>
+      <span class="mc-badge gorev">GÖREV</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════
+     VARİANT 3 — Command Bar Minimal
+═══════════════════════════════════ -->
+<div class="variant-block">
+  <div class="variant-label">
+    <div class="variant-num">3</div>
+    <div class="variant-title">Command Bar — Ultra Minimal</div>
+    <div class="variant-desc">Hər şey bir sırada — növ + status + filterlər tek bir xəttdə</div>
+  </div>
+
+  <div class="v3-wrap">
+    <!-- Single command bar -->
+    <div class="v3-bar">
+      <!-- Type switch -->
+      <div class="v3-typeswitch">
+        <div class="v3-typebtn">Hamısı</div>
+        <div class="v3-typebtn active">GÖREV</div>
+        <div class="v3-typebtn">TODO</div>
+      </div>
+
+      <!-- Filter commands -->
+      <div class="v3-cmd active">
+        <span class="v3-dot" style="background:#64748b"></span>
+        Gözləyir
+        <span class="v3-arr">›</span>
+      </div>
+      <div class="v3-cmd">
+        <i class="material-icons-outlined">apartment</i>
+        Texniki
+        <span class="v3-arr">›</span>
+      </div>
+      <div class="v3-cmd">
+        <i class="material-icons-outlined">flag</i>
+        Yüksək
+        <span class="v3-arr">›</span>
+      </div>
+      <div class="v3-cmd">
+        <i class="material-icons-outlined">person_outline</i>
+        Hasan
+        <span class="v3-arr">›</span>
+      </div>
+
+      <div class="v3-spacer"></div>
+
+      <!-- Count + reset -->
+      <div style="font-size:12px;color:var(--text-3);font-weight:500;padding:0 8px">31 tapşırıq</div>
+      <div style="display:flex;align-items:center;gap:3px;font-size:11px;color:var(--red);font-weight:600;cursor:pointer;padding:5px 8px;border-radius:7px;background:var(--red-light)">
+        <i class="material-icons-outlined" style="font-size:13px">restart_alt</i> Sıfırla
+      </div>
+    </div>
+
+    <!-- Status count pills -->
+    <div class="v3-count-row">
+      <div class="v3-stab active">
+        <span class="sdot" style="width:7px;height:7px;border-radius:50%;background:#94a3b8;display:inline-block"></span>
+        Hamısı <span class="cnt">47</span>
+      </div>
+      <div class="v3-stab">
+        <span class="sdot" style="width:7px;height:7px;border-radius:50%;background:#64748b;display:inline-block"></span>
+        Gözləyir <span class="cnt">12</span>
+      </div>
+      <div class="v3-stab">
+        <span class="sdot" style="width:7px;height:7px;border-radius:50%;background:#3b82f6;display:inline-block"></span>
+        Davam edir <span class="cnt">8</span>
+      </div>
+      <div class="v3-stab">
+        <span class="sdot" style="width:7px;height:7px;border-radius:50%;background:#f59e0b;display:inline-block"></span>
+        Onay gözl. <span class="cnt">3</span>
+      </div>
+      <div class="v3-stab">
+        <span class="sdot" style="width:7px;height:7px;border-radius:50%;background:#10b981;display:inline-block"></span>
+        Tamamlandı <span class="cnt">8</span>
+      </div>
+      <div class="v3-stab">
+        <span class="sdot" style="width:7px;height:7px;border-radius:50%;background:#e53935;display:inline-block"></span>
+        Rədd <span class="cnt">2</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="mock-items">
+    <div class="mock-card">
+      <div class="mock-chk"></div>
+      <div class="mock-info">
+        <div class="mock-name">Dizayn sistemi komponenti</div>
+        <div class="mock-sub">UI/UX · Aynur · 2 Apr</div>
+      </div>
+      <span class="mc-badge high">Yüksək</span>
+    </div>
+    <div class="mock-card">
+      <div class="mock-chk"></div>
+      <div class="mock-info">
+        <div class="mock-name">İstifadəçi test sessiyası keçir</div>
+        <div class="mock-sub">QA · Nigar · 3 Apr</div>
+      </div>
+      <span class="mc-badge med">Orta</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════
+     VARİANT 4 — Glass Card Filter Shelf
+═══════════════════════════════════ -->
+<div class="variant-block">
+  <div class="variant-label">
+    <div class="variant-num">4</div>
+    <div class="variant-title">Glass Filter Shelf</div>
+    <div class="variant-desc">Hər filter qrupu öz bölməsində — şəffaf card üzərindəki rəflər</div>
+  </div>
+
+  <div class="v4-wrap">
+    <div class="v4-inner">
+
+      <!-- Top shelf: grouped filters -->
+      <div class="v4-shelf">
+        <!-- Növ -->
+        <div class="v4-group">
+          <div class="v4-group-label">Növ</div>
+          <div class="v4-chips">
+            <div class="v4-chip">Hamısı <span class="cnt">47</span></div>
+            <div class="v4-chip active">GÖREV <span class="cnt">31</span></div>
+            <div class="v4-chip teal">TODO <span class="cnt">16</span></div>
+          </div>
+        </div>
+
+        <!-- Filial -->
+        <div class="v4-group">
+          <div class="v4-group-label">Filial</div>
+          <div class="v4-chips">
+            <div class="v4-chip active">Hamısı</div>
+            <div class="v4-chip">Texniki</div>
+            <div class="v4-chip">Satış</div>
+            <div class="v4-chip">HR</div>
+          </div>
+        </div>
+
+        <!-- Prioritet -->
+        <div class="v4-group">
+          <div class="v4-group-label">Prioritet</div>
+          <div class="v4-chips">
+            <div class="v4-chip active">Hamısı</div>
+            <div class="v4-chip"><span class="dot" style="background:#7c3aed"></span>Kritik</div>
+            <div class="v4-chip"><span class="dot" style="background:#e53935"></span>Yüksək</div>
+            <div class="v4-chip"><span class="dot" style="background:#f59e0b"></span>Orta</div>
+            <div class="v4-chip"><span class="dot" style="background:#10b981"></span>Aşağı</div>
+          </div>
+        </div>
+
+        <!-- İşçi -->
+        <div class="v4-group" style="border-right:none">
+          <div class="v4-group-label">İşçi</div>
+          <div class="v4-chips">
+            <div class="v4-chip active">Hamısı</div>
+            <div class="v4-chip">Hasan</div>
+            <div class="v4-chip">Leyla</div>
+            <div class="v4-chip">Nigar</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Status row -->
+      <div class="v4-status-row">
+        <div class="v4-stab active primary">
+          <i class="material-icons-outlined icon">select_all</i>
+          Hamısı <span class="cnt">47</span>
+        </div>
+        <div class="v4-stab">
+          <i class="material-icons-outlined icon" style="color:#64748b">radio_button_unchecked</i>
+          Gözləyir <span class="cnt">12</span>
+        </div>
+        <div class="v4-stab active blue">
+          <i class="material-icons-outlined icon">sync</i>
+          Davam edir <span class="cnt">8</span>
+        </div>
+        <div class="v4-stab">
+          <i class="material-icons-outlined icon" style="color:#f59e0b">hourglass_top</i>
+          Onay gözl. <span class="cnt">3</span>
+        </div>
+        <div class="v4-stab">
+          <i class="material-icons-outlined icon" style="color:#10b981">check_circle</i>
+          Tamamlandı <span class="cnt">8</span>
+        </div>
+        <div class="v4-stab">
+          <i class="material-icons-outlined icon" style="color:#e53935">cancel</i>
+          Rədd <span class="cnt">2</span>
+        </div>
+        <div style="margin-left:auto;font-size:11px;color:var(--red);font-weight:600;cursor:pointer;display:flex;align-items:center;gap:3px">
+          <i class="material-icons-outlined" style="font-size:14px">restart_alt</i> Sıfırla
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="mock-items">
+    <div class="mock-card">
+      <div class="mock-chk"></div>
+      <div class="mock-info">
+        <div class="mock-name">Mobil tətbiq UI dizaynı</div>
+        <div class="mock-sub">Texniki · Aynur · Bu gün</div>
+      </div>
+      <span class="mc-badge high">Yüksək</span>
+      <span class="mc-badge gorev">GÖREV</span>
+    </div>
+    <div class="mock-card">
+      <div class="mock-chk"></div>
+      <div class="mock-info">
+        <div class="mock-name">Database optimallaşdırması</div>
+        <div class="mock-sub">Texniki · Hasan · Bu gün</div>
+      </div>
+      <span class="mc-badge high">Yüksək</span>
+      <span class="mc-badge gorev">GÖREV</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════
+     VARİANT 5 — Side Panel + Top Pills
+═══════════════════════════════════ -->
+<div class="variant-block">
+  <div class="variant-label">
+    <div class="variant-num">5</div>
+    <div class="variant-title">Side Filter Panel + Top Pills</div>
+    <div class="variant-desc">Sol panel — tam filter sahəsi; yuxarıda növ seçimi; sağda siyahı</div>
+  </div>
+
+  <div class="v5-wrap">
+
+    <!-- Side filter panel -->
+    <div class="v5-panel">
+
+      <!-- Type / Növ -->
+      <div>
+        <div class="v5-section-title">Növ</div>
+        <div class="v5-prio-row">
+          <div class="v5-radio">
+            <div class="bullet"></div>
+            Hamısı
+            <span class="cnt-badge">47</span>
+          </div>
+          <div class="v5-radio active">
+            <div class="bullet"></div>
+            GÖREV
+            <span class="cnt-badge">31</span>
+          </div>
+          <div class="v5-radio">
+            <div class="bullet"></div>
+            TODO
+            <span class="cnt-badge">16</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="v5-divider"></div>
+
+      <!-- Status -->
+      <div>
+        <div class="v5-section-title">Status</div>
+        <div class="v5-prio-row">
+          <div class="v5-radio">
+            <span class="cdot" style="background:#94a3b8"></span>
+            Hamısı
+            <span class="cnt-badge">47</span>
+          </div>
+          <div class="v5-radio active">
+            <span class="cdot" style="background:#64748b"></span>
+            Gözləyir
+            <span class="cnt-badge">12</span>
+          </div>
+          <div class="v5-radio">
+            <span class="cdot" style="background:#3b82f6"></span>
+            Davam edir
+            <span class="cnt-badge">8</span>
+          </div>
+          <div class="v5-radio">
+            <span class="cdot" style="background:#f59e0b"></span>
+            Onay gözl.
+            <span class="cnt-badge">3</span>
+          </div>
+          <div class="v5-radio">
+            <span class="cdot" style="background:#10b981"></span>
+            Tamamlandı
+            <span class="cnt-badge">8</span>
+          </div>
+          <div class="v5-radio">
+            <span class="cdot" style="background:#e53935"></span>
+            Rədd
+            <span class="cnt-badge">2</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="v5-divider"></div>
+
+      <!-- Priority -->
+      <div>
+        <div class="v5-section-title">Prioritet</div>
+        <div class="v5-prio-row">
+          <div class="v5-radio">
+            <div class="bullet"></div>
+            Hamısı
+          </div>
+          <div class="v5-radio">
+            <span class="cdot" style="background:#7c3aed"></span>
+            Kritik
+          </div>
+          <div class="v5-radio active">
+            <span class="cdot" style="background:#e53935"></span>
+            Yüksək
+          </div>
+          <div class="v5-radio">
+            <span class="cdot" style="background:#f59e0b"></span>
+            Orta
+          </div>
+          <div class="v5-radio">
+            <span class="cdot" style="background:#10b981"></span>
+            Aşağı
+          </div>
+        </div>
+      </div>
+
+      <div class="v5-divider"></div>
+
+      <!-- Reset -->
+      <div style="text-align:center">
+        <div style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--red);font-weight:600;cursor:pointer;padding:7px 16px;background:var(--red-light);border-radius:8px">
+          <i class="material-icons-outlined" style="font-size:14px">restart_alt</i>
+          Sıfırla
+        </div>
+      </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="v5-main">
+      <!-- Top bar: filial + işçi + count -->
+      <div class="v5-topbar">
+        <div class="v5-type-pill">
+          <div class="v5-tp">Bütün filiallar</div>
+          <div class="v5-tp active">Texniki</div>
+          <div class="v5-tp">Satış</div>
+          <div class="v5-tp">HR</div>
+        </div>
+        <div class="v5-pill-count">31 tapşırıq</div>
+      </div>
+
+      <!-- Mock task list -->
+      <div class="mock-items" style="margin-top:0">
+        <div class="mock-card">
+          <div class="mock-chk"></div>
+          <div class="mock-info">
+            <div class="mock-name">Yeni funksiya testi</div>
+            <div class="mock-sub">Texniki · Rashad · Bu gün</div>
+          </div>
+          <span class="mc-badge high">Yüksək</span>
+          <span class="mc-badge gorev">GÖREV</span>
+        </div>
+        <div class="mock-card">
+          <div class="mock-chk"></div>
+          <div class="mock-info">
+            <div class="mock-name">Aylıq hesabat hazırla</div>
+            <div class="mock-sub">Texniki · Hasan · 2 Apr</div>
+          </div>
+          <span class="mc-badge high">Yüksək</span>
+          <span class="mc-badge gorev">GÖREV</span>
+        </div>
+        <div class="mock-card">
+          <div class="mock-chk"></div>
+          <div class="mock-info">
+            <div class="mock-name">Push bildiriş konfiqurasiyası</div>
+            <div class="mock-sub">Texniki · Aynur · 3 Apr</div>
+          </div>
+          <span class="mc-badge med">Orta</span>
+          <span class="mc-badge gorev">GÖREV</span>
+        </div>
+        <div class="mock-card">
+          <div class="mock-chk done"></div>
+          <div class="mock-info">
+            <div class="mock-name" style="text-decoration:line-through;color:var(--text-3)">Auth sistemi yeniləndi</div>
+            <div class="mock-sub">Texniki · Tamamlandı</div>
+          </div>
+          <span class="mc-badge low">Aşağı</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Bottom legend -->
+<div style="background:var(--white);border-radius:16px;padding:20px 24px;box-shadow:var(--shadow);margin-top:8px">
+  <div style="font-family:'Manrope',sans-serif;font-size:14px;font-weight:700;color:var(--primary);margin-bottom:12px">Müqayisə Cədvəli</div>
+  <table style="width:100%;border-collapse:collapse;font-size:12px">
+    <thead>
+      <tr style="border-bottom:2px solid var(--border)">
+        <th style="text-align:left;padding:8px 12px;color:var(--text-3);font-weight:600">#</th>
+        <th style="text-align:left;padding:8px 12px;color:var(--text-3);font-weight:600">Dizayn</th>
+        <th style="text-align:left;padding:8px 12px;color:var(--text-3);font-weight:600">Üstünlük</th>
+        <th style="text-align:left;padding:8px 12px;color:var(--text-3);font-weight:600">Çatışmazlıq</th>
+        <th style="text-align:left;padding:8px 12px;color:var(--text-3);font-weight:600">Ən uyğun</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom:1px solid var(--border)">
+        <td style="padding:10px 12px;font-weight:700;color:var(--primary)">1</td>
+        <td style="padding:10px 12px;font-weight:600">Floating Pills</td>
+        <td style="padding:10px 12px;color:var(--text-2)">Hava dolu, asan oxunan, müasir</td>
+        <td style="padding:10px 12px;color:var(--text-2)">Çox filter varsa sıxlaşır</td>
+        <td style="padding:10px 12px;color:var(--teal);font-weight:600">Bugün + Gələcək</td>
+      </tr>
+      <tr style="border-bottom:1px solid var(--border)">
+        <td style="padding:10px 12px;font-weight:700;color:var(--primary)">2</td>
+        <td style="padding:10px 12px;font-weight:600">Segmented + Dropdown</td>
+        <td style="padding:10px 12px;color:var(--text-2)">Qruplaşdırılmış, professional görünüş</td>
+        <td style="padding:10px 12px;color:var(--text-2)">Çox sətir tələb edir</td>
+        <td style="padding:10px 12px;color:var(--teal);font-weight:600">Gələnlər (inbox)</td>
+      </tr>
+      <tr style="border-bottom:1px solid var(--border)">
+        <td style="padding:10px 12px;font-weight:700;color:var(--primary)">3</td>
+        <td style="padding:10px 12px;font-weight:600">Command Bar</td>
+        <td style="padding:10px 12px;color:var(--text-2)">Ultra minimal, güclü istifadəçilər üçün</td>
+        <td style="padding:10px 12px;color:var(--text-2)">Yeni istifadəçilər üçün çətin</td>
+        <td style="padding:10px 12px;color:var(--teal);font-weight:600">Power user rejimi</td>
+      </tr>
+      <tr style="border-bottom:1px solid var(--border)">
+        <td style="padding:10px 12px;font-weight:700;color:var(--primary)">4</td>
+        <td style="padding:10px 12px;font-weight:600">Glass Filter Shelf</td>
+        <td style="padding:10px 12px;color:var(--text-2)">Vizual olaraq ən zəngin, rəf görünüşü</td>
+        <td style="padding:10px 12px;color:var(--text-2)">Çox yer tutur</td>
+        <td style="padding:10px 12px;color:var(--teal);font-weight:600">Bütün 3 səhifə</td>
+      </tr>
+      <tr>
+        <td style="padding:10px 12px;font-weight:700;color:var(--primary)">5</td>
+        <td style="padding:10px 12px;font-weight:600">Side Panel</td>
+        <td style="padding:10px 12px;color:var(--text-2)">Ən çox filtr seçimi, geniş ekran üçün ideal</td>
+        <td style="padding:10px 12px;color:var(--text-2)">Kiçik ekranlarda çətin</td>
+        <td style="padding:10px 12px;color:var(--teal);font-weight:600">Geniş ekran / masa üstü</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+</body>
+</html>

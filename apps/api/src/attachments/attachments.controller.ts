@@ -1,4 +1,5 @@
 import { Controller, Post, Get, Delete, Param, Query, UseGuards, UseInterceptors, UploadedFile, Req, Res } from '@nestjs/common'
+import { ApiTags } from '@nestjs/swagger'
 import { FileInterceptor } from '@nestjs/platform-express'
 import { diskStorage } from 'multer'
 import { Response } from 'express'
@@ -8,6 +9,7 @@ import * as path from 'path'
 import * as crypto from 'crypto'
 import { secureFileFilter } from '../common/file-filter'
 
+@ApiTags('Attachments')
 @Controller('attachments')
 @UseGuards(JwtAuthGuard)
 export class AttachmentsController {

@@ -10,9 +10,11 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const req = ctx.getRequest()
     const res = ctx.getResponse()
 
+    // Express body-parser kimi middleware-lər HttpException atmır,
+    // amma `status` və ya `statusCode` sahəsi var (məs. 413 PayloadTooLarge)
     const status = exception instanceof HttpException
       ? exception.getStatus()
-      : HttpStatus.INTERNAL_SERVER_ERROR
+      : (exception?.status || exception?.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
 
     const message = exception instanceof HttpException
       ? (exception.getResponse() as any)?.message || exception.message

@@ -26,6 +26,9 @@ export default function GlobalQuickAdd({ open, onClose, onAdded, projects, label
   const [dateOpen, setDateOpen] = useState(false)
   const [labelOpen, setLabelOpen] = useState(false)
   const [selectedLabels, setSelectedLabels] = useState<string[]>([])
+  const [sectionId, setSectionId] = useState('')
+  const [sectionOpen, setSectionOpen] = useState(false)
+  const [sections, setSections] = useState<{ id: string; name: string }[]>([])
   const [saving, setSaving] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -36,9 +39,19 @@ export default function GlobalQuickAdd({ open, onClose, onAdded, projects, label
   useEffect(() => {
     if (open) {
       inputRef.current?.focus()
-      setProjectId('') // layihə seçimi boş başlasın
+      setProjectId('')
+      setSectionId('')
+      setSections([])
     }
   }, [open])
+
+  // Layihə seçiləndə seksiyaları yüklə
+  useEffect(() => {
+    setSectionId('')
+    setSections([])
+    if (!projectId) return
+    api.getTodoistSections(projectId).then(data => setSections(data || [])).catch(() => {})
+  }, [projectId])
 
   // ESC to close
   useEffect(() => {
@@ -58,6 +71,7 @@ export default function GlobalQuickAdd({ open, onClose, onAdded, projects, label
         priority,
         dueDate: dueDate || undefined,
         projectId: projectId || undefined,
+        sectionId: sectionId || undefined,
         labelIds: selectedLabels.length > 0 ? selectedLabels : undefined,
       })
       setContent('')
@@ -65,6 +79,7 @@ export default function GlobalQuickAdd({ open, onClose, onAdded, projects, label
       setPriority('P4')
       setDueDate('')
       setSelectedLabels([])
+      setSectionId('')
       onAdded()
       onClose()
     } catch (err: any) { alert(err.message) }
@@ -158,6 +173,35 @@ export default function GlobalQuickAdd({ open, onClose, onAdded, projects, label
               </div>
             )}
           </div>
+
+          {/* Section selector — yalnız layihə seçilib və seksiyaları varsa */}
+          {projectId && sections.length > 0 && (
+            <div className="relative">
+              <button onClick={() => { setSectionOpen(!sectionOpen); setPrioOpen(false); setDateOpen(false); setProjectOpen(false); setLabelOpen(false) }}
+                className="rounded-md px-2 py-1 text-[10px] font-semibold flex items-center gap-1"
+                style={{ backgroundColor: sectionId ? '#F0FDF4' : 'var(--todoist-sidebar-hover)', color: sectionId ? '#16A34A' : 'var(--todoist-text-secondary)', border: '1px solid var(--todoist-divider)' }}>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+                {sectionId ? (sections.find(s => s.id === sectionId)?.name || 'Seksiya') : 'Seksiya'}
+              </button>
+              {sectionOpen && (
+                <div className="absolute top-full left-0 mt-1 rounded-lg shadow-lg z-10 py-1 min-w-[160px] max-h-[200px] overflow-y-auto" style={{ backgroundColor: 'var(--todoist-surface)', border: '1px solid var(--todoist-divider)' }}>
+                  <button onClick={() => { setSectionId(''); setSectionOpen(false) }}
+                    className="w-full px-3 py-1.5 text-[11px] font-medium flex items-center gap-2 hover:bg-[var(--todoist-sidebar-hover)] text-left"
+                    style={{ color: 'var(--todoist-text-secondary)' }}>
+                    — Seksiyasız
+                  </button>
+                  {sections.map(s => (
+                    <button key={s.id} onClick={() => { setSectionId(s.id); setSectionOpen(false) }}
+                      className="w-full px-3 py-1.5 text-[11px] font-medium flex items-center justify-between hover:bg-[var(--todoist-sidebar-hover)] text-left"
+                      style={{ color: 'var(--todoist-text)', backgroundColor: sectionId === s.id ? 'var(--todoist-sidebar-hover)' : undefined }}>
+                      {s.name}
+                      {sectionId === s.id && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 6L9 17l-5-5"/></svg>}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Label selector */}
           {labels.length > 0 && (

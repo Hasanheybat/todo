@@ -1,9 +1,11 @@
 import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Req } from '@nestjs/common'
+import { ApiTags } from '@nestjs/swagger'
 import { TemplatesService } from './templates.service'
 import { CreateTemplateDto } from './dto/create-template.dto'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { PermissionsGuard, RequirePermissions } from '../auth/guards/permissions.guard'
 
+@ApiTags('Templates')
 @Controller('templates')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 export class TemplatesController {

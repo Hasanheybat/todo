@@ -18,6 +18,8 @@ import { DepartmentsModule } from './departments/departments.module'
 import { TodoistModule } from './todoist/todoist.module'
 import { TaskAssigneeFilesModule } from './task-assignee-files/task-assignee-files.module'
 import { AdminModule } from './admin/admin.module'
+import { ExportModule } from './export/export.module'
+import { EmailModule } from './email/email.module'
 import { RequestLoggerMiddleware } from './common/request-logger.middleware'
 
 @Module({
@@ -42,6 +44,8 @@ import { RequestLoggerMiddleware } from './common/request-logger.middleware'
     TodoistModule,
     TaskAssigneeFilesModule,
     AdminModule,
+    ExportModule,
+    EmailModule,
   ],
   controllers: [AppController],
 })

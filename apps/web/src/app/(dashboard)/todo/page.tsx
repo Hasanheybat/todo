@@ -7,6 +7,8 @@ import TaskQuickAdd from '@/components/todoist/TaskQuickAdd'
 import TaskDetailModal from '@/components/todoist/TaskDetailModal'
 import SectionGroup from '@/components/todoist/SectionGroup'
 import DraggableTaskList from '@/components/todoist/DraggableTaskList'
+import DraggableTodoList from '@/components/todoist/DraggableTodoList'
+import TodoBoardView from '@/components/todoist/TodoBoardView'
 import BoardView from '@/components/todoist/BoardView'
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core'
 import { api } from '@/lib/api'
@@ -41,14 +43,29 @@ export default function TodoPage() {
   const [viewType, setViewType] = useState<ViewType>('list')
   const [labelFilter, setLabelFilter] = useState<string | null>(null)
   const [addSectionOpen, setAddSectionOpen] = useState(false)
+  const [showTodoInline, setShowTodoInline] = useState(false)
+  const [todoInlineValue, setTodoInlineValue] = useState('')
   const [newSectionName, setNewSectionName] = useState('')
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [bulkMode, setBulkMode] = useState(false)
   const [saveTemplateOpen, setSaveTemplateOpen] = useState(false)
   const [typeFilter, setTypeFilter] = useState<'all' | 'gorev' | 'todo'>('all')
+  const [todoStatusFilter, setTodoStatusFilter] = useState<'ALL' | 'WAITING' | 'IN_PROGRESS' | 'DONE' | 'CANCELLED'>('ALL')
   const [selectedGorev, setSelectedGorev] = useState<any>(null)
   const dndSensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }))
   const [calMonth, setCalMonth] = useState(() => { const d = new Date(); return { year: d.getFullYear(), month: d.getMonth() } })
+  // Calendar drag-drop
+  const [calDragTaskId, setCalDragTaskId] = useState<string | null>(null)
+  const [calDragOverDate, setCalDragOverDate] = useState<string | null>(null)
+
+  // Bulk move modal
+  const [bulkMoveOpen, setBulkMoveOpen] = useState(false)
+  const [bulkMoveProjectId, setBulkMoveProjectId] = useState('')
+  // Calendar quick add
+  const [calAddDate, setCalAddDate] = useState<string | null>(null)
+  const [calAddContent, setCalAddContent] = useState('')
+  // Shortcuts modal
+  const [shortcutsOpen, setShortcutsOpen] = useState(false)
 
   const activeProjectId = projectIdFromUrl || null
   const activeProject = activeProjectId ? projects.find((p: any) => p.id === activeProjectId) : null
@@ -94,8 +111,44 @@ export default function TodoPage() {
     loadData()
   }, [activeProjectId, labelIdFromUrl, loadData])
 
+  // Klaviatura qısayolları
+  useEffect(() => {
+    const onViewChange = (e: Event) => {
+      const view = (e as CustomEvent).detail as ViewType
+      setViewType(view)
+    }
+    const onShowShortcuts = () => setShortcutsOpen(true)
+    const onEscape = () => {
+      setSelectedTaskId(null)
+      setSelectedGorev(null)
+      setBulkMoveOpen(false)
+      setCalAddDate(null)
+      setShortcutsOpen(false)
+    }
+    const onTaskAdded = () => loadData()
+    window.addEventListener('todo-view-change', onViewChange)
+    window.addEventListener('todo-show-shortcuts', onShowShortcuts)
+    window.addEventListener('todo-escape', onEscape)
+    window.addEventListener('todo-task-added', onTaskAdded)
+    return () => {
+      window.removeEventListener('todo-view-change', onViewChange)
+      window.removeEventListener('todo-show-shortcuts', onShowShortcuts)
+      window.removeEventListener('todo-escape', onEscape)
+      window.removeEventListener('todo-task-added', onTaskAdded)
+    }
+  }, [loadData])
+
   // Tapşırıq əməliyyatları
   const handleAdd = async (data: any, sectionId?: string) => {
+    // Optimistik: anında siyahıya əlavə et
+    const tempId = `temp-${Date.now()}`
+    const tempTask = {
+      id: tempId, content: data.content, priority: data.priority || 'P4',
+      dueDate: data.dueDate || null, isCompleted: false, todoStatus: 'WAITING',
+      sectionId: sectionId || null, labels: [], subTasks: [], attachments: [],
+      _isTemp: true,
+    }
+    setTasks(prev => [tempTask, ...prev])
     try {
       await api.createTodoistTask({
         content: data.content, priority: data.priority, dueDate: data.dueDate,
@@ -105,16 +158,35 @@ export default function TodoPage() {
         recurRule: data.recurRule || undefined,
       })
       loadData(); refreshProjects()
-    } catch (err: any) { alert(err.message) }
+    } catch (err: any) {
+      setTasks(prev => prev.filter(t => t.id !== tempId))
+      alert(err.message)
+    }
+  }
+
+  const handleAddTodoInline = async () => {
+    if (!todoInlineValue.trim()) return
+    setShowTodoInline(false)
+    setTodoInlineValue('')
+    await handleAdd({ content: todoInlineValue.trim(), priority: 'P4' })
   }
 
   const handleToggle = async (id: string) => {
     const task = tasks.find(t => t.id === id)
     if (!task) return
     try {
-      if (task.isCompleted) {
+      if (isInbox) {
+        // Inbox-da TODO: status dəyişir (yox olmur)
+        const newStatus = (task.todoStatus || 'WAITING') === 'DONE' ? 'WAITING' : 'DONE'
+        // Optimistik yeniləmə
+        setTasks(prev => prev.map(t => t.id === id ? { ...t, todoStatus: newStatus } : t))
+        await api.updateTodoistTask(id, { todoStatus: newStatus })
+        toast(newStatus === 'DONE' ? '✅ Tamamlandı' : '↩️ Geri açıldı')
+        loadData()
+      } else if (task.isCompleted) {
         await api.uncompleteTodoistTask(id)
         toast('Tapşırıq geri açıldı', { icon: '↩️' })
+        loadData(); refreshProjects()
       } else {
         await api.completeTodoistTask(id)
         toast((t) => (
@@ -126,8 +198,8 @@ export default function TodoPage() {
             </button>
           </div>
         ), { duration: 5000 })
+        loadData(); refreshProjects()
       }
-      loadData(); refreshProjects()
     } catch (err: any) { toast.error(err.message) }
   }
 
@@ -200,21 +272,40 @@ export default function TodoPage() {
   }
 
   const handleDeleteSection = async (id: string) => {
-    if (!confirm('Seksiya silinsin? Tapşırıqlar seksiyasız qalacaq.')) return
-    try { await api.deleteTodoistSection(id); loadData() } catch (err: any) { alert(err.message) }
+    toast((t) => (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span>🗑️ Seksiya silinsin?</span>
+        <button onClick={async () => {
+          toast.dismiss(t.id)
+          try { await api.deleteTodoistSection(id); loadData() } catch (err: any) { toast.error(String(err)) }
+        }} style={{ padding: '2px 10px', fontSize: 12, borderRadius: 4, backgroundColor: '#EF4444', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Sil</button>
+        <button onClick={() => toast.dismiss(t.id)} style={{ padding: '2px 8px', fontSize: 12, borderRadius: 4, backgroundColor: '#6B7280', color: '#fff', border: 'none', cursor: 'pointer' }}>Ləğv</button>
+      </div>
+    ), { duration: 8000 })
   }
 
+  // Search state (layout.tsx / klaviatura ilə fokuslanır)
+  const [searchQuery, setSearchQuery] = useState('')
+
   // Filtrləmə
-  let filteredTasks = tasks
-  if (statusFilter === 'active') filteredTasks = filteredTasks.filter(t => !t.isCompleted)
-  else if (statusFilter === 'completed') filteredTasks = filteredTasks.filter(t => t.isCompleted)
+  let filteredTasks = tasks.filter(t => !t.isCompleted)
   if (labelFilter) filteredTasks = filteredTasks.filter(t => t.labels?.some((l: any) => l.label?.id === labelFilter || l.labelId === labelFilter))
+  if (todoStatusFilter !== 'ALL') filteredTasks = filteredTasks.filter(t => (t.todoStatus || 'WAITING') === todoStatusFilter)
+  if (searchQuery.trim()) {
+    const q = searchQuery.toLowerCase()
+    filteredTasks = filteredTasks.filter(t =>
+      t.content?.toLowerCase().includes(q) ||
+      t.description?.toLowerCase().includes(q) ||
+      t.labels?.some((l: any) => (l.label?.name || l.name)?.toLowerCase().includes(q))
+    )
+  }
 
   const activeTasks = tasks.filter(t => !t.isCompleted)
   const completedTasks = tasks.filter(t => t.isCompleted)
 
   // Seksiya bazalı qruplaşdırma (list görünüşü üçün)
-  const unsectionedTasks = filteredTasks.filter(t => !t.sectionId)
+  // Inbox-da sectionId fərqi olmadan bütün tapşırıqlar göstərilir
+  const unsectionedTasks = isInbox ? filteredTasks : filteredTasks.filter(t => !t.sectionId)
   const sectionedGroups = sections.map(s => ({
     section: s,
     tasks: filteredTasks.filter(t => t.sectionId === s.id),
@@ -267,12 +358,12 @@ export default function TodoPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Tapşırıq əlavə et */}
+          {/* TODO / Tapşırıq əlavə et */}
           <button onClick={openQuickAdd}
             className="flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-[13px] font-semibold text-white transition hover:opacity-90"
             style={{ backgroundColor: 'var(--todoist-red)' }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M12 5v14M5 12h14"/></svg>
-            Tapşırıq əlavə et
+            {isInbox ? 'TODO əlavə et' : 'Tapşırıq əlavə et'}
           </button>
 
           {/* Şablon kimi saxla — yalnız layihələrdə */}
@@ -291,32 +382,56 @@ export default function TodoPage() {
             {bulkMode ? '✕ Ləğv et' : '☑ Seç'}
           </button>
 
-        {/* List/Board toggle — yalnız layihələrdə */}
-        {!isInbox && (
-          <div className="flex rounded-lg overflow-hidden border border-[var(--todoist-divider)]">
-            <button onClick={() => setViewType('list')}
-              className={`px-3 py-1.5 text-[11px] font-bold flex items-center gap-1.5 transition
-                ${viewType === 'list' ? 'bg-[var(--todoist-red)] text-white' : 'bg-white text-[var(--todoist-text-secondary)] hover:bg-gray-50'}`}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
-              Siyahı
-            </button>
-            <button onClick={() => setViewType('board')}
-              className={`px-3 py-1.5 text-[11px] font-bold flex items-center gap-1.5 transition
-                ${viewType === 'board' ? 'bg-[var(--todoist-red)] text-white' : 'bg-white text-[var(--todoist-text-secondary)] hover:bg-gray-50'}`}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="10" rx="1"/></svg>
-              Board
-            </button>
+        {/* List/Board/Calendar toggle */}
+        <div className="flex rounded-lg overflow-hidden border border-[var(--todoist-divider)]">
+          <button onClick={() => setViewType('list')}
+            className={`px-3 py-1.5 text-[11px] font-bold flex items-center gap-1.5 transition
+              ${viewType === 'list' ? 'bg-[var(--todoist-red)] text-white' : 'bg-white text-[var(--todoist-text-secondary)] hover:bg-gray-50'}`}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+            Siyahı
+          </button>
+          <button onClick={() => setViewType('board')}
+            className={`px-3 py-1.5 text-[11px] font-bold flex items-center gap-1.5 transition
+              ${viewType === 'board' ? 'bg-[var(--todoist-red)] text-white' : 'bg-white text-[var(--todoist-text-secondary)] hover:bg-gray-50'}`}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="10" rx="1"/></svg>
+            Board
+          </button>
+          {!isInbox && (
             <button onClick={() => setViewType('calendar')}
               className={`px-3 py-1.5 text-[11px] font-bold flex items-center gap-1.5 transition
                 ${viewType === 'calendar' ? 'bg-[var(--todoist-red)] text-white' : 'bg-white text-[var(--todoist-text-secondary)] hover:bg-gray-50'}`}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
               Təqvim
             </button>
-          </div>
-        )}
+          )}
+        </div>
         </div>
       </div>
-      <p className="text-[12px] text-[var(--todoist-text-tertiary)] mb-4">{isInbox ? 'Tarixsiz və yeni tapşırıqlar' : 'Layihə tapşırıqları'}</p>
+      {/* Axtarış + hint */}
+      <div className="flex items-center gap-2 mb-4">
+        <div className="flex-1 relative">
+          <svg className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--todoist-text-tertiary)" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input
+            data-search
+            type="text"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Escape') { setSearchQuery(''); (e.target as HTMLInputElement).blur() } }}
+            placeholder="Tapşırıqlarda axtar..."
+            className="w-full pl-9 pr-4 py-2 rounded-xl text-[13px] outline-none transition"
+            style={{ background: 'var(--todoist-sidebar-hover)', border: '1px solid var(--todoist-border)', color: 'var(--todoist-text)' }}
+          />
+          {searchQuery && (
+            <button onClick={() => setSearchQuery('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full flex items-center justify-center hover:bg-[var(--todoist-border)]">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+          )}
+        </div>
+        <span className="text-[11px] hidden sm:flex items-center gap-1" style={{ color: 'var(--todoist-text-tertiary)' }}>
+          <kbd className="px-1.5 py-0.5 rounded text-[10px] font-mono" style={{ background: 'var(--todoist-border)', color: 'var(--todoist-text-secondary)' }}>/</kbd> axtar
+          <kbd className="px-1.5 py-0.5 rounded text-[10px] font-mono ml-2" style={{ background: 'var(--todoist-border)', color: 'var(--todoist-text-secondary)' }}>?</kbd> kömək
+        </span>
+      </div>
 
       {/* Bulk Action Bar */}
       {bulkMode && selectedIds.size > 0 && (
@@ -325,12 +440,19 @@ export default function TodoPage() {
           <div className="flex-1" />
           <button onClick={() => handleBulkAction('complete')}
             className="px-3 py-1.5 rounded-lg bg-[#058527] text-white text-[11px] font-bold">✓ Tamamla</button>
-          <button onClick={() => {
-            const projectId = prompt('Layihə ID (boş = ləğv):')
-            if (projectId) handleBulkAction('move', { projectId })
-          }}
+          <button onClick={() => setBulkMoveOpen(true)}
             className="px-3 py-1.5 rounded-lg bg-[#246FE0] text-white text-[11px] font-bold">↗ Köçür</button>
-          <button onClick={() => { if (confirm(`${selectedIds.size} tapşırıq silinsin?`)) handleBulkAction('delete') }}
+          <button onClick={() => {
+            toast((t) => (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span>🗑️ {selectedIds.size} tapşırıq silinsin?</span>
+                <button onClick={async () => { toast.dismiss(t.id); handleBulkAction('delete') }}
+                  style={{ padding: '2px 10px', fontSize: 12, borderRadius: 4, backgroundColor: '#EF4444', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Sil</button>
+                <button onClick={() => toast.dismiss(t.id)}
+                  style={{ padding: '2px 8px', fontSize: 12, borderRadius: 4, backgroundColor: '#6B7280', color: '#fff', border: 'none', cursor: 'pointer' }}>Ləğv</button>
+              </div>
+            ), { duration: 8000 })
+          }}
             className="px-3 py-1.5 rounded-lg bg-[var(--todoist-red)] text-white text-[11px] font-bold">🗑 Sil</button>
           <button onClick={() => { setSelectedIds(new Set()); setBulkMode(false) }}
             className="px-2 py-1.5 rounded-lg text-[11px] font-medium text-[var(--todoist-text-secondary)] hover:bg-[var(--todoist-border)]">Ləğv et</button>
@@ -356,28 +478,30 @@ export default function TodoPage() {
         </div>
       )}
 
-      {/* Status + Label filter tabs */}
-      {typeFilter !== 'gorev' && <div className="flex gap-0 mb-3 border-b-2 border-[var(--todoist-divider)] overflow-x-auto">
-        <button onClick={() => setStatusFilter('active')}
-          className={`px-4 py-2.5 text-[12px] font-semibold border-b-2 -mb-[2px] transition flex items-center gap-1.5 whitespace-nowrap
-            ${statusFilter === 'active' ? 'border-[var(--todoist-red)] text-[var(--todoist-red)]' : 'border-transparent text-[var(--todoist-text-secondary)] hover:text-[var(--todoist-text)]'}`}>
-          Aktiv
-          <span className={`text-[10px] px-1.5 py-px rounded-full font-bold ${statusFilter === 'active' ? 'bg-[var(--todoist-red-light)] text-[var(--todoist-red)]' : 'bg-[var(--todoist-border)] text-[var(--todoist-text-tertiary)]'}`}>{activeTasks.length}</span>
-        </button>
-        <button onClick={() => setStatusFilter('completed')}
-          className={`px-4 py-2.5 text-[12px] font-semibold border-b-2 -mb-[2px] transition flex items-center gap-1.5 whitespace-nowrap
-            ${statusFilter === 'completed' ? 'border-[var(--todoist-red)] text-[var(--todoist-red)]' : 'border-transparent text-[var(--todoist-text-secondary)] hover:text-[var(--todoist-text)]'}`}>
-          <span className="w-1.5 h-1.5 rounded-full bg-[#058527]" />
-          Tamamlandı
-          <span className="text-[10px] text-[var(--todoist-text-tertiary)]">{completedTasks.length}</span>
-        </button>
-        <button onClick={() => setStatusFilter('all')}
-          className={`px-4 py-2.5 text-[12px] font-semibold border-b-2 -mb-[2px] transition flex items-center gap-1.5 whitespace-nowrap
-            ${statusFilter === 'all' ? 'border-[var(--todoist-red)] text-[var(--todoist-red)]' : 'border-transparent text-[var(--todoist-text-secondary)] hover:text-[var(--todoist-text)]'}`}>
-          Hamısı
-          <span className="text-[10px] text-[var(--todoist-text-tertiary)]">{tasks.length}</span>
-        </button>
-      </div>}
+      {/* Status filter tabs */}
+      {typeFilter !== 'gorev' && (
+        <div className="flex gap-0 mb-3 border-b-2 border-[var(--todoist-divider)] overflow-x-auto">
+          {([
+            { key: 'ALL' as const,        label: 'Hamısı',        dot: null },
+            { key: 'WAITING' as const,    label: 'Gözləyir',      dot: '#94A3B8' },
+            { key: 'IN_PROGRESS' as const,label: 'Davam edir',    dot: '#F59E0B' },
+            { key: 'DONE' as const,       label: 'Tamamlandı',    dot: '#10B981' },
+            { key: 'CANCELLED' as const,  label: 'İptal edilib',  dot: '#EF4444' },
+          ]).map(s => (
+            <button key={s.key} onClick={() => setTodoStatusFilter(s.key)}
+              className={`px-4 py-2.5 text-[12px] font-semibold border-b-2 -mb-[2px] transition flex items-center gap-1.5 whitespace-nowrap
+                ${todoStatusFilter === s.key ? 'border-[var(--todoist-red)] text-[var(--todoist-red)]' : 'border-transparent text-[var(--todoist-text-secondary)] hover:text-[var(--todoist-text)]'}`}>
+              {s.dot && <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: s.dot }} />}
+              {s.label}
+              <span className={`text-[10px] px-1.5 py-px rounded-full font-bold ${todoStatusFilter === s.key ? 'bg-[var(--todoist-red-light)] text-[var(--todoist-red)]' : 'bg-[var(--todoist-border)] text-[var(--todoist-text-tertiary)]'}`}>
+                {s.key === 'ALL'
+                  ? tasks.filter(t => !t.isCompleted).length
+                  : tasks.filter(t => !t.isCompleted && (t.todoStatus || 'WAITING') === s.key).length}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Label chip filtrləri */}
       {labels.length > 0 && (
@@ -445,6 +569,15 @@ export default function TodoPage() {
             </div>
           )}
         </div>
+      ) : viewType === 'board' && (isInbox || typeFilter === 'todo') ? (
+        /* ═══ TODO STATUS BOARD (Gözləyir / Davam edir / Tamamlandı) ═══ */
+        <TodoBoardView
+          todos={filteredTasks}
+          projects={projects}
+          onRefresh={loadData}
+          onClickTodo={setSelectedTaskId}
+          onCompleteTodo={async (id) => { await api.updateTodoistTask(id, { todoStatus: "DONE" }); loadData() }}
+        />
       ) : viewType === 'board' && !isInbox ? (
         /* ═══ BOARD GÖRÜNÜŞü ═══ */
         <BoardView
@@ -487,12 +620,29 @@ export default function TodoPage() {
             {calendarDays.map((cell, i) => {
               const cellTasks = filteredTasks.filter(t => t.dueDate && t.dueDate.split('T')[0] === cell.dateStr)
               const isToday = cell.dateStr === todayStr
+              const isDragOver = calDragOverDate === cell.dateStr && calDragTaskId !== null
               return (
-                <div key={i} className={`min-h-[80px] p-1.5 cursor-pointer hover:bg-[#F9F8F6] transition ${cell.isCurrentMonth ? (isToday ? 'bg-[#FFF5F3]' : 'bg-white') : 'bg-[var(--todoist-bg)]'}`}
+                <div key={i}
+                  className={`min-h-[80px] p-1.5 cursor-pointer transition ${cell.isCurrentMonth ? (isToday ? 'bg-[#FFF5F3]' : 'bg-white') : 'bg-[var(--todoist-bg)]'}`}
+                  style={{ outline: isDragOver ? '2px dashed var(--todoist-red)' : undefined, backgroundColor: isDragOver ? 'var(--todoist-red-light)' : undefined }}
                   onClick={() => {
                     if (cell.dateStr) {
-                      const content = prompt('Tapşırıq adı:')
-                      if (content?.trim()) handleAdd({ content: content.trim(), priority: 'P4', dueDate: cell.dateStr })
+                      setCalAddDate(cell.dateStr)
+                      setCalAddContent('')
+                    }
+                  }}
+                  onDragOver={e => { e.preventDefault(); if (cell.dateStr) setCalDragOverDate(cell.dateStr) }}
+                  onDragLeave={() => setCalDragOverDate(null)}
+                  onDrop={async (e) => {
+                    e.preventDefault()
+                    setCalDragOverDate(null)
+                    if (calDragTaskId && cell.dateStr) {
+                      try {
+                        await api.updateTodoistTask(calDragTaskId, { dueDate: cell.dateStr })
+                        toast('📅 Tarix dəyişdirildi', { duration: 2000 })
+                        loadData()
+                      } catch { toast.error('Xəta') }
+                      setCalDragTaskId(null)
                     }
                   }}>
                   <span className={`text-[11px] font-semibold inline-flex items-center justify-center
@@ -500,8 +650,12 @@ export default function TodoPage() {
                     {cell.date?.getDate()}
                   </span>
                   {cellTasks.slice(0, 3).map((task: any) => (
-                    <div key={task.id} onClick={(e) => { e.stopPropagation(); setSelectedTaskId(task.id) }}
-                      className="mt-0.5 text-[8px] px-1 py-px rounded font-semibold truncate cursor-pointer hover:opacity-80"
+                    <div key={task.id}
+                      draggable
+                      onDragStart={e => { e.stopPropagation(); setCalDragTaskId(task.id) }}
+                      onDragEnd={() => setCalDragTaskId(null)}
+                      onClick={(e) => { e.stopPropagation(); setSelectedTaskId(task.id) }}
+                      className="mt-0.5 text-[8px] px-1 py-px rounded font-semibold truncate cursor-grab active:cursor-grabbing hover:opacity-80"
                       style={{
                         backgroundColor: (task.priority === 'P1' ? 'var(--todoist-red)' : task.priority === 'P2' ? '#EB8909' : task.priority === 'P3' ? '#246FE0' : 'var(--todoist-text-secondary)') + '18',
                         color: task.priority === 'P1' ? 'var(--todoist-red)' : task.priority === 'P2' ? '#EB8909' : task.priority === 'P3' ? '#246FE0' : 'var(--todoist-text-secondary)',
@@ -519,6 +673,7 @@ export default function TodoPage() {
         </div>
       ) : (
         /* ═══ SİYAHI GÖRÜNÜŞü ═══ */
+        <>
         <DndContext
           sensors={dndSensors}
           collisionDetection={closestCenter}
@@ -555,12 +710,6 @@ export default function TodoPage() {
             </div>
           )}
 
-          {/* Quick add — seksiyasız */}
-          {statusFilter !== 'completed' && sections.length === 0 && (
-            <div className="mt-1 mb-4">
-              <TaskQuickAdd onAdd={(data) => handleAdd(data)} labels={labels} />
-            </div>
-          )}
 
           {/* Seksiyalar — yalnız layihələrdə */}
           {!isInbox && sectionedGroups.map(({ section, tasks: sTasks }) => (
@@ -654,6 +803,7 @@ export default function TodoPage() {
             </div>
           )}
         </DndContext>
+        </>
       )}
 
       <TaskDetailModal taskId={selectedTaskId} onClose={() => setSelectedTaskId(null)} onRefresh={loadData} />
@@ -779,6 +929,132 @@ export default function TodoPage() {
         projectColor={activeProject?.color}
         tasks={tasks}
       />
+
+      {/* ═══ BULK MOVE MODAL ═══ */}
+      {bulkMoveOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={() => setBulkMoveOpen(false)}>
+          <div className="absolute inset-0 bg-black/40" />
+          <div className="relative rounded-2xl shadow-2xl w-full max-w-[380px] p-5"
+            style={{ backgroundColor: 'var(--todoist-surface)', border: '1px solid var(--todoist-divider)' }}
+            onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-[15px] font-bold" style={{ color: 'var(--todoist-text)' }}>Layihəyə köçür ({selectedIds.size} tapşırıq)</h3>
+              <button onClick={() => setBulkMoveOpen(false)} className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-[var(--todoist-border)]">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              </button>
+            </div>
+            <div className="space-y-1.5 max-h-60 overflow-y-auto mb-4">
+              {projects.filter((p: any) => !p.isInbox).map((p: any) => (
+                <button key={p.id} onClick={() => setBulkMoveProjectId(p.id)}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left transition hover:bg-[var(--todoist-sidebar-hover)]"
+                  style={{ background: bulkMoveProjectId === p.id ? (p.color || '#808080') + '18' : undefined, border: `1px solid ${bulkMoveProjectId === p.id ? (p.color || '#808080') : 'transparent'}` }}>
+                  <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: p.color || '#808080' }} />
+                  <span className="text-[13px] font-medium flex-1" style={{ color: 'var(--todoist-text)' }}>{p.name}</span>
+                  {bulkMoveProjectId === p.id && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={p.color || '#808080'} strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>}
+                </button>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => setBulkMoveOpen(false)}
+                className="flex-1 py-2 rounded-xl text-[13px] font-semibold transition hover:opacity-80"
+                style={{ background: 'var(--todoist-border)', color: 'var(--todoist-text-secondary)' }}>Ləğv et</button>
+              <button onClick={() => {
+                if (bulkMoveProjectId) {
+                  handleBulkAction('move', { projectId: bulkMoveProjectId })
+                  setBulkMoveOpen(false)
+                  setBulkMoveProjectId('')
+                }
+              }} disabled={!bulkMoveProjectId}
+                className="flex-1 py-2 rounded-xl text-[13px] font-bold transition disabled:opacity-40"
+                style={{ background: '#246FE0', color: '#fff' }}>↗ Köçür</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ═══ CALENDAR QUICK ADD ═══ */}
+      {calAddDate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={() => setCalAddDate(null)}>
+          <div className="absolute inset-0 bg-black/40" />
+          <div className="relative rounded-2xl shadow-2xl w-full max-w-[360px] p-5"
+            style={{ backgroundColor: 'var(--todoist-surface)', border: '1px solid var(--todoist-divider)' }}
+            onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-[14px] font-bold" style={{ color: 'var(--todoist-text)' }}>
+                📅 {new Date(calAddDate + 'T00:00:00').toLocaleDateString('az-AZ', { day: 'numeric', month: 'long' })} — Yeni tapşırıq
+              </h3>
+              <button onClick={() => setCalAddDate(null)} className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-[var(--todoist-border)]">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              </button>
+            </div>
+            <input
+              autoFocus
+              value={calAddContent}
+              onChange={e => setCalAddContent(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === 'Enter' && calAddContent.trim()) {
+                  handleAdd({ content: calAddContent.trim(), priority: 'P4', dueDate: calAddDate })
+                  setCalAddDate(null)
+                  setCalAddContent('')
+                }
+                if (e.key === 'Escape') setCalAddDate(null)
+              }}
+              placeholder="Tapşırıq adını yazın..."
+              className="w-full px-3 py-2.5 rounded-xl text-[13px] outline-none mb-3"
+              style={{ background: 'var(--todoist-sidebar-hover)', border: '1px solid var(--todoist-divider)', color: 'var(--todoist-text)' }}
+            />
+            <div className="flex gap-2">
+              <button onClick={() => setCalAddDate(null)}
+                className="flex-1 py-2 rounded-xl text-[13px] font-semibold transition hover:opacity-80"
+                style={{ background: 'var(--todoist-border)', color: 'var(--todoist-text-secondary)' }}>Ləğv et</button>
+              <button onClick={() => {
+                if (calAddContent.trim()) {
+                  handleAdd({ content: calAddContent.trim(), priority: 'P4', dueDate: calAddDate })
+                  setCalAddDate(null)
+                  setCalAddContent('')
+                }
+              }} disabled={!calAddContent.trim()}
+                className="flex-1 py-2 rounded-xl text-[13px] font-bold transition disabled:opacity-40"
+                style={{ background: 'var(--todoist-red)', color: '#fff' }}>+ Əlavə et</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ═══ SHORTCUTS MODAL (?) ═══ */}
+      {shortcutsOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={() => setShortcutsOpen(false)}>
+          <div className="absolute inset-0 bg-black/40" />
+          <div className="relative rounded-2xl shadow-2xl w-full max-w-[420px] p-6"
+            style={{ backgroundColor: 'var(--todoist-surface)', border: '1px solid var(--todoist-divider)' }}
+            onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="text-[16px] font-bold" style={{ color: 'var(--todoist-text)' }}>⌨️ Klaviatura qısayolları</h3>
+              <button onClick={() => setShortcutsOpen(false)} className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-[var(--todoist-border)]">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              </button>
+            </div>
+            <div className="space-y-2.5">
+              {[
+                { key: 'Q / N', desc: 'Yeni tapşırıq əlavə et' },
+                { key: '/', desc: 'Axtarışa fokuslan' },
+                { key: 'B', desc: 'Board (Lövhə) görünüşü' },
+                { key: 'L', desc: 'List (Siyahı) görünüşü' },
+                { key: '?', desc: 'Bu yardım pəncərəsini aç' },
+                { key: 'Esc', desc: 'Pəncərəni / paneli bağla' },
+              ].map(s => (
+                <div key={s.key} className="flex items-center justify-between px-3 py-2 rounded-lg" style={{ background: 'var(--todoist-sidebar-hover)' }}>
+                  <span className="text-[13px]" style={{ color: 'var(--todoist-text-secondary)' }}>{s.desc}</span>
+                  <kbd className="px-2.5 py-1 rounded-lg text-[11px] font-bold font-mono"
+                    style={{ background: 'var(--todoist-surface)', color: 'var(--todoist-text)', border: '1px solid var(--todoist-divider)', boxShadow: '0 1px 2px rgba(0,0,0,0.08)' }}>
+                    {s.key}
+                  </kbd>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
     </PageGuard>
   )

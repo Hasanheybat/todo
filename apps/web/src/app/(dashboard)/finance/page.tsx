@@ -247,6 +247,13 @@ export default function FinancePage() {
           <h1 className="text-[22px] font-extrabold" style={{ color: 'var(--todoist-text)' }}>Maliyyə</h1>
           <p className="text-[12px] mt-0.5" style={{ color: 'var(--todoist-text-tertiary)' }}>Kassa debit/kredit və işçi hesabları</p>
         </div>
+        <div className="flex items-center gap-2">
+          <button onClick={async () => { try { const blob = await api.exportFinanceExcel(); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `maliyye_${new Date().toISOString().split('T')[0]}.xlsx`; a.click(); URL.revokeObjectURL(url) } catch {} }}
+            className="flex items-center gap-1.5 px-3 py-2 text-[12px] font-semibold rounded-lg transition hover:opacity-80"
+            style={{ backgroundColor: 'var(--todoist-border)', color: 'var(--todoist-text-secondary)' }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Excel
+          </button>
         <div className="relative">
           <button onClick={() => setAddDropdown(!addDropdown)} className="flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-[13px] font-semibold text-white transition hover:opacity-90" style={{ backgroundColor: 'var(--todoist-red)' }}>
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
@@ -262,6 +269,7 @@ export default function FinancePage() {
               </button>
             </div>
           )}
+        </div>
         </div>
       </div>
 

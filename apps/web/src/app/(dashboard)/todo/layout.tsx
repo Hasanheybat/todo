@@ -24,9 +24,37 @@ export default function TodoLayout({ children }: { children: React.ReactNode }) 
     const handler = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement)?.tagName
       if (tag === 'INPUT' || tag === 'TEXTAREA' || (e.target as HTMLElement)?.isContentEditable) return
-      if (e.key === 'q' || e.key === 'Q') {
+
+      // q/Q veya n/N → Quick Add aç
+      if (e.key === 'q' || e.key === 'Q' || e.key === 'n' || e.key === 'N') {
         e.preventDefault()
         setQuickAddOpen(true)
+      }
+      // / → Axtarış inputuna fokuslan (əvvəlcə yerli data-search, sonra header)
+      if (e.key === '/') {
+        e.preventDefault()
+        const localSearch = document.querySelector<HTMLInputElement>('input[data-search]')
+        const headerSearch = document.querySelector<HTMLInputElement>('header input[type="search"], input[placeholder*="axtar"]:not([data-search])')
+        const searchInput = localSearch || headerSearch
+        if (searchInput) { searchInput.focus(); searchInput.select() }
+      }
+      // b/B → Board görünüşü; l/L → List görünüşü (custom event)
+      if (e.key === 'b' || e.key === 'B') {
+        e.preventDefault()
+        window.dispatchEvent(new CustomEvent('todo-view-change', { detail: 'board' }))
+      }
+      if (e.key === 'l' || e.key === 'L') {
+        e.preventDefault()
+        window.dispatchEvent(new CustomEvent('todo-view-change', { detail: 'list' }))
+      }
+      // ? → Qısayol kömək paneli
+      if (e.key === '?') {
+        e.preventDefault()
+        window.dispatchEvent(new CustomEvent('todo-show-shortcuts'))
+      }
+      // Escape → Panelləri bağla
+      if (e.key === 'Escape') {
+        window.dispatchEvent(new CustomEvent('todo-escape'))
       }
     }
     window.addEventListener('keydown', handler)
@@ -41,7 +69,7 @@ export default function TodoLayout({ children }: { children: React.ReactNode }) 
       <GlobalQuickAdd
         open={quickAddOpen}
         onClose={() => setQuickAddOpen(false)}
-        onAdded={loadProjects}
+        onAdded={() => { loadProjects(); window.dispatchEvent(new CustomEvent('todo-task-added')) }}
         projects={projects}
         labels={labels}
       />

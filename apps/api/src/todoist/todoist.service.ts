@@ -148,7 +148,10 @@ export class TodoistService {
     section: { select: { id: true, name: true } },
     project: { select: { id: true, name: true, color: true } },
     children: {
-      select: { id: true, content: true, isCompleted: true, priority: true, dueDate: true, reminder: true, duration: true, completedAt: true, location: true,
+      select: {
+        id: true, content: true, isCompleted: true, priority: true, dueDate: true,
+        reminder: true, duration: true, completedAt: true, location: true,
+        recurRule: true, isRecurring: true, todoStatus: true,
         labels: { include: { label: { select: { id: true, name: true, color: true } } } },
         attachments: { select: { id: true, filename: true, mimeType: true, size: true, storagePath: true, createdAt: true } },
       },
@@ -299,10 +302,10 @@ export class TodoistService {
         parentId: dto.parentId || null,
         dueDate: dto.dueDate ? new Date(dto.dueDate) : null,
         dueString: dto.dueString || null,
-        isRecurring: dto.isRecurring || false,
-        recurRule: dto.recurRule || null,
+        isRecurring: dto.isRecurring || !!(dto.recurRule || dto.recurringRule),
+        recurRule: dto.recurRule || (dto.recurringRule ? dto.recurringRule.toLowerCase() : null),
         duration: dto.duration || null,
-        reminder: dto.reminder ? new Date(dto.reminder) : null,
+        reminder: (dto.reminderAt || dto.reminder) ? new Date((dto.reminderAt || dto.reminder)!) : null,
         location: dto.location || null,
         sortOrder: (maxOrder._max.sortOrder || 0) + 1,
         userId,
@@ -329,6 +332,17 @@ export class TodoistService {
     const task = await this.prisma.todoistTask.findFirst({ where: { id, userId } })
     if (!task) throw new NotFoundException('Tapşırıq tapılmadı')
 
+    // todoStatus enum yoxlaması
+    const validStatuses = ['WAITING', 'IN_PROGRESS', 'DONE', 'CANCELLED']
+    if (dto.todoStatus !== undefined && dto.todoStatus !== null && !validStatuses.includes(dto.todoStatus)) {
+      throw new BadRequestException(`todoStatus "${dto.todoStatus}" keçərsizdir. WAITING, IN_PROGRESS, DONE və ya CANCELLED olmalıdır`)
+    }
+
+    // reminderAt alias
+    const reminderValue = dto.reminderAt ?? dto.reminder
+    // recurringRule alias (frontend DAILY/WEEKLY → database daily/weekly)
+    const recurRuleValue = dto.recurRule ?? (dto.recurringRule ? dto.recurringRule.toLowerCase() : undefined)
+
     const updated = await this.prisma.todoistTask.update({
       where: { id },
       data: {
@@ -340,10 +354,11 @@ export class TodoistService {
         ...(dto.dueDate !== undefined && { dueDate: dto.dueDate ? new Date(dto.dueDate) : null }),
         ...(dto.dueString !== undefined && { dueString: dto.dueString }),
         ...(dto.duration !== undefined && { duration: dto.duration }),
-        ...(dto.reminder !== undefined && { reminder: dto.reminder ? new Date(dto.reminder) : null, reminderSent: false }),
+        ...(reminderValue !== undefined && { reminder: reminderValue ? new Date(reminderValue) : null, reminderSent: false }),
         ...(dto.isRecurring !== undefined && { isRecurring: dto.isRecurring }),
-        ...(dto.recurRule !== undefined && { recurRule: dto.recurRule }),
+        ...(recurRuleValue !== undefined && { recurRule: recurRuleValue, isRecurring: !!recurRuleValue }),
         ...(dto.location !== undefined && { location: dto.location }),
+        ...(dto.todoStatus !== undefined && { todoStatus: dto.todoStatus as any }),
       },
       include: this.taskInclude,
     })
@@ -433,17 +448,20 @@ export class TodoistService {
 
   private calculateNextDate(currentDate: Date, recurRule: string): Date {
     const d = new Date(currentDate)
-    switch (recurRule) {
+    // Həm 'daily' həm də 'DAILY' formatını dəstəkləyir
+    const rule = recurRule.toLowerCase()
+    switch (rule) {
       case 'daily': d.setDate(d.getDate() + 1); break
       case 'weekly': d.setDate(d.getDate() + 7); break
       case 'monthly': d.setMonth(d.getMonth() + 1); break
       case 'weekdays':
+      case 'workdays':
         d.setDate(d.getDate() + 1)
         while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() + 1)
         break
       default:
         // custom:3d, custom:2w formatı
-        const match = recurRule.match(/custom:(\d+)([dwm])/)
+        const match = rule.match(/custom:(\d+)([dwm])/)
         if (match) {
           const num = parseInt(match[1])
           if (match[2] === 'd') d.setDate(d.getDate() + num)

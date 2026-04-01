@@ -43,7 +43,7 @@ function Flag({ color }: { color: string }) {
 
 export default function AssigneeTaskModal({ open, onClose, task, subTask, currentUserId, onStatusChange, onRefresh }: Props) {
   const [note, setNote] = useState('')
-  const [chatTab, setChatTab] = useState<'mine' | 'bulk'>('mine')
+  const [chatTab, setChatTab] = useState<'mine' | 'bulk' | 'activity'>('mine')
   const [, forceRender] = useState(0)
   const [msgMenu, setMsgMenu] = useState<number | null>(null)
   const [editingMsg, setEditingMsg] = useState<number | null>(null)
@@ -292,8 +292,9 @@ export default function AssigneeTaskModal({ open, onClose, task, subTask, curren
               <div className="flex items-center gap-1 mb-1.5 p-0.5 rounded-lg" style={{ backgroundColor: '#F1F5F9' }}>
                 <button onClick={() => setChatTab('mine')} className="flex-1 py-1.5 rounded-md text-[10px] font-bold transition" style={{ backgroundColor: chatTab === 'mine' ? '#fff' : 'transparent', color: chatTab === 'mine' ? '#4F46E5' : '#94A3B8', boxShadow: chatTab === 'mine' ? '0 1px 2px rgba(0,0,0,0.05)' : 'none' }}>Mesajlarım</button>
                 <button onClick={() => setChatTab('bulk')} className="flex-1 py-1.5 rounded-md text-[10px] font-bold transition" style={{ backgroundColor: chatTab === 'bulk' ? '#fff' : 'transparent', color: chatTab === 'bulk' ? '#4F46E5' : '#94A3B8', boxShadow: chatTab === 'bulk' ? '0 1px 2px rgba(0,0,0,0.05)' : 'none' }}>
-                  Toplu mesajlar {bulkNotes.length > 0 && <span className="ml-1 px-1.5 py-0.5 rounded-full text-[8px] font-bold" style={{ backgroundColor: '#EEF2FF', color: '#4F46E5' }}>{bulkNotes.length}</span>}
+                  Toplu {bulkNotes.length > 0 && <span className="ml-1 px-1.5 py-0.5 rounded-full text-[8px] font-bold" style={{ backgroundColor: '#EEF2FF', color: '#4F46E5' }}>{bulkNotes.length}</span>}
                 </button>
+                <button onClick={() => setChatTab('activity')} className="flex-1 py-1.5 rounded-md text-[10px] font-bold transition" style={{ backgroundColor: chatTab === 'activity' ? '#fff' : 'transparent', color: chatTab === 'activity' ? '#4F46E5' : '#94A3B8', boxShadow: chatTab === 'activity' ? '0 1px 2px rgba(0,0,0,0.05)' : 'none' }}>Tarixçə</button>
               </div>
               <div className="rounded-xl px-3 py-2.5 space-y-2" style={{ backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', maxHeight: 250, overflowY: 'auto' }}>
                 {/* ═══ TOPLU MESAJLAR TAB ═══ */}
@@ -311,6 +312,52 @@ export default function AssigneeTaskModal({ open, onClose, task, subTask, curren
                     })}
                   </>
                 )}
+
+                {/* ═══ AKTİVLİK TAXİRÇƏSİ TAB ═══ */}
+                {chatTab === 'activity' && (() => {
+                  const statusLabels: Record<string, { label: string; color: string; icon: string }> = {
+                    PENDING: { label: 'Gözləyir', color: '#64748B', icon: '⏳' },
+                    IN_PROGRESS: { label: 'Davam edir', color: '#3B82F6', icon: '▶' },
+                    COMPLETED: { label: 'Tamamlandı', color: '#10B981', icon: '✓' },
+                    PENDING_APPROVAL: { label: 'Onay gözləyir', color: '#F59E0B', icon: '🔍' },
+                    APPROVED: { label: 'Onaylandı', color: '#10B981', icon: '✅' },
+                    REJECTED: { label: 'Rədd edildi', color: '#EF4444', icon: '✗' },
+                    DECLINED: { label: 'İmtina', color: '#EF4444', icon: '✗' },
+                    FORCE_COMPLETED: { label: 'Bağlandı', color: '#94A3B8', icon: '🔒' },
+                  }
+                  const events: { time: string; text: string; color: string; icon: string }[] = []
+                  if (tt.createdAt) events.push({ time: tt.createdAt, text: `Tapşırıq yaradıldı${tt.creator ? ` — ${tt.creator.fullName}` : ''}`, color: '#6366F1', icon: '🆕' })
+                  ;(tt.assignees || []).forEach((a: any) => {
+                    const name = a.user?.fullName || 'İstifadəçi'
+                    ;(a.notes || []).forEach((n: any) => { if (n.createdAt) events.push({ time: n.createdAt, text: `${name} mesaj göndərdi`, color: '#64748B', icon: '💬' }) })
+                    if (a.updatedAt && a.status && a.status !== 'PENDING') {
+                      const sc = statusLabels[a.status]
+                      if (sc) events.push({ time: a.updatedAt, text: `${name} — ${sc.label}`, color: sc.color, icon: sc.icon })
+                    }
+                  })
+                  ;(tt.bulkNotes || []).forEach((n: any) => { if (n.createdAt) events.push({ time: n.createdAt, text: 'Toplu mesaj əlavə edildi', color: '#64748B', icon: '📢' }) })
+                  if (tt.dueDate) events.push({ time: tt.dueDate + 'T23:59:00', text: 'Son tarix', color: '#F59E0B', icon: '📅' })
+                  events.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime())
+                  if (events.length === 0) return <p className="text-[11px] text-center py-4" style={{ color: '#94A3B8' }}>Aktivlik yoxdur</p>
+                  return (
+                    <div className="space-y-0">
+                      {events.map((ev, i) => {
+                        const d = new Date(ev.time)
+                        const timeStr = d.toLocaleDateString('az-AZ', { day: 'numeric', month: 'short' }) + ' ' + d.toLocaleTimeString('az-AZ', { hour: '2-digit', minute: '2-digit' })
+                        return (
+                          <div key={i} className="flex items-start gap-2 py-1.5 relative">
+                            {i < events.length - 1 && <div className="absolute left-[10px] top-7 bottom-0 w-px" style={{ backgroundColor: '#E2E8F0' }} />}
+                            <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 text-[9px] z-10" style={{ backgroundColor: ev.color + '18', color: ev.color }}>{ev.icon}</div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[11px] font-medium leading-tight" style={{ color: '#0F172A' }}>{ev.text}</p>
+                              <p className="text-[10px] mt-0.5" style={{ color: '#94A3B8' }}>{timeStr}</p>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )
+                })()}
 
                 {/* ═══ MESAJLARIM TAB — MessageBubble ilə ═══ */}
                 {chatTab === 'mine' && (
