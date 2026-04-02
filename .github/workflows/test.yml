@@ -1,0 +1,302 @@
+name: WorkFlow Pro — Test Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  NODE_VERSION: '20'
+  DATABASE_URL: postgresql://test:test@localhost:5432/workflow_test
+  JWT_SECRET: test-secret-key-minimum-32-chars-long
+  JWT_REFRESH_SECRET: test-refresh-secret-minimum-32-chars
+  PLAYWRIGHT_BASE_URL: http://localhost:3000
+
+jobs:
+  # ──────────────────────────────────────────────────────────────────────────
+  # 1. BACKEND UNIT TESTLƏR
+  # ──────────────────────────────────────────────────────────────────────────
+  unit-tests:
+    name: 🧪 Backend Unit Testlər
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Kodu yüklə
+        uses: actions/checkout@v4
+
+      - name: Node.js qur
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: apps/api/package-lock.json
+
+      - name: Asılılıqları quraşdır
+        working-directory: apps/api
+        run: npm ci
+
+      - name: Unit testləri qaçır
+        working-directory: apps/api
+        run: npx jest --testPathPattern="test/unit" --coverage --passWithNoTests
+
+      - name: Coverage hesabatı yüklə
+        uses: codecov/codecov-action@v4
+        with:
+          directory: apps/api/coverage
+          flags: unit
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # 2. SECURITY TESTLƏR
+  # ──────────────────────────────────────────────────────────────────────────
+  security-tests:
+    name: 🔒 Təhlükəsizlik Testləri
+    runs-on: ubuntu-latest
+    needs: unit-tests
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: workflow_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: apps/api/package-lock.json
+
+      - name: Asılılıqları quraşdır
+        working-directory: apps/api
+        run: npm ci
+
+      - name: Prisma migriyasiyası
+        working-directory: apps/api
+        run: |
+          npx prisma generate
+          npx prisma db push --force-reset
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+
+      - name: Backend-i başlat
+        working-directory: apps/api
+        run: npm run dev &
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+          JWT_SECRET: ${{ env.JWT_SECRET }}
+          JWT_REFRESH_SECRET: ${{ env.JWT_REFRESH_SECRET }}
+          PORT: 3001
+
+      - name: Server hazır olana qədər gözlə
+        run: |
+          timeout 60 bash -c 'until curl -sf http://localhost:3001/ > /dev/null 2>&1; do sleep 2; done'
+
+      - name: Seed data yüklə
+        working-directory: apps/api
+        run: npx prisma db seed 2>/dev/null || echo "Seed yoxdur, keçilir"
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+
+      - name: Təhlükəsizlik testlərini qaçır
+        working-directory: apps/api
+        run: npx jest --testPathPattern="test/security" --runInBand --passWithNoTests
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+          JWT_SECRET: ${{ env.JWT_SECRET }}
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # 3. E2E TESTLƏR (Playwright)
+  # ──────────────────────────────────────────────────────────────────────────
+  e2e-tests:
+    name: 🎭 E2E Testlər (Playwright)
+    runs-on: ubuntu-latest
+    needs: unit-tests
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: workflow_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Backend asılılıqları
+        working-directory: apps/api
+        run: npm ci
+
+      - name: Frontend asılılıqları
+        working-directory: apps/web
+        run: npm ci
+
+      - name: Playwright brauzerlər
+        working-directory: apps/web
+        run: npx playwright install --with-deps chromium
+
+      - name: Prisma migriyasiyası
+        working-directory: apps/api
+        run: |
+          npx prisma generate
+          npx prisma db push --force-reset
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+
+      - name: Seed data
+        working-directory: apps/api
+        run: npx prisma db seed 2>/dev/null || echo "Seed yoxdur"
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+
+      - name: Backend-i başlat
+        working-directory: apps/api
+        run: npm run dev &
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+          JWT_SECRET: ${{ env.JWT_SECRET }}
+          JWT_REFRESH_SECRET: ${{ env.JWT_REFRESH_SECRET }}
+          PORT: 3001
+
+      - name: Frontend-i başlat
+        working-directory: apps/web
+        run: npm run build && npm run start &
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:3001
+          PORT: 3000
+
+      - name: Servislərin hazır olmasını gözlə
+        run: |
+          timeout 90 bash -c 'until curl -sf http://localhost:3001/; do sleep 3; done'
+          timeout 90 bash -c 'until curl -sf http://localhost:3000/; do sleep 3; done'
+
+      - name: TODO E2E testlərini qaçır
+        working-directory: apps/web
+        run: npx playwright test tests/e2e/todo.e2e.spec.ts --project=chromium
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ env.PLAYWRIGHT_BASE_URL }}
+
+      - name: GÖREV E2E testlərini qaçır
+        working-directory: apps/web
+        run: npx playwright test tests/e2e/task.e2e.spec.ts --project=chromium
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ env.PLAYWRIGHT_BASE_URL }}
+
+      - name: Təkrarlanan+Xatırlatma E2E testlər
+        working-directory: apps/web
+        run: npx playwright test tests/e2e/recurring-reminder.e2e.spec.ts --project=chromium
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ env.PLAYWRIGHT_BASE_URL }}
+
+      - name: Playwright hesabatı yüklə
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: apps/web/playwright-report/
+          retention-days: 7
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # 4. PERFORMANS TƏHLÜKƏSİ (yalnız main branch)
+  # ──────────────────────────────────────────────────────────────────────────
+  performance-smoke:
+    name: ⚡ Performans Smoke Testi
+    runs-on: ubuntu-latest
+    needs: [unit-tests]
+    if: github.ref == 'refs/heads/main'
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: workflow_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: k6 quraşdır
+        run: |
+          curl https://github.com/grafana/k6/releases/download/v0.50.0/k6-v0.50.0-linux-amd64.tar.gz -L | tar xvz --strip-components 1
+
+      - name: Backend asılılıqları
+        working-directory: apps/api
+        run: npm ci
+
+      - name: Prisma migriyasiyası + seed
+        working-directory: apps/api
+        run: |
+          npx prisma generate
+          npx prisma db push --force-reset
+          npx prisma db seed 2>/dev/null || true
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+
+      - name: Backend-i başlat
+        working-directory: apps/api
+        run: npm run dev &
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+          JWT_SECRET: ${{ env.JWT_SECRET }}
+          JWT_REFRESH_SECRET: ${{ env.JWT_REFRESH_SECRET }}
+          PORT: 3001
+
+      - name: Hazır olana qədər gözlə
+        run: timeout 60 bash -c 'until curl -sf http://localhost:3001/; do sleep 2; done'
+
+      - name: Smoke testi qaçır
+        run: ./k6 run --env SCENARIO=smoke --env BASE_URL=http://localhost:3001 performance/load-test.js
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # 5. NƏTİCƏ
+  # ──────────────────────────────────────────────────────────────────────────
+  test-summary:
+    name: ✅ Test Nəticəsi
+    runs-on: ubuntu-latest
+    needs: [unit-tests, security-tests, e2e-tests]
+    if: always()
+
+    steps:
+      - name: Nəticəni çap et
+        run: |
+          echo "## 📊 Test Nəticəsi" >> $GITHUB_STEP_SUMMARY
+          echo "| Test | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Unit Testlər | ${{ needs.unit-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Security Testlər | ${{ needs.security-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| E2E Testlər | ${{ needs.e2e-tests.result }} |" >> $GITHUB_STEP_SUMMARY

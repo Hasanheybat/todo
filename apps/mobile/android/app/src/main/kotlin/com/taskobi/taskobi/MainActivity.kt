@@ -1,4 +1,4 @@
-package com.workflowpro.workflow_pro
+package com.taskobi.taskobi
 
 import io.flutter.embedding.android.FlutterActivity
 

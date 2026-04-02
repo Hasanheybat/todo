@@ -1,36 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'app/theme.dart';
 import 'app/router.dart';
-import 'app/providers.dart';
+import 'core/storage/offline_storage.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const ProviderScope(child: WorkFlowProApp()));
+  await Hive.initFlutter();
+  await OfflineStorage.init();
+
+  runApp(const ProviderScope(child: TaskobiApp()));
 }
 
-class WorkFlowProApp extends ConsumerStatefulWidget {
-  const WorkFlowProApp({super.key});
+class TaskobiApp extends ConsumerWidget {
+  const TaskobiApp({super.key});
 
   @override
-  ConsumerState<WorkFlowProApp> createState() => _WorkFlowProAppState();
-}
-
-class _WorkFlowProAppState extends ConsumerState<WorkFlowProApp> {
-  @override
-  void initState() {
-    super.initState();
-    Future.microtask(() => ref.read(authStateProvider.notifier).checkAuth());
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
-
     return MaterialApp.router(
-      title: 'WorkFlow Pro',
+      title: 'Taskobi',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: ThemeMode.system,
       routerConfig: router,
     );
   }

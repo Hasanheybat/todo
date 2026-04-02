@@ -5,10 +5,10 @@
 // 'flutter create' template.
 
 // The application's name. By default this is also the title of the Flutter window.
-PRODUCT_NAME = workflow_pro
+PRODUCT_NAME = taskobi
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = az.workflowpro.workflowPro
+PRODUCT_BUNDLE_IDENTIFIER = com.taskobi.taskobi
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2026 az.workflowpro. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2026 com.taskobi. All rights reserved.

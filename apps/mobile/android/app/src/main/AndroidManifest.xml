@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="workflow_pro"
+        android:label="taskobi"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

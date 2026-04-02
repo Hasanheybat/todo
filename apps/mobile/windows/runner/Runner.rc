@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "az.workflowpro" "\0"
-            VALUE "FileDescription", "workflow_pro" "\0"
+            VALUE "CompanyName", "com.taskobi" "\0"
+            VALUE "FileDescription", "taskobi" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "workflow_pro" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 az.workflowpro. All rights reserved." "\0"
-            VALUE "OriginalFilename", "workflow_pro.exe" "\0"
-            VALUE "ProductName", "workflow_pro" "\0"
+            VALUE "InternalName", "taskobi" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 com.taskobi. All rights reserved." "\0"
+            VALUE "OriginalFilename", "taskobi.exe" "\0"
+            VALUE "ProductName", "taskobi" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

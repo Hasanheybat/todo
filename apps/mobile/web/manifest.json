@@ -1,6 +1,6 @@
 {
-    "name": "workflow_pro",
-    "short_name": "workflow_pro",
+    "name": "taskobi",
+    "short_name": "taskobi",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
