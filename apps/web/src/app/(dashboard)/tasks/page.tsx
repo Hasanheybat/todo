@@ -16,6 +16,7 @@ import WorkerRecurringTaskModal from '@/components/templates/WorkerRecurringTask
 import PageGuard from '@/components/PageGuard'
 import TaskCard, { P, S, PrioFlag, daysDiff } from '@/components/TaskCard'
 import FilterBar from '@/components/FilterBar'
+import TaskTableView from '@/components/TaskTableView'
 
 // Zaman qrupları — kəskin rənglər
 const timeGroups = [
@@ -43,6 +44,7 @@ export default function TasksPage() {
   const [selectedPriority, setSelectedPriority] = useState<string>('ALL')
   const [selectedStatus, setSelectedStatus] = useState<string>('PENDING')
   const [activeTimeGroup, setActiveTimeGroup] = useState<string | null>(null)
+  const [taskView, setTaskView] = useState<'cards' | 'table'>('cards')
   const [addOpen, setAddOpen] = useState(false)
   const [editingTask, setEditingTask] = useState<any | null>(null)
   const [departments, setDepartments] = useState<any[]>([])
@@ -655,6 +657,22 @@ export default function TasksPage() {
           <p className="text-[13px]" style={{ color: 'var(--todoist-text-secondary)' }}>Bütün tapşırıqlar — {filtered.length} ədəd</p>
         </div>
         <div className="flex items-center gap-2">
+          <div className="flex rounded-lg overflow-hidden" style={{ border: '1px solid var(--todoist-divider)' }}>
+            <button onClick={() => setTaskView('cards')}
+              className={`px-3 py-1.5 text-[11px] font-bold flex items-center gap-1.5 transition
+                ${taskView === 'cards' ? 'bg-[var(--todoist-red)] text-white' : 'text-[var(--todoist-text-secondary)] hover:bg-gray-50'}`}
+              style={{ backgroundColor: taskView === 'cards' ? undefined : 'var(--todoist-surface)' }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+              Kartlar
+            </button>
+            <button onClick={() => setTaskView('table')}
+              className={`px-3 py-1.5 text-[11px] font-bold flex items-center gap-1.5 transition
+                ${taskView === 'table' ? 'bg-[#2563EB] text-white' : 'text-[var(--todoist-text-secondary)] hover:bg-gray-50'}`}
+              style={{ backgroundColor: taskView === 'table' ? undefined : 'var(--todoist-surface)' }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>
+              Cədvəl
+            </button>
+          </div>
           <button onClick={async () => { try { const blob = await api.exportTasksExcel(); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `tapshiriqlar_${new Date().toISOString().split('T')[0]}.xlsx`; a.click(); URL.revokeObjectURL(url) } catch {} }}
             className="flex items-center gap-1.5 px-3 py-2 text-[12px] font-semibold rounded-lg transition hover:opacity-80"
             style={{ backgroundColor: 'var(--todoist-border)', color: 'var(--todoist-text-secondary)' }}>
@@ -726,8 +744,19 @@ export default function TasksPage() {
         </div>
       )}
 
+      {/* ───── CƏDVƏL GÖRÜNÜŞÜ ───── */}
+      {taskView === 'table' && displayTasks.length > 0 && (
+        <div className="mb-5">
+          <TaskTableView
+            tasks={displayTasks}
+            onTaskClick={handleTaskClick}
+            onStatusChange={async (taskId, status) => { try { await api.updateMyTaskStatus(taskId, status); loadData() } catch {} }}
+          />
+        </div>
+      )}
+
       {/* ───── TAPŞIRIQ KARTLARI — 4-lü grid ───── */}
-      {displayTasks.length > 0 && (
+      {taskView === 'cards' && displayTasks.length > 0 && (
         <div className="mb-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5">
               {displayTasks.map((task: any) => (

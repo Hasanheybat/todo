@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, ForbiddenException, BadRequestException,
 import { PrismaService } from '../prisma/prisma.service'
 import { NotificationsService } from '../notifications/notifications.service'
 import { UsersService } from '../users/users.service'
+import { ActivityService } from '../activity/activity.service'
 import { CreateTaskDto } from './dto/create-task.dto'
 import { UpdateTaskDto } from './dto/update-task.dto'
 
@@ -11,6 +12,7 @@ export class TasksService {
     private prisma: PrismaService,
     private notifications: NotificationsService,
     private usersService: UsersService,
+    private activityService: ActivityService,
   ) {}
 
   async create(dto: CreateTaskDto, creatorId: string, tenantId: string) {
@@ -205,6 +207,19 @@ export class TasksService {
         comments: { include: { author: { select: { id: true, fullName: true } } }, orderBy: { createdAt: 'asc' } },
       },
     })
+
+    // Activity log: tapşırıq yaradıldı
+    try {
+      await this.activityService.log({
+        tenantId,
+        userId: creatorId,
+        action: 'TASK_CREATED',
+        entityType: 'TASK',
+        entityId: task.id,
+        entityTitle: task.title,
+        details: { type: task.type, priority: task.priority, assigneeCount: dto.assigneeIds?.length || 0 },
+      })
+    } catch (_) {}
 
     return fullTask || task
   }
@@ -405,6 +420,32 @@ export class TasksService {
       }
     }
 
+    // Activity log: tapşırıq yeniləndi
+    try {
+      if (dto.priority && dto.priority !== task.priority) {
+        await this.activityService.log({
+          tenantId,
+          userId,
+          action: 'PRIORITY_CHANGED',
+          entityType: 'TASK',
+          entityId: id,
+          entityTitle: task.title,
+          details: { from: task.priority, to: dto.priority },
+        })
+      }
+      if (dto.dueDate && dto.dueDate !== task.dueDate?.toISOString()) {
+        await this.activityService.log({
+          tenantId,
+          userId,
+          action: 'DUE_DATE_CHANGED',
+          entityType: 'TASK',
+          entityId: id,
+          entityTitle: task.title,
+          details: { from: task.dueDate, to: dto.dueDate },
+        })
+      }
+    } catch (_) {}
+
     // Tam datanı qaytar
     return this.prisma.task.findUnique({
       where: { id },
@@ -444,6 +485,19 @@ export class TasksService {
       where: { id: assignee.id },
       data: { status: 'COMPLETED' },
     })
+
+    // Activity log: status dəyişikliyi
+    try {
+      await this.activityService.log({
+        tenantId,
+        userId,
+        action: 'STATUS_CHANGED',
+        entityType: 'TASK',
+        entityId: id,
+        entityTitle: task.title,
+        details: { from: assignee.status, to: 'COMPLETED' },
+      })
+    } catch (_) {}
 
     // Görevin ümumi statusu dəyişmir — yaradıcı bağlayana qədər
     // Bildiriş: yaradana (işçi tamamladı)

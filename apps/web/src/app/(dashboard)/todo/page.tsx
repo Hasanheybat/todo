@@ -15,10 +15,11 @@ import { api } from '@/lib/api'
 import { useTodoContext } from '@/contexts/TodoContext'
 import SaveAsTemplateModal from '@/components/todoist/SaveAsTemplateModal'
 import PageGuard from '@/components/PageGuard'
+import TodoTableView from '@/components/TodoTableView'
 import toast from 'react-hot-toast'
 
 type StatusFilter = 'active' | 'completed' | 'all'
-type ViewType = 'list' | 'board' | 'calendar'
+type ViewType = 'list' | 'board' | 'calendar' | 'table'
 
 const MONTH_NAMES = ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'İyun', 'İyul', 'Avqust', 'Sentyabr', 'Oktyabr', 'Noyabr', 'Dekabr']
 const DAY_HEADERS = ['B.e', 'Ç.a', 'Ç', 'C.a', 'C', 'Ş', 'B']
@@ -40,7 +41,7 @@ export default function TodoPage() {
   const [loading, setLoading] = useState(true)
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null)
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('active')
-  const [viewType, setViewType] = useState<ViewType>('list')
+  const [viewType, setViewType] = useState<ViewType>('board')
   const [labelFilter, setLabelFilter] = useState<string | null>(null)
   const [addSectionOpen, setAddSectionOpen] = useState(false)
   const [showTodoInline, setShowTodoInline] = useState(false)
@@ -396,6 +397,12 @@ export default function TodoPage() {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="10" rx="1"/></svg>
             Board
           </button>
+          <button onClick={() => setViewType('table')}
+            className={`px-3 py-1.5 text-[11px] font-bold flex items-center gap-1.5 transition
+              ${viewType === 'table' ? 'bg-[#2563EB] text-white' : 'bg-white text-[var(--todoist-text-secondary)] hover:bg-gray-50'}`}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>
+            Cədvəl
+          </button>
           {!isInbox && (
             <button onClick={() => setViewType('calendar')}
               className={`px-3 py-1.5 text-[11px] font-bold flex items-center gap-1.5 transition
@@ -569,6 +576,13 @@ export default function TodoPage() {
             </div>
           )}
         </div>
+      ) : viewType === 'table' ? (
+        /* ═══ CƏDVƏL GÖRÜNÜŞü ═══ */
+        <TodoTableView
+          todos={filteredTasks}
+          onTodoClick={setSelectedTaskId}
+          onComplete={async (id) => { try { await api.updateTodoistTask(id, { todoStatus: "DONE" }); loadData() } catch {} }}
+        />
       ) : viewType === 'board' && (isInbox || typeFilter === 'todo') ? (
         /* ═══ TODO STATUS BOARD (Gözləyir / Davam edir / Tamamlandı) ═══ */
         <TodoBoardView

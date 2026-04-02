@@ -175,7 +175,23 @@ export default function TodoBoardView({ todos, projects, onRefresh, onClickTodo,
 
     const overData = over.data?.current
     const activeData = active.data?.current
-    const targetStatus: string = overData?.status ?? 'WAITING'
+
+    // Target status-u tap: əvvəl data-dan, sonra over.id-dən (todo-col-CANCELLED formatı)
+    let targetStatus: string = overData?.status ?? ''
+    if (!targetStatus && typeof over.id === 'string' && over.id.startsWith('todo-col-')) {
+      targetStatus = over.id.replace('todo-col-', '')
+    }
+    // Əgər başqa bir kartın üstünə düşübsə, o kartın statusunu götür
+    if (!targetStatus && overData?.type === 'todo') {
+      targetStatus = overData.status || 'WAITING'
+    }
+    if (!targetStatus) {
+      // over.id başqa bir todo ID-sidir — o todo-nun statusunu tap
+      const overTodo = todos.find(t => t.id === over.id)
+      if (overTodo) targetStatus = overTodo.todoStatus || 'WAITING'
+    }
+    if (!targetStatus) targetStatus = 'WAITING'
+
     const sourceStatus: string = activeData?.status ?? 'WAITING'
 
     if (targetStatus === sourceStatus) return

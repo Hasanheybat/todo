@@ -20,6 +20,7 @@ import { TaskAssigneeFilesModule } from './task-assignee-files/task-assignee-fil
 import { AdminModule } from './admin/admin.module'
 import { ExportModule } from './export/export.module'
 import { EmailModule } from './email/email.module'
+import { ActivityModule } from './activity/activity.module'
 import { RequestLoggerMiddleware } from './common/request-logger.middleware'
 
 @Module({
@@ -46,6 +47,7 @@ import { RequestLoggerMiddleware } from './common/request-logger.middleware'
     AdminModule,
     ExportModule,
     EmailModule,
+    ActivityModule,
   ],
   controllers: [AppController],
 })

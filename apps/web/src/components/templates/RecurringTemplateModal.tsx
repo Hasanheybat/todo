@@ -66,7 +66,7 @@ export default function RecurringTemplateModal({ open, editTemplate, onClose, on
   }, [businessId])
 
   useEffect(() => {
-    if (businessId) loadUsers()
+    loadUsers()
   }, [businessId, departmentId])
 
   function resetForm() {

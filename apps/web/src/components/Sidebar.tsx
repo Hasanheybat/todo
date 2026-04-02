@@ -22,7 +22,7 @@ const workNav = [
   { name: 'Tapşırıqlar', href: '/tasks', icon: 'tasks', perm: 'tasks.read' },
   { name: 'Todo', href: '/todo', icon: 'todo' },
   { name: 'Şablonlar', href: '/templates', icon: 'templates', perm: 'tasks.read' },
-  { name: 'Filter Test ✦', href: '/filter-test', icon: 'filter' },
+  // { name: 'Tarixçə', href: '/activity', icon: 'activity' }, // hazır olanda açılacaq
 ]
 
 const manageNav = [
@@ -45,6 +45,7 @@ function NavIcon({ type, active }: { type: string; active: boolean }) {
     roles: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
     salary: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16M12 11h.01"/></svg>,
     filter: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>,
+    activity: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>,
   }
   return icons[type] || <span />
 }
@@ -156,15 +157,6 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                 <div className="fixed inset-0 z-10" onClick={() => setAddDropdownOpen(false)} />
                 <div className="absolute left-0 right-0 top-full mt-1 z-20 rounded-xl shadow-lg overflow-hidden"
                   style={{ backgroundColor: 'var(--todoist-surface)', border: '1px solid var(--todoist-divider)' }}>
-                  {hasPermission('tasks.create') && (
-                    <button onClick={() => { window.dispatchEvent(new CustomEvent('open-add-task')); setAddDropdownOpen(false); onClose() }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2.5 text-[12px] font-semibold transition hover:opacity-80"
-                      style={{ color: '#4F46E5', borderBottom: '1px solid var(--todoist-border)' }}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" strokeWidth="2"><path d="M12 5v14M5 12h14"/></svg>
-                      TASK yarat
-                      <span className="ml-auto text-[10px] font-normal" style={{ color: 'var(--todoist-sidebar-label)' }}>Adi tapşırıq</span>
-                    </button>
-                  )}
                   {hasPermission('gorev.create') && (
                     <button onClick={() => { window.dispatchEvent(new CustomEvent('open-add-gorev')); setAddDropdownOpen(false); onClose() }}
                       className="w-full flex items-center gap-2.5 px-3 py-2.5 text-[12px] font-semibold transition hover:opacity-80"

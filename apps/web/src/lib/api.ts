@@ -494,6 +494,20 @@ class ApiClient {
     if (!res.ok) throw new Error('Export failed')
     return res.blob()
   }
+
+  // Activity Log
+  async getActivityLog(filters?: { entityType?: string; userId?: string; limit?: number; offset?: number }) {
+    const params = new URLSearchParams()
+    if (filters?.entityType) params.set('entityType', filters.entityType)
+    if (filters?.userId) params.set('userId', filters.userId)
+    if (filters?.limit) params.set('limit', String(filters.limit))
+    if (filters?.offset) params.set('offset', String(filters.offset))
+    const qs = params.toString()
+    return this.request<{ items: any[]; total: number }>(`/activity${qs ? `?${qs}` : ''}`)
+  }
+  async getEntityActivity(entityType: string, entityId: string) {
+    return this.request<any[]>(`/activity/entity/${entityType}/${entityId}`)
+  }
 }
 
 export const api = new ApiClient()

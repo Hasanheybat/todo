@@ -15,6 +15,8 @@ import GlobalQuickAdd from '@/components/todoist/GlobalQuickAdd'
 import TaskCard, { P, S, daysDiff } from '@/components/TaskCard'
 import GlassFilterBar from '@/components/GlassFilterBar'
 import DraggableTodoList from '@/components/todoist/DraggableTodoList'
+import TaskTableView from '@/components/TaskTableView'
+import TodoTableView from '@/components/TodoTableView'
 
 type ViewType = 'list' | 'calendar'
 
@@ -59,12 +61,14 @@ export default function UpcomingPage() {
   const [workerRecurringModal, setWorkerRecurringModal] = useState<{ open: boolean; task: any }>({ open: false, task: null })
   const [todoSearch, setTodoSearch] = useState('')
   const [todoStatusFilter, setTodoStatusFilter] = useState<'ALL' | 'WAITING' | 'IN_PROGRESS' | 'DONE' | 'CANCELLED'>('ALL')
-  const [todoView, setTodoView] = useState<'list' | 'board'>('list')
+  const [todoView, setTodoView] = useState<'list' | 'board'>('board')
   const [todoDragTaskId, setTodoDragTaskId] = useState<string | null>(null)
   const [todoDragOverCol, setTodoDragOverCol] = useState<string | null>(null)
   const [calDragTodoId, setCalDragTodoId] = useState<string | null>(null)
   const [calDragGorevId, setCalDragGorevId] = useState<string | null>(null)
   const [calDragOverDate, setCalDragOverDate] = useState<string | null>(null)
+  const [gorevView, setGorevView] = useState<'cards' | 'table'>('cards')
+  const [allView, setAllView] = useState<'list' | 'table'>('list')
 
   function fmtDuration(mins: number): string {
     if (!mins) return ''
@@ -378,8 +382,164 @@ export default function UpcomingPage() {
       {/* SİYAHI GÖRÜNÜŞÜ — tarix qrupları + kart grid */}
       {view === 'list' && (
         <div className="space-y-6">
-          {/* TODO bölməsi (əgər todo tab aktiv və ya all) */}
-          {viewFilter !== 'gorev' && (viewFilter === 'todo' || incompleteTodos.length > 0) && (
+          {/* ══════ HAMISİ — birləşmiş siyahı/cədvəl ══════ */}
+          {viewFilter === 'all' && (
+            <div className="mb-5">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-[13px] font-bold" style={{ color: 'var(--todoist-text)' }}>Bütün tapşırıqlar</span>
+                <div className="flex-1 h-px" style={{ backgroundColor: 'var(--todoist-divider)' }} />
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ color: 'var(--todoist-text-tertiary)', backgroundColor: 'var(--todoist-border)' }}>{displayTasks.length + incompleteTodos.length}</span>
+                <div className="flex rounded-lg overflow-hidden" style={{ border: '1px solid var(--todoist-divider)' }}>
+                  <button onClick={() => setAllView('list')}
+                    className={`px-2.5 py-1 text-[10px] font-bold flex items-center gap-1 transition ${allView === 'list' ? 'bg-[var(--todoist-red)] text-white' : 'text-[var(--todoist-text-secondary)] hover:bg-gray-50'}`}
+                    style={{ backgroundColor: allView === 'list' ? undefined : 'var(--todoist-surface)' }}>
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+                    Siyahı
+                  </button>
+                  <button onClick={() => setAllView('table')}
+                    className={`px-2.5 py-1 text-[10px] font-bold flex items-center gap-1 transition ${allView === 'table' ? 'bg-[#2563EB] text-white' : 'text-[var(--todoist-text-secondary)] hover:bg-gray-50'}`}
+                    style={{ backgroundColor: allView === 'table' ? undefined : 'var(--todoist-surface)' }}>
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>
+                    Cədvəl
+                  </button>
+                </div>
+              </div>
+
+              {allView === 'list' && (
+                <div className="space-y-1">
+                  {displayTasks.map((task: any) => (
+                    <div key={task.id} onClick={() => handleTaskClick(task)}
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition overflow-hidden"
+                      onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--todoist-bg)'}
+                      onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                      <span className="text-[9px] px-1.5 py-px rounded bg-[#E8F0FE] text-[#246FE0] font-bold shrink-0">GÖREV</span>
+                      <span className="w-2 h-2 rounded-sm shrink-0" style={{ backgroundColor: P[task.priority] || '#808080' }} />
+                      <span className="text-[13px] font-medium flex-1 min-w-0" style={{ color: 'var(--todoist-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{task.title}</span>
+                      {task.dueDate && (() => { const d = daysDiff(task.dueDate); return <span className="text-[10px] font-medium shrink-0" style={{ color: d < 0 ? '#EF4444' : d === 0 ? '#D97706' : '#94A3B8' }}>{d < 0 ? `${Math.abs(d)}g gecikmiş` : d === 0 ? 'Bugün' : new Date(task.dueDate).toLocaleDateString('az-AZ', { day: 'numeric', month: 'short' })}</span> })()}
+                      {task.assignees?.[0]?.user && <span className="text-[10px] shrink-0" style={{ color: 'var(--todoist-text-tertiary)' }}>{task.assignees[0].user.fullName}</span>}
+                    </div>
+                  ))}
+                  {filteredTodos.map((task: any) => {
+                    const diff = todoDiff(task.dueDate)
+                    const dueDateColor = diff !== null ? (diff < 0 ? '#EF4444' : diff === 0 ? '#D97706' : '#94A3B8') : '#94A3B8'
+                    return (
+                      <div key={task.id} onClick={() => setSelectedTodoId(task.id)}
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition overflow-hidden"
+                        onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--todoist-bg)'}
+                        onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                        <span className="text-[9px] px-1.5 py-px rounded bg-[#FFF3E0] text-[#EB8909] font-bold shrink-0">TODO</span>
+                        <button onClick={async (e) => { e.stopPropagation(); try { await api.updateTodoistTask(task.id, { todoStatus: "DONE" }); loadData() } catch {} }}
+                          className="w-[16px] h-[16px] rounded-full border-2 shrink-0"
+                          style={{ borderColor: (task.todoStatus || 'WAITING') === 'DONE' ? '#10B981' : (task.todoStatus || 'WAITING') === 'IN_PROGRESS' ? '#F59E0B' : '#94A3B8' }} />
+                        <span className="text-[13px] font-medium flex-1 min-w-0" style={{ color: 'var(--todoist-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{task.content}</span>
+                        {task.dueDate && <span className="text-[10px] font-medium shrink-0" style={{ color: dueDateColor }}>{diff !== null && diff < 0 ? `${Math.abs(diff)}g gecikmiş` : diff === 0 ? 'Bugün' : new Date(task.dueDate).toLocaleDateString('az-AZ', { day: 'numeric', month: 'short' })}</span>}
+                        {task.project && <span className="text-[10px] shrink-0" style={{ color: 'var(--todoist-text-tertiary)' }}>{task.project.name}</span>}
+                      </div>
+                    )
+                  })}
+                  {displayTasks.length === 0 && incompleteTodos.length === 0 && (
+                    <div className="text-center py-12">
+                      <h3 className="text-[16px] font-bold" style={{ color: 'var(--todoist-text)' }}>Gələcək tapşırıq yoxdur!</h3>
+                      <p className="text-[13px] mt-1" style={{ color: 'var(--todoist-text-secondary)' }}>Qarşıdakı günlərdə tapşırıq planlanmayıb</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {allView === 'table' && (() => {
+                const allRows = [
+                  ...displayTasks.map(t => ({ ...t, _type: 'GÖREV' as const, _title: t.title, _date: t.dueDate, _created: t.createdAt })),
+                  ...filteredTodos.map(t => ({ ...t, _type: 'TODO' as const, _title: t.content, _date: t.dueDate, _created: t.createdAt })),
+                ]
+                return (
+                  <div className="rounded-xl overflow-hidden" style={{ backgroundColor: 'white', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px', borderBottom: '1px solid #F1F5F9', background: '#FAFBFC' }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: '#64748B' }}>{allRows.length} sətir</span>
+                      <span style={{ color: '#E2E8F0' }}>·</span>
+                      <span style={{ fontSize: 11, fontWeight: 600, color: '#246FE0' }}>{displayTasks.length} görev</span>
+                      <span style={{ color: '#E2E8F0' }}>·</span>
+                      <span style={{ fontSize: 11, fontWeight: 600, color: '#EB8909' }}>{filteredTodos.length} todo</span>
+                    </div>
+                    <div style={{ overflowX: 'auto' }}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 900 }}>
+                        <thead>
+                          <tr>
+                            <th style={{ width: 44, padding: '11px 8px', textAlign: 'center', background: '#F8FAFC', borderBottom: '2px solid #E2E8F0', fontSize: 10, fontWeight: 700, color: '#94A3B8' }}>#</th>
+                            <th style={{ width: 65, padding: '11px 8px', background: '#F8FAFC', borderBottom: '2px solid #E2E8F0', fontSize: 10, fontWeight: 700, color: '#94A3B8' }}>NÖV</th>
+                            <th style={{ padding: '11px 14px', textAlign: 'left', background: '#F8FAFC', borderBottom: '2px solid #E2E8F0', fontSize: 11, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: 0.5 }}>AD</th>
+                            <th style={{ width: 130, padding: '11px 14px', textAlign: 'left', background: '#F8FAFC', borderBottom: '2px solid #E2E8F0', fontSize: 11, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: 0.5 }}>STATUS</th>
+                            <th style={{ width: 110, padding: '11px 14px', textAlign: 'left', background: '#F8FAFC', borderBottom: '2px solid #E2E8F0', fontSize: 11, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: 0.5 }}>PRİORİTET</th>
+                            <th style={{ width: 120, padding: '11px 14px', textAlign: 'left', background: '#F8FAFC', borderBottom: '2px solid #E2E8F0', fontSize: 11, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: 0.5 }}>SON TARİX</th>
+                            <th style={{ width: 140, padding: '11px 14px', textAlign: 'left', background: '#F8FAFC', borderBottom: '2px solid #E2E8F0', fontSize: 11, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: 0.5 }}>İŞÇİ / LAYİHƏ</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {allRows.map((row, i) => {
+                            const isGorev = row._type === 'GÖREV'
+                            const status = isGorev ? (row.myStatus || row.status) : (row.todoStatus || 'WAITING')
+                            const sMap: Record<string, { label: string; color: string; bg: string }> = {
+                              PENDING: { label: 'Gözləyir', color: '#64748B', bg: '#F1F5F9' }, CREATED: { label: 'Gözləyir', color: '#64748B', bg: '#F1F5F9' },
+                              IN_PROGRESS: { label: 'Davam edir', color: '#3B82F6', bg: '#EFF6FF' },
+                              PENDING_APPROVAL: { label: 'Onay gözl.', color: '#F59E0B', bg: '#FFFBEB' },
+                              COMPLETED: { label: 'Tamamlandı', color: '#10B981', bg: '#ECFDF5' }, APPROVED: { label: 'Tamamlandı', color: '#10B981', bg: '#ECFDF5' },
+                              REJECTED: { label: 'Rədd', color: '#EF4444', bg: '#FEF2F2' },
+                              WAITING: { label: 'Gözləyir', color: '#64748B', bg: '#F1F5F9' },
+                              DONE: { label: 'Tamamlandı', color: '#10B981', bg: '#ECFDF5' },
+                              CANCELLED: { label: 'İptal', color: '#EF4444', bg: '#FEF2F2' },
+                            }
+                            const sc = sMap[status] || sMap.PENDING
+                            const pColor = P[row.priority] || '#808080'
+                            const diff = row._date ? daysDiff(row._date) : null
+                            const dueDateColor = diff !== null ? (diff < 0 ? '#EF4444' : diff === 0 ? '#D97706' : '#94A3B8') : '#94A3B8'
+                            const done = ['COMPLETED', 'APPROVED', 'FORCE_COMPLETED', 'DONE'].includes(status)
+
+                            return (
+                              <tr key={row.id}
+                                onClick={() => isGorev ? handleTaskClick(row) : setSelectedTodoId(row.id)}
+                                style={{ cursor: 'pointer', backgroundColor: i % 2 === 1 ? '#FAFBFC' : 'white', transition: 'background 0.1s' }}
+                                onMouseEnter={e => e.currentTarget.style.backgroundColor = '#F0F4FF'}
+                                onMouseLeave={e => e.currentTarget.style.backgroundColor = i % 2 === 1 ? '#FAFBFC' : 'white'}>
+                                <td style={{ padding: '10px 8px', textAlign: 'center', borderBottom: '1px solid #F1F5F9', fontSize: 11, color: '#94A3B8' }}>{i + 1}</td>
+                                <td style={{ padding: '10px 8px', borderBottom: '1px solid #F1F5F9' }}>
+                                  <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 4, backgroundColor: isGorev ? '#E8F0FE' : '#FFF3E0', color: isGorev ? '#246FE0' : '#EB8909' }}>{row._type}</span>
+                                </td>
+                                <td style={{ padding: '10px 14px', borderBottom: '1px solid #F1F5F9' }}>
+                                  <span style={{ fontSize: 13, fontWeight: 600, color: done ? '#94A3B8' : '#1E293B', textDecoration: done ? 'line-through' : 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block', maxWidth: 350 }}>{row._title}</span>
+                                </td>
+                                <td style={{ padding: '10px 14px', borderBottom: '1px solid #F1F5F9' }}>
+                                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 20, backgroundColor: sc.bg, color: sc.color }}>
+                                    <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: sc.color }} />{sc.label}
+                                  </span>
+                                </td>
+                                <td style={{ padding: '10px 14px', borderBottom: '1px solid #F1F5F9' }}>
+                                  <span style={{ fontSize: 11, fontWeight: 600, padding: '3px 8px', borderRadius: 6, backgroundColor: pColor + '14', color: pColor }}>
+                                    {row.priority === 'CRITICAL' ? 'Kritik' : row.priority === 'HIGH' ? 'Yüksək' : row.priority === 'MEDIUM' || row.priority === 'P3' ? 'Orta' : row.priority === 'LOW' ? 'Aşağı' : row.priority === 'P1' ? 'Kritik' : row.priority === 'P2' ? 'Yüksək' : 'Normal'}
+                                  </span>
+                                </td>
+                                <td style={{ padding: '10px 14px', borderBottom: '1px solid #F1F5F9' }}>
+                                  {row._date ? (
+                                    <span style={{ fontSize: 12, fontWeight: 600, color: dueDateColor }}>
+                                      {diff !== null && diff < 0 ? `${Math.abs(diff)}g gecikmiş` : diff === 0 ? 'Bugün' : new Date(row._date).toLocaleDateString('az-AZ', { day: 'numeric', month: 'short' })}
+                                    </span>
+                                  ) : <span style={{ color: '#CBD5E1' }}>—</span>}
+                                </td>
+                                <td style={{ padding: '10px 14px', borderBottom: '1px solid #F1F5F9', fontSize: 12, color: '#64748B' }}>
+                                  {isGorev ? (row.assignees?.[0]?.user?.fullName || '—') : (row.project?.name || '—')}
+                                </td>
+                              </tr>
+                            )
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )
+              })()}
+            </div>
+          )}
+
+          {/* TODO bölməsi (əgər todo tab aktiv) */}
+          {viewFilter === 'todo' && (viewFilter === 'todo' || incompleteTodos.length > 0) && (
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-[9px] px-1.5 py-px rounded bg-[#FFF3E0] text-[#EB8909] font-bold">TODO</span>
@@ -563,18 +723,42 @@ export default function UpcomingPage() {
           )}
 
           {/* GÖREV kart grid — gün qrupları ilə */}
-          {viewFilter !== 'todo' && (
+          {viewFilter === 'gorev' && (
             <>
-              {viewFilter === 'all' && displayTasks.length > 0 && (
+              {displayTasks.length > 0 && (
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-[9px] px-1.5 py-px rounded bg-[#E8F0FE] text-[#246FE0] font-bold">GÖREV</span>
                   <span className="text-[13px] font-bold" style={{ color: 'var(--todoist-text)' }}>Gələcək tapşırıqlar</span>
                   <div className="flex-1 h-px" style={{ backgroundColor: 'var(--todoist-divider)' }} />
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ color: 'var(--todoist-text-tertiary)', backgroundColor: 'var(--todoist-border)' }}>{displayTasks.length}</span>
+                  <div className="flex rounded-lg overflow-hidden" style={{ border: '1px solid var(--todoist-divider)' }}>
+                    <button onClick={() => setGorevView('cards')}
+                      className={`px-2.5 py-1 text-[10px] font-bold flex items-center gap-1 transition ${gorevView === 'cards' ? 'bg-[var(--todoist-red)] text-white' : 'text-[var(--todoist-text-secondary)] hover:bg-gray-50'}`}
+                      style={{ backgroundColor: gorevView === 'cards' ? undefined : 'var(--todoist-surface)' }}>
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                      Kartlar
+                    </button>
+                    <button onClick={() => setGorevView('table')}
+                      className={`px-2.5 py-1 text-[10px] font-bold flex items-center gap-1 transition ${gorevView === 'table' ? 'bg-[#2563EB] text-white' : 'text-[var(--todoist-text-secondary)] hover:bg-gray-50'}`}
+                      style={{ backgroundColor: gorevView === 'table' ? undefined : 'var(--todoist-surface)' }}>
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>
+                      Cədvəl
+                    </button>
+                  </div>
                 </div>
               )}
 
-              {days.map(day => {
+              {gorevView === 'table' && displayTasks.length > 0 && (
+                <div className="mb-5">
+                  <TaskTableView
+                    tasks={displayTasks}
+                    onTaskClick={handleTaskClick}
+                    onStatusChange={async (taskId, status) => { try { await api.updateMyTaskStatus(taskId, status); loadData() } catch {} }}
+                  />
+                </div>
+              )}
+
+              {gorevView === 'cards' && days.map(day => {
                 const dayTasks = displayTasks.filter(t => t.dueDate && t.dueDate.split('T')[0] === day.dateStr)
                 if (dayTasks.length === 0) return null
                 return (
@@ -598,7 +782,7 @@ export default function UpcomingPage() {
               })}
 
               {/* Tarixsiz GÖREV-lər */}
-              {(() => {
+              {gorevView === 'cards' && (() => {
                 const noDateTasks = displayTasks.filter(t => !t.dueDate)
                 if (noDateTasks.length === 0) return null
                 return (
@@ -618,7 +802,7 @@ export default function UpcomingPage() {
                 )
               })()}
 
-              {displayTasks.length === 0 && viewFilter !== 'all' && (
+              {displayTasks.length === 0 && (
                 <div className="text-center py-12">
                   <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4" style={{ backgroundColor: 'var(--todoist-red-light)' }}>
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--todoist-red)" strokeWidth="2"><path d="M20 6L9 17l-5-5"/></svg>

@@ -55,16 +55,34 @@ export default function TemplatesPage() {
 
   useEffect(() => { loadTemplates() }, [])
 
+  const [recurringTodos, setRecurringTodos] = useState<any[]>([])
+
   async function loadTemplates() {
     setLoading(true)
-    try { setTemplates(await api.getTemplates()) } catch (err) { console.error(err) }
+    try {
+      const [tmpl, todos] = await Promise.all([
+        api.getTemplates().catch(() => []),
+        api.getTodoistTasks().catch(() => []),
+      ])
+      setTemplates(tmpl)
+      setRecurringTodos(todos.filter((t: any) => t.isRecurring))
+    } catch (err) { console.error(err) }
     finally { setLoading(false) }
   }
 
-  const tabTemplates = templates.filter(t => activeTab === 'recurring' ? t.isRecurring : !t.isRecurring)
-  const filtered = filterActive === 'ALL' ? tabTemplates : tabTemplates.filter(t => filterActive === 'ACTIVE' ? t.isActive : !t.isActive)
+  const tabTemplates = activeTab === 'templates'
+    ? recurringTodos
+    : templates.filter(t => t.isRecurring)
+  const filtered = filterActive === 'ALL' ? tabTemplates : tabTemplates.filter(t => {
+    if (activeTab === 'templates') {
+      // Şəxsi TODO-lar: aktiv = tamamlanmamış
+      return filterActive === 'ACTIVE' ? !t.isCompleted : t.isCompleted
+    }
+    // GÖREV şablonları: aktiv = isActive
+    return filterActive === 'ACTIVE' ? t.isActive : !t.isActive
+  })
   const recurringCount = templates.filter(t => t.isRecurring).length
-  const standardCount = templates.filter(t => !t.isRecurring).length
+  const standardCount = recurringTodos.length
 
   function addItem() { setTemplateItems([...templateItems, { title: '', priority: 'MEDIUM' }]) }
   function removeItem(i: number) { if (templateItems.length > 1) setTemplateItems(templateItems.filter((_, idx) => idx !== i)) }
@@ -126,21 +144,7 @@ export default function TemplatesPage() {
           <h1 className="text-[24px] font-extrabold" style={{ color: 'var(--todoist-text)' }}>Şablonlar</h1>
           <p className="text-[13px]" style={{ color: 'var(--todoist-text-secondary)' }}>Görev şablonları və təkrarlanan görevlər</p>
         </div>
-        {activeTab === 'templates' ? (
-          <button onClick={() => setModalOpen(true)}
-            className="inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-[13px] font-semibold text-white transition hover:opacity-90"
-            style={{ backgroundColor: 'var(--todoist-red)' }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M12 5v14M5 12h14"/></svg>
-            Yeni Təkrarlanan TODO
-          </button>
-        ) : (
-          <button onClick={() => { setEditRecurringTemplate(null); setRecurringModalOpen(true) }}
-            className="inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-[13px] font-semibold text-white transition hover:opacity-90"
-            style={{ backgroundColor: 'var(--todoist-red)' }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M12 5v14M5 12h14"/></svg>
-            Yeni Təkrarlanan Görev
-          </button>
-        )}
+        {/* Əlavə düyməsi silindi — şablonlar yalnız tapşırıq yaradarkən "Təkrarla" ilə yaranır */}
       </div>
 
       {/* ═══ 2 TAB BAR ═══ */}
@@ -203,12 +207,42 @@ export default function TemplatesPage() {
         </div>
       )}
 
-      {/* ═══ Şəxsi Təkrarlanan Tab ═══ */}
+      {/* ═══ Şəxsi Təkrarlanan Tab — recurring TODO-lar ═══ */}
       {activeTab === 'templates' && (filtered.length === 0 ? (
         <div className="rounded-xl p-12 text-center" style={{ border: '1px solid var(--todoist-divider)', background: 'var(--todoist-surface)' }}>
           <p style={{ color: 'var(--todoist-text-tertiary)' }}>Şəxsi təkrarlanan tapşırıq tapılmadı</p>
-          <button onClick={() => setModalOpen(true)} className="mt-3 text-sm font-medium" style={{ color: 'var(--todoist-red)' }}>İlk təkrarlanan TODO-nu yaradın →</button>
+          <p className="mt-2 text-[12px]" style={{ color: 'var(--todoist-text-secondary)' }}>TODO yaradarkən "Təkrarla" seçimini aktiv edin</p>
         </div>
+      ) : (
+        <div className="space-y-2">
+          {filtered.map((todo: any) => {
+            const recurLabel = todo.recurRule === 'daily' ? 'Hər gün' : todo.recurRule === 'weekly' ? 'Hər həftə' : todo.recurRule === 'monthly' ? 'Hər ay' : todo.recurRule
+            const statusColor = (todo.todoStatus || 'WAITING') === 'DONE' ? '#10B981' : (todo.todoStatus || 'WAITING') === 'IN_PROGRESS' ? '#F59E0B' : '#64748B'
+            const statusLabel = (todo.todoStatus || 'WAITING') === 'DONE' ? 'Tamamlandı' : (todo.todoStatus || 'WAITING') === 'IN_PROGRESS' ? 'Davam edir' : 'Gözləyir'
+            return (
+              <div key={todo.id} className="flex items-center gap-3 px-4 py-3 rounded-xl transition cursor-pointer hover:shadow-sm"
+                style={{ background: 'var(--todoist-surface)', border: '1px solid var(--todoist-divider)' }}
+                onClick={() => setDetailTemplate(todo)}>
+                <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: statusColor }} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-[13px] font-semibold truncate" style={{ color: 'var(--todoist-text)' }}>{todo.content}</p>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: '#EEF2FF', color: '#4F46E5' }}>🔁 {recurLabel}</span>
+                    <span className="text-[10px]" style={{ color: statusColor }}>{statusLabel}</span>
+                    {todo.dueDate && <span className="text-[10px]" style={{ color: 'var(--todoist-text-tertiary)' }}>📅 {new Date(todo.dueDate).toLocaleDateString('az-AZ', { day: 'numeric', month: 'short' })}</span>}
+                    {todo.project?.name && <span className="text-[10px]" style={{ color: '#EB8909' }}>📂 {todo.project.name}</span>}
+                  </div>
+                </div>
+                <span className="text-[10px] px-2 py-0.5 rounded-full shrink-0" style={{ backgroundColor: '#FFF3E0', color: '#EB8909', fontWeight: 700 }}>TODO</span>
+              </div>
+            )
+          })}
+        </div>
+      ))}
+
+      {/* ═══ Köhnə Şəxsi Təkrarlanan kart (gizli saxlanılır, lazım olanda açılacaq) ═══ */}
+      {false && (activeTab as string) === 'templates_old' && (filtered.length === 0 ? (
+        <div />
       ) : (
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {filtered.map((template) => (

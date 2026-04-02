@@ -16,6 +16,8 @@ import WorkerRecurringTaskModal from '@/components/templates/WorkerRecurringTask
 import TaskCard, { P, S, daysDiff } from '@/components/TaskCard'
 import GlassFilterBar from '@/components/GlassFilterBar'
 import DraggableTodoList from '@/components/todoist/DraggableTodoList'
+import TaskTableView from '@/components/TaskTableView'
+import TodoTableView from '@/components/TodoTableView'
 
 export default function DashboardPage() {
   const { user } = useAuth()
@@ -52,9 +54,11 @@ export default function DashboardPage() {
   const [workerRecurringModal, setWorkerRecurringModal] = useState<{ open: boolean; task: any }>({ open: false, task: null })
   const [todoSearch, setTodoSearch] = useState('')
   const [todoStatusFilter, setTodoStatusFilter] = useState<'ALL' | 'WAITING' | 'IN_PROGRESS' | 'DONE' | 'CANCELLED'>('ALL')
-  const [todoView, setTodoView] = useState<'list' | 'board'>('list')
+  const [todoView, setTodoView] = useState<'list' | 'board'>('board')
   const [todoDragTaskId, setTodoDragTaskId] = useState<string | null>(null)
   const [todoDragOverCol, setTodoDragOverCol] = useState<string | null>(null)
+  const [gorevView, setGorevView] = useState<'cards' | 'table'>('cards')
+  const [allView, setAllView] = useState<'list' | 'table'>('list')
 
   function fmtDuration(mins: number): string {
     if (!mins) return ''
@@ -321,45 +325,6 @@ export default function DashboardPage() {
       </div>
 
 
-      {/* KPI kartları */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-        {[
-          { label: 'Bugün tamamlanan', value: tasksWithMyStatus.filter(t => ['COMPLETED','APPROVED','FORCE_COMPLETED'].includes(t.myStatus)).length, total: tasksWithMyStatus.length, icon: '✓', color: '#10B981', bg: '#ECFDF5' },
-          { label: 'Davam edən', value: statusTabCounts.IN_PROGRESS, icon: '▶', color: '#3B82F6', bg: '#EFF6FF' },
-          { label: 'Gecikmiş', value: tasksWithMyStatus.filter(t => t.dueDate && new Date(t.dueDate) < new Date() && !['COMPLETED','APPROVED','FORCE_COMPLETED'].includes(t.myStatus)).length, icon: '⚠', color: '#EF4444', bg: '#FEF2F2' },
-          { label: 'TODO aktiv', value: incompleteTodos.length, icon: '☑', color: '#F59E0B', bg: '#FFFBEB' },
-        ].map((kpi, i) => (
-          <div key={i} className="rounded-xl px-4 py-3" style={{ backgroundColor: kpi.bg, border: `1px solid ${kpi.color}20` }}>
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-[11px] font-semibold" style={{ color: kpi.color }}>{kpi.label}</span>
-              <span className="text-[14px]">{kpi.icon}</span>
-            </div>
-            <p className="text-[22px] font-extrabold" style={{ color: kpi.color }}>{kpi.value}</p>
-            {kpi.total !== undefined && (
-              <div className="mt-1.5 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: kpi.color + '20' }}>
-                <div className="h-full rounded-full transition-all" style={{ width: `${kpi.total > 0 ? (kpi.value / kpi.total) * 100 : 0}%`, backgroundColor: kpi.color }} />
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-
-      {/* Gözləyən onaylar widget */}
-      {statusTabCounts.PENDING_APPROVAL > 0 && (
-        <div className="mb-4 rounded-xl px-4 py-3 flex items-center justify-between" style={{ backgroundColor: '#FFFBEB', border: '1px solid #FED7AA' }}>
-          <div className="flex items-center gap-2">
-            <span className="text-[18px]">⏳</span>
-            <div>
-              <p className="text-[13px] font-bold" style={{ color: '#92400E' }}>Gözləyən onaylar</p>
-              <p className="text-[11px]" style={{ color: '#B45309' }}>{statusTabCounts.PENDING_APPROVAL} tapşırıq onayınızı gözləyir</p>
-            </div>
-          </div>
-          <button onClick={() => setSelectedStatus('PENDING_APPROVAL')} className="rounded-lg px-3 py-1.5 text-[11px] font-bold text-white transition hover:opacity-90" style={{ backgroundColor: '#F59E0B' }}>
-            Baxış keç
-          </button>
-        </div>
-      )}
-
       {/* ── GLASS FILTER BAR V4 ── */}
       <GlassFilterBar
         viewFilter={viewFilter}
@@ -394,8 +359,166 @@ export default function DashboardPage() {
       />
 
 
-      {/* TODO bölməsi */}
-      {viewFilter !== 'gorev' && (viewFilter === 'todo' || incompleteTodos.length > 0) && (
+      {/* ══════ HAMISİ — birləşmiş siyahı/cədvəl ══════ */}
+      {viewFilter === 'all' && (
+        <div className="mb-5">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-[13px] font-bold" style={{ color: 'var(--todoist-text)' }}>Bütün tapşırıqlar</span>
+            <div className="flex-1 h-px" style={{ backgroundColor: 'var(--todoist-divider)' }} />
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ color: 'var(--todoist-text-tertiary)', backgroundColor: 'var(--todoist-border)' }}>{displayTasks.length + incompleteTodos.length}</span>
+            <div className="flex rounded-lg overflow-hidden" style={{ border: '1px solid var(--todoist-divider)' }}>
+              <button onClick={() => setAllView('list')}
+                className={`px-2.5 py-1 text-[10px] font-bold flex items-center gap-1 transition ${allView === 'list' ? 'bg-[var(--todoist-red)] text-white' : 'text-[var(--todoist-text-secondary)] hover:bg-gray-50'}`}
+                style={{ backgroundColor: allView === 'list' ? undefined : 'var(--todoist-surface)' }}>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+                Siyahı
+              </button>
+              <button onClick={() => setAllView('table')}
+                className={`px-2.5 py-1 text-[10px] font-bold flex items-center gap-1 transition ${allView === 'table' ? 'bg-[#2563EB] text-white' : 'text-[var(--todoist-text-secondary)] hover:bg-gray-50'}`}
+                style={{ backgroundColor: allView === 'table' ? undefined : 'var(--todoist-surface)' }}>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>
+                Cədvəl
+              </button>
+            </div>
+          </div>
+
+          {allView === 'list' && (
+            <div className="space-y-1">
+              {/* GÖREV-lər siyahıda */}
+              {displayTasks.map((task: any) => (
+                <div key={task.id} onClick={() => handleTaskClick(task)}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition overflow-hidden"
+                  onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--todoist-bg)'}
+                  onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                  <span className="text-[9px] px-1.5 py-px rounded bg-[#E8F0FE] text-[#246FE0] font-bold shrink-0">GÖREV</span>
+                  <span className="w-2 h-2 rounded-sm shrink-0" style={{ backgroundColor: P[task.priority] || '#808080' }} />
+                  <span className="text-[13px] font-medium flex-1 min-w-0" style={{ color: 'var(--todoist-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{task.title}</span>
+                  {task.dueDate && (() => { const d = daysDiff(task.dueDate); return <span className="text-[10px] font-medium shrink-0" style={{ color: d < 0 ? '#EF4444' : d === 0 ? '#D97706' : '#94A3B8' }}>{d < 0 ? `${Math.abs(d)}g gecikmiş` : d === 0 ? 'Bugün' : new Date(task.dueDate).toLocaleDateString('az-AZ', { day: 'numeric', month: 'short' })}</span> })()}
+                  {task.assignees?.[0]?.user && <span className="text-[10px] shrink-0" style={{ color: 'var(--todoist-text-tertiary)' }}>{task.assignees[0].user.fullName}</span>}
+                </div>
+              ))}
+              {/* TODO-lar siyahıda */}
+              {filteredTodos.map((task: any) => {
+                const diff = todoDiff(task.dueDate)
+                const dueDateColor = diff !== null ? (diff < 0 ? '#EF4444' : diff === 0 ? '#D97706' : '#94A3B8') : '#94A3B8'
+                return (
+                  <div key={task.id} onClick={() => setSelectedTodoId(task.id)}
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition overflow-hidden"
+                    onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--todoist-bg)'}
+                    onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                    <span className="text-[9px] px-1.5 py-px rounded bg-[#FFF3E0] text-[#EB8909] font-bold shrink-0">TODO</span>
+                    <button onClick={async (e) => { e.stopPropagation(); try { await api.updateTodoistTask(task.id, { todoStatus: "DONE" }); loadData() } catch {} }}
+                      className="w-[16px] h-[16px] rounded-full border-2 shrink-0"
+                      style={{ borderColor: (task.todoStatus || 'WAITING') === 'DONE' ? '#10B981' : (task.todoStatus || 'WAITING') === 'IN_PROGRESS' ? '#F59E0B' : '#94A3B8' }} />
+                    <span className="text-[13px] font-medium flex-1 min-w-0" style={{ color: 'var(--todoist-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{task.content}</span>
+                    {task.dueDate && <span className="text-[10px] font-medium shrink-0" style={{ color: dueDateColor }}>{diff !== null && diff < 0 ? `${Math.abs(diff)}g gecikmiş` : diff === 0 ? 'Bugün' : new Date(task.dueDate).toLocaleDateString('az-AZ', { day: 'numeric', month: 'short' })}</span>}
+                    {task.project && <span className="text-[10px] shrink-0" style={{ color: 'var(--todoist-text-tertiary)' }}>{task.project.name}</span>}
+                  </div>
+                )
+              })}
+              {displayTasks.length === 0 && incompleteTodos.length === 0 && (
+                <div className="text-center py-12">
+                  <h3 className="text-[16px] font-bold" style={{ color: 'var(--todoist-text)' }}>Bugün tapşırıq yoxdur!</h3>
+                  <p className="text-[13px] mt-1" style={{ color: 'var(--todoist-text-secondary)' }}>Bugünə tapşırıq planlanmayıb</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {allView === 'table' && (() => {
+            const allRows = [
+              ...displayTasks.map(t => ({ ...t, _type: 'GÖREV' as const, _title: t.title, _date: t.dueDate, _created: t.createdAt })),
+              ...filteredTodos.map(t => ({ ...t, _type: 'TODO' as const, _title: t.content, _date: t.dueDate, _created: t.createdAt })),
+            ]
+            return (
+              <div className="rounded-xl overflow-hidden" style={{ backgroundColor: 'white', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px', borderBottom: '1px solid #F1F5F9', background: '#FAFBFC' }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: '#64748B' }}>{allRows.length} sətir</span>
+                  <span style={{ color: '#E2E8F0' }}>·</span>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: '#246FE0' }}>{displayTasks.length} görev</span>
+                  <span style={{ color: '#E2E8F0' }}>·</span>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: '#EB8909' }}>{filteredTodos.length} todo</span>
+                </div>
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 900 }}>
+                    <thead>
+                      <tr>
+                        <th style={{ width: 44, padding: '11px 8px', textAlign: 'center', background: '#F8FAFC', borderBottom: '2px solid #E2E8F0', fontSize: 10, fontWeight: 700, color: '#94A3B8' }}>#</th>
+                        <th style={{ width: 65, padding: '11px 8px', background: '#F8FAFC', borderBottom: '2px solid #E2E8F0', fontSize: 10, fontWeight: 700, color: '#94A3B8' }}>NÖV</th>
+                        <th style={{ padding: '11px 14px', textAlign: 'left', background: '#F8FAFC', borderBottom: '2px solid #E2E8F0', fontSize: 11, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: 0.5 }}>AD</th>
+                        <th style={{ width: 130, padding: '11px 14px', textAlign: 'left', background: '#F8FAFC', borderBottom: '2px solid #E2E8F0', fontSize: 11, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: 0.5 }}>STATUS</th>
+                        <th style={{ width: 110, padding: '11px 14px', textAlign: 'left', background: '#F8FAFC', borderBottom: '2px solid #E2E8F0', fontSize: 11, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: 0.5 }}>PRİORİTET</th>
+                        <th style={{ width: 120, padding: '11px 14px', textAlign: 'left', background: '#F8FAFC', borderBottom: '2px solid #E2E8F0', fontSize: 11, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: 0.5 }}>SON TARİX</th>
+                        <th style={{ width: 140, padding: '11px 14px', textAlign: 'left', background: '#F8FAFC', borderBottom: '2px solid #E2E8F0', fontSize: 11, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: 0.5 }}>İŞÇİ / LAYİHƏ</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {allRows.map((row, i) => {
+                        const isGorev = row._type === 'GÖREV'
+                        const status = isGorev ? (row.myStatus || row.status) : (row.todoStatus || 'WAITING')
+                        const sMap: Record<string, { label: string; color: string; bg: string }> = {
+                          PENDING: { label: 'Gözləyir', color: '#64748B', bg: '#F1F5F9' }, CREATED: { label: 'Gözləyir', color: '#64748B', bg: '#F1F5F9' },
+                          IN_PROGRESS: { label: 'Davam edir', color: '#3B82F6', bg: '#EFF6FF' },
+                          PENDING_APPROVAL: { label: 'Onay gözl.', color: '#F59E0B', bg: '#FFFBEB' },
+                          COMPLETED: { label: 'Tamamlandı', color: '#10B981', bg: '#ECFDF5' }, APPROVED: { label: 'Tamamlandı', color: '#10B981', bg: '#ECFDF5' },
+                          REJECTED: { label: 'Rədd', color: '#EF4444', bg: '#FEF2F2' },
+                          WAITING: { label: 'Gözləyir', color: '#64748B', bg: '#F1F5F9' },
+                          DONE: { label: 'Tamamlandı', color: '#10B981', bg: '#ECFDF5' },
+                          CANCELLED: { label: 'İptal', color: '#EF4444', bg: '#FEF2F2' },
+                        }
+                        const sc = sMap[status] || sMap.PENDING
+                        const pColor = P[row.priority] || '#808080'
+                        const diff = row._date ? daysDiff(row._date) : null
+                        const dueDateColor = diff !== null ? (diff < 0 ? '#EF4444' : diff === 0 ? '#D97706' : '#94A3B8') : '#94A3B8'
+                        const done = ['COMPLETED', 'APPROVED', 'FORCE_COMPLETED', 'DONE'].includes(status)
+
+                        return (
+                          <tr key={row.id}
+                            onClick={() => isGorev ? handleTaskClick(row) : setSelectedTodoId(row.id)}
+                            style={{ cursor: 'pointer', backgroundColor: i % 2 === 1 ? '#FAFBFC' : 'white', transition: 'background 0.1s' }}
+                            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#F0F4FF'}
+                            onMouseLeave={e => e.currentTarget.style.backgroundColor = i % 2 === 1 ? '#FAFBFC' : 'white'}>
+                            <td style={{ padding: '10px 8px', textAlign: 'center', borderBottom: '1px solid #F1F5F9', fontSize: 11, color: '#94A3B8' }}>{i + 1}</td>
+                            <td style={{ padding: '10px 8px', borderBottom: '1px solid #F1F5F9' }}>
+                              <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 4, backgroundColor: isGorev ? '#E8F0FE' : '#FFF3E0', color: isGorev ? '#246FE0' : '#EB8909' }}>{row._type}</span>
+                            </td>
+                            <td style={{ padding: '10px 14px', borderBottom: '1px solid #F1F5F9' }}>
+                              <span style={{ fontSize: 13, fontWeight: 600, color: done ? '#94A3B8' : '#1E293B', textDecoration: done ? 'line-through' : 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block', maxWidth: 350 }}>{row._title}</span>
+                            </td>
+                            <td style={{ padding: '10px 14px', borderBottom: '1px solid #F1F5F9' }}>
+                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 20, backgroundColor: sc.bg, color: sc.color }}>
+                                <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: sc.color }} />{sc.label}
+                              </span>
+                            </td>
+                            <td style={{ padding: '10px 14px', borderBottom: '1px solid #F1F5F9' }}>
+                              <span style={{ fontSize: 11, fontWeight: 600, padding: '3px 8px', borderRadius: 6, backgroundColor: pColor + '14', color: pColor }}>
+                                {row.priority === 'CRITICAL' ? 'Kritik' : row.priority === 'HIGH' ? 'Yüksək' : row.priority === 'MEDIUM' || row.priority === 'P3' ? 'Orta' : row.priority === 'LOW' ? 'Aşağı' : row.priority === 'P1' ? 'Kritik' : row.priority === 'P2' ? 'Yüksək' : 'Normal'}
+                              </span>
+                            </td>
+                            <td style={{ padding: '10px 14px', borderBottom: '1px solid #F1F5F9' }}>
+                              {row._date ? (
+                                <span style={{ fontSize: 12, fontWeight: 600, color: dueDateColor }}>
+                                  {diff !== null && diff < 0 ? `${Math.abs(diff)}g gecikmiş` : diff === 0 ? 'Bugün' : new Date(row._date).toLocaleDateString('az-AZ', { day: 'numeric', month: 'short' })}
+                                </span>
+                              ) : <span style={{ color: '#CBD5E1' }}>—</span>}
+                            </td>
+                            <td style={{ padding: '10px 14px', borderBottom: '1px solid #F1F5F9', fontSize: 12, color: '#64748B' }}>
+                              {isGorev ? (row.assignees?.[0]?.user?.fullName || '—') : (row.project?.name || '—')}
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )
+          })()}
+        </div>
+      )}
+
+      {/* ══════ TODO seçiləndə — siyahı/board ══════ */}
+      {viewFilter === 'todo' && incompleteTodos.length > 0 && (
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-3">
             <span className="text-[9px] px-1.5 py-px rounded bg-[#FFF3E0] text-[#EB8909] font-bold">TODO</span>
@@ -403,13 +526,13 @@ export default function DashboardPage() {
             <div className="flex-1 h-px" style={{ backgroundColor: 'var(--todoist-divider)' }} />
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full mr-1" style={{ color: 'var(--todoist-text-tertiary)', backgroundColor: 'var(--todoist-border)' }}>{filteredTodos.length < incompleteTodos.length ? `${filteredTodos.length}/${incompleteTodos.length}` : incompleteTodos.length}</span>
             <div className="flex rounded-md overflow-hidden border border-[var(--todoist-divider)]">
-              <button onClick={() => setTodoView('list')} title="Sürükle-bırak siyahı"
+              <button onClick={() => setTodoView('list')}
                 className={`px-2 py-1 text-[10px] font-bold flex items-center gap-1 transition
                   ${todoView === 'list' ? 'bg-[#EB8909] text-white' : 'bg-white text-[var(--todoist-text-secondary)] hover:bg-gray-50'}`}>
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
                 Siyahı
               </button>
-              <button onClick={() => setTodoView('board')} title="Kanban board"
+              <button onClick={() => setTodoView('board')}
                 className={`px-2 py-1 text-[10px] font-bold flex items-center gap-1 transition
                   ${todoView === 'board' ? 'bg-[#3B82F6] text-white' : 'bg-white text-[var(--todoist-text-secondary)] hover:bg-gray-50'}`}>
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="12" rx="1"/><rect x="17" y="3" width="5" height="15" rx="1"/></svg>
@@ -417,12 +540,7 @@ export default function DashboardPage() {
               </button>
             </div>
           </div>
-          {incompleteTodos.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-[14px] font-semibold" style={{ color: 'var(--todoist-text)' }}>Şəxsi tapşırıq yoxdur</p>
-              <p className="text-[12px] mt-1" style={{ color: 'var(--todoist-text-secondary)' }}>Todo səhifəsindən tapşırıq əlavə edin</p>
-            </div>
-          ) : filteredTodos.length === 0 ? (
+          {filteredTodos.length === 0 ? (
             <div className="text-center py-6">
               <p className="text-[13px] font-semibold" style={{ color: 'var(--todoist-text-secondary)' }}>Bu filtrdə todo tapılmadı</p>
               <button onClick={() => setTodoStatusFilter('ALL')} className="mt-2 text-[11px] font-bold px-3 py-1 rounded-lg" style={{ background: 'var(--todoist-red-light)', color: 'var(--todoist-red)' }}>Filtr sıfırla</button>
@@ -433,14 +551,11 @@ export default function DashboardPage() {
             <DraggableTodoList
               items={filteredTodos}
               disabled={false}
-              onReorder={async (reordered) => {
-                try { await api.reorderTodoistTasks(reordered); loadData() } catch {}
-              }}
+              onReorder={async (reordered) => { try { await api.reorderTodoistTasks(reordered); loadData() } catch {} }}
               renderItem={(task, dragHandleProps) => {
                 const diff = todoDiff(task.dueDate)
                 const dueDateColor = diff !== null ? (diff < 0 ? '#EF4444' : diff === 0 ? '#D97706' : 'var(--todoist-text-tertiary)') : 'var(--todoist-text-tertiary)'
                 const dueDateText = diff !== null ? (diff < 0 ? `${Math.abs(diff)}g gecikmiş` : diff === 0 ? 'Bugün' : new Date(task.dueDate).toLocaleDateString('az-AZ', { day: 'numeric', month: 'short' })) : ''
-                const hasBadges = (task.subTasks?.length > 0) || (task.attachments?.length > 0) || ((task.notes?.length || 0) + (task.comments?.length || 0)) > 0
                 return (
                   <div onClick={() => setSelectedTodoId(task.id)}
                     className="group flex items-start gap-2 px-2 py-2.5 rounded-lg cursor-pointer transition overflow-hidden"
@@ -450,11 +565,7 @@ export default function DashboardPage() {
                       className="shrink-0 mt-1 cursor-grab active:cursor-grabbing touch-none opacity-0 group-hover:opacity-30 hover:!opacity-70 transition-opacity"
                       style={{ color: 'var(--todoist-text-tertiary)' }}
                       onClick={(e: React.MouseEvent) => e.stopPropagation()}>
-                      <svg width="8" height="12" viewBox="0 0 8 12" fill="currentColor">
-                        <circle cx="2" cy="2" r="1.2"/><circle cx="6" cy="2" r="1.2"/>
-                        <circle cx="2" cy="6" r="1.2"/><circle cx="6" cy="6" r="1.2"/>
-                        <circle cx="2" cy="10" r="1.2"/><circle cx="6" cy="10" r="1.2"/>
-                      </svg>
+                      <svg width="8" height="12" viewBox="0 0 8 12" fill="currentColor"><circle cx="2" cy="2" r="1.2"/><circle cx="6" cy="2" r="1.2"/><circle cx="2" cy="6" r="1.2"/><circle cx="6" cy="6" r="1.2"/><circle cx="2" cy="10" r="1.2"/><circle cx="6" cy="10" r="1.2"/></svg>
                     </div>
                     <button onClick={async (e) => { e.stopPropagation(); try { await api.updateTodoistTask(task.id, { todoStatus: "DONE" }); loadData() } catch {} }}
                       className="mt-0.5 w-[18px] h-[18px] rounded-full border-2 shrink-0 hover:bg-gray-50"
@@ -464,47 +575,8 @@ export default function DashboardPage() {
                       <div className="flex items-center flex-wrap gap-1.5 mt-0.5">
                         <span className="text-[9px] px-1.5 py-px rounded bg-[#FFF3E0] text-[#EB8909] font-bold">TODO</span>
                         {task.project && <span className="text-[10px]" style={{ color: 'var(--todoist-text-tertiary)' }}>{task.project.name}</span>}
-                        {dueDateText && (
-                          <span className="flex items-center gap-0.5 text-[10px] font-medium" style={{ color: dueDateColor }}>
-                            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-                            {dueDateText}
-                          </span>
-                        )}
-                        {task.duration > 0 && (
-                          <span className="flex items-center gap-0.5 text-[10px] font-medium" style={{ color: 'var(--todoist-text-tertiary)' }}>
-                            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                            {fmtDuration(task.duration)}
-                          </span>
-                        )}
-                        {task.labels?.map((l: any) => (
-                          <span key={l.id || l.labelId} className="text-[9px] px-1.5 py-px rounded-full font-semibold"
-                            style={{ backgroundColor: (l.color || l.label?.color || '#808080') + '20', color: l.color || l.label?.color || '#808080' }}>
-                            {l.name || l.label?.name}
-                          </span>
-                        ))}
+                        {dueDateText && <span className="flex items-center gap-0.5 text-[10px] font-medium" style={{ color: dueDateColor }}>{dueDateText}</span>}
                       </div>
-                      {hasBadges && (
-                        <div className="flex items-center gap-2 mt-1">
-                          {task.subTasks?.length > 0 && (
-                            <span className="flex items-center gap-0.5 text-[9px] font-semibold" style={{ color: 'var(--todoist-text-secondary)' }}>
-                              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-                              {task.subTasks.length}
-                            </span>
-                          )}
-                          {task.attachments?.length > 0 && (
-                            <span className="flex items-center gap-0.5 text-[9px] font-semibold" style={{ color: 'var(--todoist-text-secondary)' }}>
-                              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-                              {task.attachments.length}
-                            </span>
-                          )}
-                          {((task.notes?.length || 0) + (task.comments?.length || 0)) > 0 && (
-                            <span className="flex items-center gap-0.5 text-[9px] font-semibold" style={{ color: 'var(--todoist-text-secondary)' }}>
-                              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                              {(task.notes?.length || 0) + (task.comments?.length || 0)}
-                            </span>
-                          )}
-                        </div>
-                      )}
                     </div>
                   </div>
                 )
@@ -520,55 +592,42 @@ export default function DashboardPage() {
             ]
             return (
               <div style={{ display: 'flex', gap: 8, width: '100%' }}>
-                  {TODO_COLS.map(col => {
-                    const colTasks = incompleteTodos.filter((t: any) => (t.todoStatus || 'WAITING') === col.status)
-                    const isOver = todoDragOverCol === col.status
-                    return (
-                      <div key={col.status}
-                        onDragOver={e => { e.preventDefault(); setTodoDragOverCol(col.status) }}
-                        onDragLeave={() => setTodoDragOverCol(null)}
-                        onDrop={async e => {
-                          e.preventDefault(); setTodoDragOverCol(null)
-                          if (!todoDragTaskId) return
-                          try { await api.updateTodoistTask(todoDragTaskId, { todoStatus: col.status }); loadData() } catch {}
-                          setTodoDragTaskId(null)
-                        }}
-                        style={{ flex: 1, minWidth: 0, minHeight: 300, borderRadius: 10,
-                          backgroundColor: isOver ? col.bg : 'rgba(0,0,0,0.02)',
-                          border: `1.5px solid ${isOver ? col.color : 'rgba(0,0,0,0.06)'}`,
-                          transition: 'all 0.15s' }}>
-                        <div style={{ padding: '8px 10px 7px', borderBottom: '1px solid rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                          <span style={{ fontSize: 11, fontWeight: 700, color: col.color }}>{col.label}</span>
-                          <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 7, backgroundColor: col.color + '18', color: col.color }}>{colTasks.length}</span>
-                        </div>
-                        <div style={{ padding: '7px', display: 'flex', flexDirection: 'column', gap: 5 }}>
-                          {colTasks.map((task: any) => {
-                            const isDragging = todoDragTaskId === task.id
-                            const diff = todoDiff(task.dueDate)
-                            const dueDateColor = diff !== null ? (diff < 0 ? '#EF4444' : diff === 0 ? '#D97706' : '#94A3B8') : '#94A3B8'
-                            const dueDateText = diff !== null ? (diff < 0 ? `${Math.abs(diff)}g gecikmiş` : diff === 0 ? 'Bugün' : new Date(task.dueDate).toLocaleDateString('az-AZ', { day: 'numeric', month: 'short' })) : ''
-                            return (
-                              <div key={task.id} draggable
-                                onDragStart={() => setTodoDragTaskId(task.id)}
-                                onDragEnd={() => setTodoDragTaskId(null)}
-                                onClick={() => setSelectedTodoId(task.id)}
-                                style={{ background: isDragging ? '#f0f4ff' : 'white', borderRadius: 7,
-                                  boxShadow: isDragging ? '0 4px 12px rgba(0,0,0,0.1)' : '0 1px 3px rgba(0,0,0,0.06)',
-                                  padding: '8px 9px', cursor: 'grab', opacity: isDragging ? 0.6 : 1,
-                                  border: '1px solid rgba(0,0,0,0.05)', overflow: 'hidden' }}>
-                                <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--todoist-text)', lineHeight: 1.4, marginBottom: 4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{task.content}</p>
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
-                                  {task.project && <span style={{ fontSize: 9, fontWeight: 600, padding: '1px 5px', borderRadius: 4, backgroundColor: '#FFF3E0', color: '#EB8909' }}>{task.project.name}</span>}
-                                  {dueDateText && <span style={{ fontSize: 9, fontWeight: 600, color: dueDateColor }}>{dueDateText}</span>}
-                                </div>
-                              </div>
-                            )
-                          })}
-                          {colTasks.length === 0 && <div style={{ textAlign: 'center', padding: '16px 8px', color: '#CBD5E1', fontSize: 11 }}>Boş</div>}
-                        </div>
+                {TODO_COLS.map(col => {
+                  const colTasks = incompleteTodos.filter((t: any) => (t.todoStatus || 'WAITING') === col.status)
+                  const isOver = todoDragOverCol === col.status
+                  return (
+                    <div key={col.status}
+                      onDragOver={e => { e.preventDefault(); setTodoDragOverCol(col.status) }}
+                      onDragLeave={() => setTodoDragOverCol(null)}
+                      onDrop={async e => { e.preventDefault(); setTodoDragOverCol(null); if (!todoDragTaskId) return; try { await api.updateTodoistTask(todoDragTaskId, { todoStatus: col.status }); loadData() } catch {}; setTodoDragTaskId(null) }}
+                      style={{ flex: 1, minWidth: 0, minHeight: 300, borderRadius: 10, backgroundColor: isOver ? col.bg : 'rgba(0,0,0,0.02)', border: `1.5px solid ${isOver ? col.color : 'rgba(0,0,0,0.06)'}`, transition: 'all 0.15s' }}>
+                      <div style={{ padding: '8px 10px 7px', borderBottom: '1px solid rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: col.color }}>{col.label}</span>
+                        <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 7, backgroundColor: col.color + '18', color: col.color }}>{colTasks.length}</span>
                       </div>
-                    )
-                  })}
+                      <div style={{ padding: '7px', display: 'flex', flexDirection: 'column', gap: 5 }}>
+                        {colTasks.map((task: any) => {
+                          const isDragging = todoDragTaskId === task.id
+                          const diff = todoDiff(task.dueDate)
+                          const dueDateColor = diff !== null ? (diff < 0 ? '#EF4444' : diff === 0 ? '#D97706' : '#94A3B8') : '#94A3B8'
+                          const dueDateText = diff !== null ? (diff < 0 ? `${Math.abs(diff)}g gecikmiş` : diff === 0 ? 'Bugün' : new Date(task.dueDate).toLocaleDateString('az-AZ', { day: 'numeric', month: 'short' })) : ''
+                          return (
+                            <div key={task.id} draggable onDragStart={() => setTodoDragTaskId(task.id)} onDragEnd={() => setTodoDragTaskId(null)}
+                              onClick={() => setSelectedTodoId(task.id)}
+                              style={{ background: isDragging ? '#f0f4ff' : 'white', borderRadius: 7, boxShadow: isDragging ? '0 4px 12px rgba(0,0,0,0.1)' : '0 1px 3px rgba(0,0,0,0.06)', padding: '8px 9px', cursor: 'grab', opacity: isDragging ? 0.6 : 1, border: '1px solid rgba(0,0,0,0.05)', overflow: 'hidden' }}>
+                              <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--todoist-text)', lineHeight: 1.4, marginBottom: 4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{task.content}</p>
+                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+                                {task.project && <span style={{ fontSize: 9, fontWeight: 600, padding: '1px 5px', borderRadius: 4, backgroundColor: '#FFF3E0', color: '#EB8909' }}>{task.project.name}</span>}
+                                {dueDateText && <span style={{ fontSize: 9, fontWeight: 600, color: dueDateColor }}>{dueDateText}</span>}
+                              </div>
+                            </div>
+                          )
+                        })}
+                        {colTasks.length === 0 && <div style={{ textAlign: 'center', padding: '16px 8px', color: '#CBD5E1', fontSize: 11 }}>Boş</div>}
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
             )
           })()}
@@ -576,28 +635,49 @@ export default function DashboardPage() {
           )}
         </div>
       )}
+      {viewFilter === 'todo' && incompleteTodos.length === 0 && (
+        <div className="text-center py-8">
+          <p className="text-[14px] font-semibold" style={{ color: 'var(--todoist-text)' }}>Şəxsi tapşırıq yoxdur</p>
+          <p className="text-[12px] mt-1" style={{ color: 'var(--todoist-text-secondary)' }}>Todo səhifəsindən tapşırıq əlavə edin</p>
+        </div>
+      )}
 
-      {/* GÖREV kart grid — yalnız list modunda */}
-      {viewFilter !== 'todo' && displayTasks.length > 0 && (
+      {/* ══════ GÖREV seçiləndə — kartlar/cədvəl ══════ */}
+      {viewFilter === 'gorev' && displayTasks.length > 0 && (
         <div className="mb-5">
-          {viewFilter === 'all' && (
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-[9px] px-1.5 py-px rounded bg-[#E8F0FE] text-[#246FE0] font-bold">GÖREV</span>
-              <span className="text-[13px] font-bold" style={{ color: 'var(--todoist-text)' }}>Tapşırıqlar</span>
-              <div className="flex-1 h-px" style={{ backgroundColor: 'var(--todoist-divider)' }} />
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ color: 'var(--todoist-text-tertiary)', backgroundColor: 'var(--todoist-border)' }}>{displayTasks.length}</span>
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-[9px] px-1.5 py-px rounded bg-[#E8F0FE] text-[#246FE0] font-bold">GÖREV</span>
+            <span className="text-[13px] font-bold" style={{ color: 'var(--todoist-text)' }}>Tapşırıqlar</span>
+            <div className="flex-1 h-px" style={{ backgroundColor: 'var(--todoist-divider)' }} />
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ color: 'var(--todoist-text-tertiary)', backgroundColor: 'var(--todoist-border)' }}>{displayTasks.length}</span>
+            <div className="flex rounded-lg overflow-hidden" style={{ border: '1px solid var(--todoist-divider)' }}>
+              <button onClick={() => setGorevView('cards')}
+                className={`px-2.5 py-1 text-[10px] font-bold flex items-center gap-1 transition ${gorevView === 'cards' ? 'bg-[var(--todoist-red)] text-white' : 'text-[var(--todoist-text-secondary)] hover:bg-gray-50'}`}
+                style={{ backgroundColor: gorevView === 'cards' ? undefined : 'var(--todoist-surface)' }}>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                Kartlar
+              </button>
+              <button onClick={() => setGorevView('table')}
+                className={`px-2.5 py-1 text-[10px] font-bold flex items-center gap-1 transition ${gorevView === 'table' ? 'bg-[#2563EB] text-white' : 'text-[var(--todoist-text-secondary)] hover:bg-gray-50'}`}
+                style={{ backgroundColor: gorevView === 'table' ? undefined : 'var(--todoist-surface)' }}>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>
+                Cədvəl
+              </button>
+            </div>
+          </div>
+          {gorevView === 'table' ? (
+            <TaskTableView tasks={displayTasks} onTaskClick={handleTaskClick}
+              onStatusChange={async (taskId, status) => { try { await api.updateMyTaskStatus(taskId, status); loadData() } catch {} }} />
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5">
+              {displayTasks.map((task: any) => <TaskCard key={task.id} task={task} onClick={handleTaskClick} />)}
             </div>
           )}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5">
-            {displayTasks.map((task: any) => (
-              <TaskCard key={task.id} task={task} onClick={handleTaskClick} />
-            ))}
-          </div>
         </div>
       )}
 
       {/* Boş state */}
-      {viewFilter !== 'todo' && displayTasks.length === 0 && (
+      {viewFilter === 'gorev' && displayTasks.length === 0 && (
         <div className="text-center mt-16">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4" style={{ backgroundColor: 'var(--todoist-red-light)' }}>
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--todoist-red)" strokeWidth="2"><path d="M20 6L9 17l-5-5"/></svg>

@@ -30,6 +30,15 @@ export default function GlobalQuickAdd({ open, onClose, onAdded, projects, label
   const [sectionOpen, setSectionOpen] = useState(false)
   const [sections, setSections] = useState<{ id: string; name: string }[]>([])
   const [saving, setSaving] = useState(false)
+  const [recurOpen, setRecurOpen] = useState(false)
+  const [recurRule, setRecurRule] = useState('')
+  const [recurScheduleType, setRecurScheduleType] = useState<'MONTHLY' | 'WEEKLY'>('WEEKLY')
+  const [recurDayOfWeek, setRecurDayOfWeek] = useState(1) // B.e.
+  const [recurDayOfMonth, setRecurDayOfMonth] = useState(1)
+  const [recurNotifDay, setRecurNotifDay] = useState(1)
+  const [recurDeadlineDay, setRecurDeadlineDay] = useState(5)
+  const [subTasks, setSubTasks] = useState<string[]>([])
+  const [subTaskOpen, setSubTaskOpen] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const toggleLabel = (id: string) => {
@@ -65,7 +74,7 @@ export default function GlobalQuickAdd({ open, onClose, onAdded, projects, label
     if (!content.trim()) return
     setSaving(true)
     try {
-      await api.createTodoistTask({
+      const created: any = await api.createTodoistTask({
         content: content.trim(),
         description: description.trim() || undefined,
         priority,
@@ -73,13 +82,25 @@ export default function GlobalQuickAdd({ open, onClose, onAdded, projects, label
         projectId: projectId || undefined,
         sectionId: sectionId || undefined,
         labelIds: selectedLabels.length > 0 ? selectedLabels : undefined,
+        ...(recurRule ? { isRecurring: true, recurRule: recurScheduleType === 'WEEKLY' ? 'weekly' : 'monthly' } : {}),
       })
+      // Alt görevləri yarat
+      const validSubs = subTasks.filter(s => s.trim())
+      if (validSubs.length > 0 && created?.id) {
+        for (const sub of validSubs) {
+          await api.createTodoistTask({ content: sub.trim(), parentId: created.id }).catch(() => {})
+        }
+      }
       setContent('')
       setDescription('')
       setPriority('P4')
       setDueDate('')
       setSelectedLabels([])
       setSectionId('')
+      setRecurRule('')
+      setRecurOpen(false)
+      setSubTasks([])
+      setSubTaskOpen(false)
       onAdded()
       onClose()
     } catch (err: any) { alert(err.message) }
@@ -103,17 +124,55 @@ export default function GlobalQuickAdd({ open, onClose, onAdded, projects, label
             className="w-full text-[14px] font-medium outline-none placeholder-[var(--todoist-text-tertiary)]"
             style={{ color: 'var(--todoist-text)' }}
             placeholder="Tapşırıq adı yazın..." />
-          <input value={description} onChange={e => setDescription(e.target.value)}
-            className="w-full text-[12px] outline-none placeholder-[var(--todoist-text-tertiary)] mt-1"
-            style={{ color: 'var(--todoist-text-secondary)' }}
-            placeholder="Açıqlama (istəyə bağlı)" />
+          <div className="flex items-center gap-2 mt-1">
+            <input value={description} onChange={e => setDescription(e.target.value)}
+              className="flex-1 text-[12px] outline-none placeholder-[var(--todoist-text-tertiary)]"
+              style={{ color: 'var(--todoist-text-secondary)' }}
+              placeholder="Açıqlama (istəyə bağlı)" />
+            <button type="button" onClick={() => { setSubTaskOpen(!subTaskOpen); if (!subTaskOpen && subTasks.length === 0) setSubTasks(['']) }}
+              className="shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold transition hover:opacity-90"
+              style={{ backgroundColor: subTasks.filter(s => s.trim()).length > 0 ? 'var(--todoist-red)' : 'var(--todoist-border)', color: subTasks.filter(s => s.trim()).length > 0 ? 'white' : 'var(--todoist-text-secondary)' }}>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 5v14M5 12h14"/></svg>
+              Alt görev {subTasks.filter(s => s.trim()).length > 0 ? `(${subTasks.filter(s => s.trim()).length})` : ''}
+            </button>
+          </div>
+
+          {/* Alt görev siyahısı */}
+          {subTaskOpen && (
+            <div className="mt-2 pl-4 border-l-2" style={{ borderColor: '#C7D2FE' }}>
+              {subTasks.map((sub, i) => (
+                <div key={i} className="flex items-center gap-1.5 mb-1">
+                  <span className="w-3 h-3 rounded-full shrink-0" style={{ border: '1.5px solid #CBD5E1' }} />
+                  <input value={sub}
+                    onChange={e => { const ns = [...subTasks]; ns[i] = e.target.value; setSubTasks(ns) }}
+                    onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); setSubTasks([...subTasks, '']); setTimeout(() => { const inputs = document.querySelectorAll('[data-subtask-input]'); (inputs[inputs.length - 1] as HTMLInputElement)?.focus() }, 50) } }}
+                    data-subtask-input
+                    className="flex-1 text-[12px] outline-none py-1 placeholder-[var(--todoist-text-tertiary)]"
+                    style={{ color: 'var(--todoist-text)' }}
+                    placeholder={`Alt görev ${i + 1}...`}
+                    autoFocus={i === subTasks.length - 1} />
+                  <button onClick={() => { const ns = subTasks.filter((_, idx) => idx !== i); setSubTasks(ns.length === 0 ? [''] : ns) }}
+                    className="shrink-0 w-4 h-4 flex items-center justify-center rounded hover:bg-red-50 transition"
+                    style={{ color: '#CBD5E1' }}>
+                    <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                  </button>
+                </div>
+              ))}
+              <button onClick={() => setSubTasks([...subTasks, ''])}
+                className="flex items-center gap-1 mt-1 text-[10px] font-semibold transition hover:opacity-70"
+                style={{ color: '#4F46E5' }}>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                Əlavə et
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Action row */}
         <div className="px-4 pb-3 flex items-center gap-1.5 flex-wrap">
           {/* Due Date */}
           <div className="relative">
-            <button onClick={() => { setDateOpen(!dateOpen); setPrioOpen(false); setProjectOpen(false) }}
+            <button onClick={() => { setDateOpen(!dateOpen); setPrioOpen(false); setProjectOpen(false); setRecurOpen(false) }}
               className="rounded-md px-2 py-1 text-[10px] font-semibold flex items-center gap-1"
               style={{ backgroundColor: dueDate ? '#E8F0FE' : 'var(--todoist-sidebar-hover)', color: dueDate ? '#246FE0' : 'var(--todoist-text-secondary)', border: '1px solid var(--todoist-divider)' }}>
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
@@ -126,9 +185,18 @@ export default function GlobalQuickAdd({ open, onClose, onAdded, projects, label
                 onClear={() => { setDueDate(''); setDateOpen(false) }}
                 onClose={() => setDateOpen(false)}
                 position="bottom"
+                showQuickButtons={true}
               />
             )}
           </div>
+
+          {/* Təkrarla */}
+          <button onClick={() => { setRecurOpen(!recurOpen); if (!recurRule) setRecurRule('weekly'); setDateOpen(false); setPrioOpen(false); setProjectOpen(false) }}
+            className="rounded-md px-2 py-1 text-[10px] font-semibold flex items-center gap-1"
+            style={{ backgroundColor: recurRule ? '#EEF2FF' : 'var(--todoist-sidebar-hover)', color: recurRule ? '#4F46E5' : 'var(--todoist-text-secondary)', border: `1px solid ${recurRule ? '#C7D2FE' : 'var(--todoist-divider)'}` }}>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
+            {recurRule ? `🔁 ${recurScheduleType === 'MONTHLY' ? `Ayın ${recurDayOfMonth}-i` : `${['Baz','B.e','Ç.a','Çər','C.a','Cü','Şə'][recurDayOfWeek]}`}` : 'Təkrarla'}
+          </button>
 
           {/* Priority */}
           <div className="relative">
@@ -203,6 +271,15 @@ export default function GlobalQuickAdd({ open, onClose, onAdded, projects, label
             </div>
           )}
 
+          {/* Recurring ləğv et */}
+          {recurRule && (
+            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold cursor-pointer hover:opacity-70"
+              style={{ backgroundColor: '#FEE2E2', color: '#EF4444' }}
+              onClick={() => { setRecurRule(''); setRecurOpen(false) }}>
+              ✕ Ləğv
+            </span>
+          )}
+
           {/* Label selector */}
           {labels.length > 0 && (
             <div className="relative">
@@ -250,6 +327,52 @@ export default function GlobalQuickAdd({ open, onClose, onAdded, projects, label
             {saving ? '...' : 'Əlavə et'}
           </button>
         </div>
+
+        {/* ═══ Təkrarlanan panel — tapşırıqdakı kimi ═══ */}
+        {recurOpen && recurRule && (
+          <div className="px-4 pb-3">
+            <div className="rounded-xl p-3" style={{ backgroundColor: '#EEF2FF', border: '1px solid #C7D2FE' }}>
+              <div className="text-[10px] font-bold mb-2" style={{ color: '#4F46E5' }}>🔁 Təkrarlama qaydası — sistem avtomatik təkrarlayacaq</div>
+              <div className="flex items-center gap-2 mb-3 p-2 rounded-lg" style={{ backgroundColor: '#fff', border: '1px solid #C7D2FE' }}>
+                <span className="text-[11px] font-semibold" style={{ color: '#4F46E5' }}>Hər</span>
+                <select value={recurScheduleType} onChange={e => setRecurScheduleType(e.target.value as any)}
+                  className="rounded px-2 py-1 text-[11px] font-semibold outline-none" style={{ border: '1px solid #C7D2FE', color: '#4F46E5', backgroundColor: '#F5F3FF' }}>
+                  <option value="MONTHLY">ayın</option>
+                  <option value="WEEKLY">həftənin</option>
+                </select>
+                {recurScheduleType === 'MONTHLY' ? (
+                  <input type="number" value={recurDayOfMonth} onChange={e => setRecurDayOfMonth(Number(e.target.value))} min={1} max={31}
+                    className="w-[42px] text-center rounded px-1 py-1 text-[11px] font-bold outline-none" style={{ border: '1px solid #C7D2FE', color: '#4F46E5' }} />
+                ) : (
+                  <select value={recurDayOfWeek} onChange={e => setRecurDayOfWeek(Number(e.target.value))}
+                    className="rounded px-2 py-1 text-[11px] font-semibold outline-none" style={{ border: '1px solid #C7D2FE', color: '#4F46E5', backgroundColor: '#F5F3FF' }}>
+                    {['Bazar','B.e.','Ç.a.','Çərşənbə','C.a.','Cümə','Şənbə'].map((d, i) => <option key={i} value={i}>{d}</option>)}
+                  </select>
+                )}
+                {recurScheduleType === 'MONTHLY' && <span className="text-[11px] font-semibold" style={{ color: '#4F46E5' }}>-u/ı/si</span>}
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="rounded-lg p-2" style={{ border: '1.5px solid #C7D2FE', backgroundColor: '#F5F3FF' }}>
+                  <div className="text-[8px] font-bold uppercase tracking-wider mb-1" style={{ color: '#64748B' }}>📅 ATANMA</div>
+                  <div className="text-[8px] mb-1" style={{ color: '#94A3B8' }}>Nə vaxt yaransın?</div>
+                  <div className="text-[12px] font-bold" style={{ color: '#4F46E5' }}>{recurScheduleType === 'MONTHLY' ? `Ayın ${recurDayOfMonth}-i` : ['Bazar','B.e.','Ç.a.','Çərşənbə','C.a.','Cümə','Şənbə'][recurDayOfWeek]}</div>
+                </div>
+                <div className="rounded-lg p-2" style={{ border: '1.5px solid #FFE0B2', backgroundColor: '#FFF8F0' }}>
+                  <div className="text-[8px] font-bold uppercase tracking-wider mb-1" style={{ color: '#64748B' }}>🔔 BİLDİRİM</div>
+                  <div className="text-[8px] mb-1" style={{ color: '#94A3B8' }}>Xatırlatma günü</div>
+                  <input type="number" value={recurNotifDay} onChange={e => setRecurNotifDay(Number(e.target.value))} min={1} max={31}
+                    className="w-[50px] text-center rounded px-1 py-0.5 text-[12px] font-bold outline-none" style={{ border: '1.5px solid #FFE0B2' }} />
+                </div>
+                <div className="rounded-lg p-2" style={{ border: '1.5px solid #FFCDD2', backgroundColor: '#FFF5F5' }}>
+                  <div className="text-[8px] font-bold uppercase tracking-wider mb-1" style={{ color: '#64748B' }}>⏰ SON TARİX</div>
+                  <div className="text-[8px] mb-1" style={{ color: '#94A3B8' }}>Nə vaxta qədər?</div>
+                  <input type="number" value={recurDeadlineDay} onChange={e => setRecurDeadlineDay(Number(e.target.value))} min={1} max={31}
+                    className="w-[50px] text-center rounded px-1 py-0.5 text-[12px] font-bold outline-none" style={{ border: '1.5px solid #FFCDD2' }} />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Shortcut hint */}
         <div className="px-4 pb-2 flex items-center gap-3 border-t" style={{ borderColor: 'var(--todoist-divider)' }}>
