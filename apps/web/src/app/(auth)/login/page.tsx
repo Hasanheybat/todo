@@ -100,7 +100,7 @@ export default function LoginPage() {
       </p>
 
       {/* ═══ Sürətli giriş — test istifadəçiləri ═══ */}
-      <div className="mt-8 pt-6" style={{ borderTop: '1px solid #E2E8F0' }}>
+      {process.env.NODE_ENV === 'development' && <div className="mt-8 pt-6" style={{ borderTop: '1px solid #E2E8F0' }}>
         <p className="text-center text-[11px] font-semibold mb-3" style={{ color: '#94A3B8' }}>Sürətli giriş</p>
         <div className="grid grid-cols-3 gap-2">
           {[
@@ -136,7 +136,7 @@ export default function LoginPage() {
             </button>
           ))}
         </div>
-      </div>
+      </div>}
     </>
   )
 }

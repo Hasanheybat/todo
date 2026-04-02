@@ -9,6 +9,7 @@ interface RequestOptions {
 
 class ApiClient {
   private accessToken: string | null = null
+  private isRedirecting = false
 
   setToken(token: string | null) {
     this.accessToken = token
@@ -47,10 +48,10 @@ class ApiClient {
     const res = await fetch(`${API_URL}${endpoint}`, config)
 
     if (res.status === 401) {
-      // Token-i sil, login-ə yönləndir
       this.setToken(null)
       localStorage.removeItem('refreshToken')
-      if (typeof window !== 'undefined') {
+      if (typeof window !== 'undefined' && !this.isRedirecting) {
+        this.isRedirecting = true
         window.location.href = '/login'
       }
       throw new Error('Sessiya bitdi')
@@ -58,7 +59,9 @@ class ApiClient {
 
     if (!res.ok) {
       const error = await res.json().catch(() => ({ message: 'Xəta baş verdi' }))
-      throw new Error(error.message || `HTTP ${res.status}`)
+      const msg = error.message || 'Xəta baş verdi'
+      if (process.env.NODE_ENV === 'development') console.warn(`[API] ${method} ${endpoint} → ${res.status}:`, msg)
+      throw new Error(msg)
     }
 
     // 204 No Content
@@ -421,7 +424,7 @@ class ApiClient {
   }
 
   async updateComment(id: string, content: string) {
-    return this.request(`/comments/${id}`, { method: 'PUT', body: JSON.stringify({ content }) })
+    return this.request(`/comments/${id}`, { method: 'PUT', body: { content } })
   }
 
   async deleteComment(id: string) {

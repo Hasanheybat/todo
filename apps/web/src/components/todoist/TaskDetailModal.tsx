@@ -6,6 +6,7 @@ import CustomDatePicker from './CustomDatePicker'
 import ReminderPicker from './ReminderPicker'
 import toast from 'react-hot-toast'
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'
 const PRIO_COLORS: Record<string, string> = { P1: '#DC4C3E', P2: '#EB8909', P3: '#246FE0', P4: '#B3B3B3' }
 const PRIO_LABELS: Record<string, string> = { P1: 'Təcili', P2: 'Yüksək', P3: 'Orta', P4: 'Normal' }
 
@@ -844,7 +845,7 @@ export default function TaskDetailModal({ taskId, onClose, onRefresh }: TaskDeta
                                 {sub.attachments?.length > 0 && (
                                   <div className="flex flex-wrap gap-1 mt-1">
                                     {sub.attachments.map((att: any) => (
-                                      <a key={att.id} href={`http://localhost:4000/uploads/${att.storagePath?.split('/').pop() || att.storagePath}`}
+                                      <a key={att.id} href={`${API_BASE}/uploads/${att.storagePath?.split('/').pop() || att.storagePath}`}
                                         target="_blank" rel="noopener noreferrer" download={att.filename}
                                         className="flex items-center gap-1 px-1.5 py-0.5 rounded hover:opacity-80 transition" style={{ backgroundColor: 'var(--todoist-sidebar-hover)' }}>
                                         <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="var(--todoist-text-tertiary)" strokeWidth="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
@@ -1134,7 +1135,7 @@ export default function TaskDetailModal({ taskId, onClose, onRefresh }: TaskDeta
                 {attachments.length > 0 && (
                   <div className="space-y-1">
                     {attachments.map((att: any) => {
-                      const fileUrl = `http://localhost:4000/uploads/${att.storagePath?.split('/').pop() || att.storagePath}`
+                      const fileUrl = `${API_BASE}/uploads/${att.storagePath?.split('/').pop() || att.storagePath}`
                       const isImage = att.mimeType?.startsWith('image/')
                       return (
                         <div key={att.id} className="group/file flex items-center gap-2 px-2 py-1.5 rounded hover:bg-[var(--todoist-sidebar-hover)] transition">
@@ -1295,7 +1296,7 @@ export default function TaskDetailModal({ taskId, onClose, onRefresh }: TaskDeta
             </button>
             {/* Image */}
             <img
-              src={`http://localhost:4000/uploads/${previewAtt.storagePath?.split('/').pop() || previewAtt.storagePath}`}
+              src={`${API_BASE}/uploads/${previewAtt.storagePath?.split('/').pop() || previewAtt.storagePath}`}
               alt={previewAtt.filename}
               className="rounded-xl shadow-2xl object-contain"
               style={{ maxWidth: '88vw', maxHeight: '80vh' }}
@@ -1305,7 +1306,7 @@ export default function TaskDetailModal({ taskId, onClose, onRefresh }: TaskDeta
               <span className="text-[12px] font-medium text-white/80">{previewAtt.filename}</span>
               <span className="text-[10px] text-white/50">·</span>
               <span className="text-[10px] text-white/50">{formatFileSize(previewAtt.size)}</span>
-              <a href={`http://localhost:4000/uploads/${previewAtt.storagePath?.split('/').pop() || previewAtt.storagePath}`}
+              <a href={`${API_BASE}/uploads/${previewAtt.storagePath?.split('/').pop() || previewAtt.storagePath}`}
                 download={previewAtt.filename} target="_blank" rel="noopener noreferrer"
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold transition hover:opacity-80"
                 style={{ background: 'rgba(255,255,255,0.2)', color: '#fff' }} onClick={e => e.stopPropagation()}>

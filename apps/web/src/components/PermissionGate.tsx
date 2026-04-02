@@ -25,7 +25,7 @@ export default function PermissionGate({ requires, requiresAny, children, fallba
     allowed = requires.every(p => hasPermission(p))
   }
   if (requiresAny && requiresAny.length > 0) {
-    allowed = hasAnyPermission(requiresAny)
+    allowed = allowed && hasAnyPermission(requiresAny)
   }
 
   if (allowed) return <>{children}</>

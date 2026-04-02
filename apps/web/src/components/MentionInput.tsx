@@ -64,7 +64,7 @@ export default function MentionInput({ value, onChange, users, selectedIds, onTo
   }
 
   function escapeHtml(str: string): string {
-    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
   }
 
   // Sync external value → contentEditable (rebuild HTML when value or selectedIds changes)

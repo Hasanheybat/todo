@@ -8,11 +8,7 @@ let syncInterval: ReturnType<typeof setInterval> | null = null
 
 function getToken(): string | null {
   if (typeof window === 'undefined') return null
-  try {
-    const auth = localStorage.getItem('auth')
-    if (auth) return JSON.parse(auth).accessToken
-  } catch {}
-  return null
+  return localStorage.getItem('accessToken')
 }
 
 // ═══ Əsas Sync Funksiyası ═══

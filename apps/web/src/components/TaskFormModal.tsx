@@ -1602,7 +1602,7 @@ export default function TaskFormModal({ open, onClose, onSaved, editingTask, use
                           {canEdit && (
                             <label className="shrink-0 cursor-pointer transition hover:opacity-70" title="Bu işçiyə özəl fayl əlavə et">
                               <span style={{ color: (item.files?.length || 0) > 0 ? '#4F46E5' : '#CBD5E1', fontSize: 14 }}>📎</span>
-                              <input type="file" multiple className="hidden" onChange={e => {
+                              <input type="file" multiple className="hidden" accept="image/png,image/jpeg,image/gif,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" onChange={e => {
                                 if (e.target.files) {
                                   const newFiles = Array.from(e.target.files)
                                   setNewTask(prev => ({
@@ -1796,7 +1796,7 @@ export default function TaskFormModal({ open, onClose, onSaved, editingTask, use
               <label className="flex items-center justify-center gap-2 rounded-lg p-2.5 cursor-pointer transition" style={{ backgroundColor: 'var(--todoist-hover)', border: '1px dashed var(--todoist-text-tertiary)' }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: 'var(--todoist-text-secondary)' }}><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
                 <span className="text-[11px] font-medium" style={{ color: 'var(--todoist-text-secondary)' }}>📎 Fayl əlavə et (hamıya göndəriləcək)</span>
-                <input type="file" multiple className="hidden" onChange={handleFileChange} />
+                <input type="file" multiple className="hidden" accept="image/png,image/jpeg,image/gif,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" onChange={handleFileChange} />
               </label>
               {newTask.files.length > 0 && (
                 <div className="mt-1.5 space-y-1">

@@ -1021,7 +1021,7 @@ export default function TasksPage() {
                       <input type="date" value={sub.dueDate || ''} min={editingTask ? undefined : todayDate} onChange={e => handleSubDateChange(i, e.target.value)} className="text-[10px] outline-none bg-transparent w-28" style={{ color: sub.dueDate ? '#058527' : 'var(--todoist-text-tertiary)' }} title="Boş = ümumi tarix" />
                       <label className="cursor-pointer" title="Fayl əlavə et">
                         <span className="text-[10px]" style={{ color: 'var(--todoist-text-secondary)' }}>📎</span>
-                        <input type="file" multiple className="hidden" onChange={e => addSubTaskFile(i, e)} />
+                        <input type="file" multiple className="hidden" accept="image/png,image/jpeg,image/gif,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" onChange={e => addSubTaskFile(i, e)} />
                       </label>
                       <button type="button" onClick={() => removeSubTask(i)} className="text-[10px]" style={{ color: 'var(--todoist-red)' }}>✕</button>
                     </div>
@@ -1069,7 +1069,7 @@ export default function TasksPage() {
                   <label className="flex items-center justify-center gap-2 rounded-lg p-2.5 cursor-pointer transition hover:bg-[var(--todoist-divider)]" style={{ backgroundColor: 'var(--todoist-sidebar-hover)', border: '1px dashed #CDCDCD' }}>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--todoist-text-secondary)" strokeWidth="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
                     <span className="text-[11px] font-medium" style={{ color: 'var(--todoist-text-secondary)' }}>📎 Fayl əlavə et</span>
-                    <input type="file" multiple className="hidden" onChange={handleFileChange} />
+                    <input type="file" multiple className="hidden" accept="image/png,image/jpeg,image/gif,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" onChange={handleFileChange} />
                   </label>
                   {newTask.files.length > 0 && (
                     <div className="mt-1.5 space-y-1">

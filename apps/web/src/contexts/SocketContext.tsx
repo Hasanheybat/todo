@@ -20,10 +20,11 @@ export function SocketProvider({ children }: { children: ReactNode }) {
   const [connected, setConnected] = useState(false)
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
+    const token = localStorage.getItem('accessToken')
     if (!token) return
 
-    const s = io('http://localhost:4000/notifications', {
+    const wsUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'
+    const s = io(`${wsUrl}/notifications`, {
       auth: { token },
       transports: ['websocket', 'polling'],
       reconnection: true,
@@ -33,12 +34,12 @@ export function SocketProvider({ children }: { children: ReactNode }) {
 
     s.on('connect', () => {
       setConnected(true)
-      console.log('[WS] Bağlandı')
+      if (process.env.NODE_ENV === 'development') console.log('[WS] Bağlandı')
     })
 
     s.on('disconnect', () => {
       setConnected(false)
-      console.log('[WS] Ayrıldı')
+      if (process.env.NODE_ENV === 'development') console.log('[WS] Ayrıldı')
     })
 
     setSocket(s)

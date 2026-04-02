@@ -83,7 +83,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
   async function markAllRead() { await api.markAllNotificationsRead(); setUnreadCount(0); setNotifications(p => p.map(n => ({...n, isRead: true}))) }
   async function notifClick(n: any) {
     if (!n.isRead) { await api.markNotificationRead(n.id); setUnreadCount(p => Math.max(0, p-1)); setNotifications(p => p.map(x => x.id === n.id ? {...x, isRead: true} : x)) }
-    if (n.link) window.location.href = n.link
+    if (n.link && typeof n.link === 'string' && n.link.startsWith('/')) window.location.href = n.link
     setNotifOpen(false)
   }
 
