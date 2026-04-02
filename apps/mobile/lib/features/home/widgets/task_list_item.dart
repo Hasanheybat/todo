@@ -12,82 +12,77 @@ class TaskListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColors>()!;
     final isDone = ['COMPLETED', 'APPROVED', 'FORCE_COMPLETED'].contains(task.status);
-    final priorityColor = _priorityColor(task.priority, colors);
-    final daysLeft = task.dueDate != null ? task.dueDate!.difference(DateTime.now()).inDays : null;
+    final pColor = _pColor(task.priority, colors);
+    final daysLeft = task.dueDate?.difference(DateTime.now()).inDays;
 
-    return InkWell(
+    return GestureDetector(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: const Color(0xFFF1F5F9)),
+          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 8, offset: const Offset(0, 2))],
+        ),
         child: Row(
           children: [
-            // Priority indicator
+            // Prioritet nöqtəsi
             Container(
-              width: 3, height: 36,
-              decoration: BoxDecoration(color: priorityColor, borderRadius: BorderRadius.circular(2)),
+              width: 10, height: 10,
+              decoration: BoxDecoration(shape: BoxShape.circle, color: pColor),
             ),
             const SizedBox(width: 12),
-            // Content
+            // Məzmun
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-                        decoration: BoxDecoration(color: colors.gorevBg, borderRadius: BorderRadius.circular(4)),
-                        child: Text('GÖREV', style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: colors.gorevText)),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          task.title,
-                          maxLines: 1, overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 14, fontWeight: FontWeight.w600,
-                            color: isDone ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4) : Theme.of(context).colorScheme.onSurface,
-                            decoration: isDone ? TextDecoration.lineThrough : null,
-                          ),
-                        ),
-                      ),
-                    ],
+                  Text(
+                    task.title,
+                    maxLines: 1, overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 14, fontWeight: FontWeight.w600,
+                      color: isDone ? const Color(0xFF94A3B8) : const Color(0xFF1E293B),
+                      decoration: isDone ? TextDecoration.lineThrough : null,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Row(
                     children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                        decoration: BoxDecoration(color: colors.gorevBg, borderRadius: BorderRadius.circular(4)),
+                        child: Text('GÖREV', style: TextStyle(fontSize: 8, fontWeight: FontWeight.w800, color: colors.gorevText)),
+                      ),
                       if (daysLeft != null) ...[
-                        Icon(Icons.calendar_today, size: 11, color: daysLeft < 0 ? colors.danger : daysLeft == 0 ? colors.warning : Colors.grey),
-                        const SizedBox(width: 3),
-                        Text(
-                          daysLeft < 0 ? '${-daysLeft}g gecikmiş' : daysLeft == 0 ? 'Bugün' : '${daysLeft}g qalıb',
-                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: daysLeft < 0 ? colors.danger : daysLeft == 0 ? colors.warning : Colors.grey),
-                        ),
                         const SizedBox(width: 8),
+                        Icon(Icons.schedule, size: 12, color: daysLeft < 0 ? colors.danger : daysLeft == 0 ? colors.warning : const Color(0xFF94A3B8)),
+                        const SizedBox(width: 2),
+                        Text(
+                          daysLeft < 0 ? '${-daysLeft}g gecikmiş' : daysLeft == 0 ? 'Bugün' : '${daysLeft}g',
+                          style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: daysLeft < 0 ? colors.danger : daysLeft == 0 ? colors.warning : const Color(0xFF94A3B8)),
+                        ),
                       ],
-                      if (task.assignees.isNotEmpty)
-                        Text(task.assignees.first.fullName, style: const TextStyle(fontSize: 11, color: Colors.grey)),
+                      if (task.assignees.isNotEmpty) ...[
+                        const SizedBox(width: 8),
+                        Icon(Icons.person_outline, size: 12, color: const Color(0xFF94A3B8)),
+                        const SizedBox(width: 2),
+                        Text(task.assignees.first.fullName.split(' ').first, style: const TextStyle(fontSize: 10, color: Color(0xFF94A3B8))),
+                      ],
                     ],
                   ),
                 ],
               ),
             ),
-            // Arrow
-            Icon(Icons.chevron_right, size: 18, color: Colors.grey.shade400),
+            Icon(Icons.chevron_right, size: 18, color: Colors.grey.shade300),
           ],
         ),
       ),
     );
   }
 
-  Color _priorityColor(String priority, AppColors colors) {
-    switch (priority) {
-      case 'CRITICAL': return colors.p1;
-      case 'HIGH': return colors.p2;
-      case 'MEDIUM': return colors.p3;
-      case 'LOW': case 'INFO': return colors.p4;
-      default: return colors.p4;
-    }
+  Color _pColor(String p, AppColors c) {
+    switch (p) { case 'CRITICAL': return c.p1; case 'HIGH': return c.p2; case 'MEDIUM': return c.p3; default: return c.p4; }
   }
 }

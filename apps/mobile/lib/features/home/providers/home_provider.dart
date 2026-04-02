@@ -8,10 +8,6 @@ import '../../../core/storage/offline_storage.dart';
 
 // Bugünkü GÖREV-lər
 final todayTasksProvider = FutureProvider<List<TaskModel>>((ref) async {
-  // Auth yoxla — giriş olmayıbsa boş qaytar
-  final auth = ref.watch(authStateProvider);
-  if (!auth.isAuthenticated) return [];
-
   final api = ref.watch(apiClientProvider);
   try {
     final response = await api.get(Endpoints.tasks);
@@ -31,9 +27,6 @@ final todayTasksProvider = FutureProvider<List<TaskModel>>((ref) async {
 
 // Bugünkü TODO-lar
 final todayTodosProvider = FutureProvider<List<TodoModel>>((ref) async {
-  final auth = ref.watch(authStateProvider);
-  if (!auth.isAuthenticated) return [];
-
   final api = ref.watch(apiClientProvider);
   try {
     final response = await api.get(Endpoints.todoTasks);
